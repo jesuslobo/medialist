@@ -44,17 +44,17 @@ export interface ItemMainFields {
 export interface Itemlink {
     url?: string;
     logo_path: string;
-    name: string
+    label: string
 }
 
 
 export interface ItemBadgesType {
     logo_path: string;
-    value: string;
+    label: string;
 }
 
 // interface ItemField {
-//     name: string;
+//     label: string;
 //     body: string
 // }
 
