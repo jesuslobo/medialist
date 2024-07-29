@@ -2,6 +2,7 @@ import { NextUIProvider } from "@nextui-org/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import React, { lazy, useEffect, useState } from "react";
+import AuthProvider from "./AuthProvider";
 
 export const queryClient = new QueryClient()
 
@@ -30,9 +31,12 @@ export default function RootProviders({
             <QueryClientProvider client={queryClient}>
                 <NextUIProvider>
                     <NextThemesProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
+                        <AuthProvider>
                             {children}
+                        </AuthProvider>
                     </NextThemesProvider>
                 </NextUIProvider>
+
                 {showDevtools && (
                     <React.Suspense fallback={null}>
                         <ReactQueryDevtoolsProduction />

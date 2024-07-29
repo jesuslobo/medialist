@@ -10,8 +10,15 @@ export interface TagData {
 export interface UserData {
     id: string
     username: string
-    roles: 'admin' | 'member'
-    email: string
+    // roles: 'admin' | 'member'
+    // email: string
     // created_at
     // last_login
+}
+
+type Cause = { username?: string; password?: string; }
+
+export interface ServerResponseError {
+    message?: string;
+    cause?: Cause
 }

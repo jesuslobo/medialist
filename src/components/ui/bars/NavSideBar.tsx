@@ -1,3 +1,5 @@
+import { queryClient } from "@/components/providers/RootProviders";
+import httpClient from "@/utils/lib/httpClient";
 import { Spinner } from "@nextui-org/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -100,11 +102,11 @@ const LogOutBut = () => {
     const [isLoading, setIsLoading] = useState(false)
 
     async function logout() {
-        // setIsLoading(true)
-        // await deleteAPI('sessions')
-        // setIsLoading(false)
-        // router.push('/')
-        // queryClient.clear()
+        setIsLoading(true)
+        await httpClient().delete('sessions')
+        queryClient.clear()
+        setIsLoading(false)
+        router.push('/')
     }
 
     return (

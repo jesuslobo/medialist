@@ -68,5 +68,5 @@ export const argon2Options = {
     parallelism: 1
 }
 
-export const validatePassword = (password: string) => password.length < 6 || password.length > 255;
-export const validateUsername = (username: string) => typeof (username) !== 'string' || username.length < 3 || username.length > 31 || !/^[a-z0-9_-]+$/.test(username);
+export const notValidPassword = (password: string) => typeof password !== "string" || password.length < 6; // Maybe add a Max Length?
+export const notValidUsername = (username: string) => typeof (username) !== 'string' || username.length < 3 || username.length > 31;

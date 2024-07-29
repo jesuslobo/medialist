@@ -62,7 +62,7 @@ const config: Config = {
           }
         },
       }
-    } as NextUIPluginConfig & { [key: string]: string | object | boolean }), //even thought nextUI uses tw-colors plugin, apparently it is not friendly with custom colors
+    } as NextUIPluginConfig & Record<string, string | object | boolean>) //even though nextUI uses tw-colors plugin, apparently it is not friendly with custom colors
   ],
 };
 export default config;

@@ -5,10 +5,10 @@ import { BiCollection, BiPlus, BiRevision } from "react-icons/bi";
 export default function ListsPage() {
   return (
     <>
-      <TitleBar 
-      title="Lists" 
-      startContent={<BiCollection className="text-3xl mr-3 flex-none " />}
-      pointedBg
+      <TitleBar
+        title="Lists"
+        startContent={<BiCollection className="text-3xl mr-3 flex-none " />}
+        pointedBg
       >
         <ButtonGroup>
           <Button className="bg-accented">
@@ -19,6 +19,7 @@ export default function ListsPage() {
           </Button>
         </ButtonGroup>
       </TitleBar>
+
       <main className="">
 
       </main>
