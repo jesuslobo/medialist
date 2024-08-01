@@ -1,5 +1,5 @@
 import httpClient from "@/utils/lib/httpClient";
-import { mutateUserCache } from "@/utils/lib/tanquery/userQuery";
+import { mutateUserCache } from "@/utils/lib/tanquery/usersQuery";
 import { ServerResponseError, UserData } from "@/utils/types/global";
 import { Input } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
