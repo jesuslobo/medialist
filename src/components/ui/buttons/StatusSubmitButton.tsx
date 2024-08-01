@@ -3,13 +3,14 @@ import { UseMutationResult } from "@tanstack/react-query"
 import { MouseEventHandler } from "react"
 import { BiCheckDouble, BiRevision } from "react-icons/bi"
 import { FaSave } from "react-icons/fa"
+// import PressEvent
 
 /** Submit Button With Indicators for Error and Success */
 export default function StatusSubmitButton<TData = unknown, TError = unknown>({
     mutation,
-    onClick,
-    errorOnClick,
-    saveOnClick,
+    onPress,
+    errorOnPress,
+    saveOnPress,
     defaultContent = <><FaSave className="text-xl" /> Save</>,
     savedContent = <><BiCheckDouble className="text-xl" /> Saved</>,
     errorContent = <><BiRevision className="text-xl" />Try Again</>,
@@ -21,9 +22,9 @@ export default function StatusSubmitButton<TData = unknown, TError = unknown>({
     isDisabled,
 }: {
     mutation: UseMutationResult<any, TError, TData, unknown>,
-    errorOnClick?: MouseEventHandler<HTMLButtonElement>,
-    onClick?: MouseEventHandler<HTMLButtonElement>,
-    saveOnClick?: MouseEventHandler<HTMLButtonElement>,
+    errorOnPress?: () => void,
+    onPress?: () => void,
+    saveOnPress?: () => void,
     defaultContent?: JSX.Element | string,
     savedContent?: JSX.Element | string,
     errorContent?: JSX.Element | string,
@@ -45,7 +46,7 @@ export default function StatusSubmitButton<TData = unknown, TError = unknown>({
     if (mutation.isError)
         return <Button
             color="danger"
-            onClick={errorOnClick || onClick}
+            onPress={errorOnPress || onPress}
             isDisabled={isDisabled}
             {...buttonProps}
         >
@@ -55,7 +56,7 @@ export default function StatusSubmitButton<TData = unknown, TError = unknown>({
     if (mutation.isSuccess)
         return <Button
             color='success'
-            onClick={saveOnClick || onClick}
+            onPress={saveOnPress || onPress}
             isDisabled={isDisabled}
             {...buttonProps}
         >
@@ -71,7 +72,7 @@ export default function StatusSubmitButton<TData = unknown, TError = unknown>({
         </Button>
 
     return <Button
-        onClick={onClick}
+        onPress={onPress}
         isDisabled={isDisabled}
         {...buttonProps}
     >

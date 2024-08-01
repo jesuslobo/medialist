@@ -66,7 +66,7 @@ function LoginForm() {
 
             <StatusSubmitButton
                 mutation={mutation}
-                onClick={handleSubmit(onSubmit)}
+                onPress={handleSubmit(onSubmit)}
                 defaultContent="Login"
                 savedContent="Logged In"
                 type="submit"

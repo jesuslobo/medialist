@@ -92,7 +92,7 @@ function SignupForm() {
 
             <StatusSubmitButton
                 mutation={mutation}
-                onClick={handleSubmit(onSubmit)}
+                onPress={handleSubmit(onSubmit)}
                 defaultContent="Sign Up"
                 savedContent="Signed Up!"
                 type="submit"
