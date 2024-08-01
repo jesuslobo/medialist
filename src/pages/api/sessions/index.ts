@@ -1,5 +1,6 @@
 import { db } from '@/db';
 import { usersTable } from '@/db/schema';
+import parseJSONReq from '@/utils/functions/parseJSONReq';
 import { argon2Options, lucia, validateAuthCookies, notValidPassword, notValidUsername } from '@/utils/lib/auth';
 import { verify } from '@node-rs/argon2';
 import { eq } from 'drizzle-orm';
@@ -13,8 +14,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     if (req.method === 'POST') {
-      const body = await req.body;
-      const { username, password } = JSON.parse(body || {})
+      const body = parseJSONReq(await req.body);
+
+      const { username, password } = body;
       if (!username || !password) return res.status(400).json({ message: 'Invalid Request' })
 
       if (notValidUsername(username))

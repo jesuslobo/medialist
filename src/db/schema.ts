@@ -4,6 +4,8 @@ export const usersTable = sqliteTable("users", {
     id: text("id").notNull().primaryKey(),
     username: text("username").notNull().unique(),
     passwordHash: text("password_hash").notNull(),
+    // createdAt: integer("created_at").notNull(),
+    // updatedAt: integer("updated_at").notNull(),
 });
 
 export const sessionsTable = sqliteTable("sessions", {
@@ -12,4 +14,20 @@ export const sessionsTable = sqliteTable("sessions", {
         .notNull()
         .references(() => usersTable.id),
     expiresAt: integer("expires_at").notNull()
+});
+
+export const listsTable = sqliteTable("lists", {
+    id: text("id").notNull().primaryKey(),
+    userId: text("user_id")
+        .notNull()
+        .references(() => usersTable.id),
+    title: text("title").notNull(),
+    coverPath: text("cover_path"),
+    trash: integer("trash", { mode: "boolean" }).notNull().default(false),
+    // fav: integer("fav", { mode: "boolean" }).notNull().default(false),
+    // createdAt: integer("created_at").notNull(),
+    // updatedAt: integer("updated_at").notNull(),
+    // templates: text("templates").notNull().default("[]"), // JSON string
+    // configs: text("templates").notNull().default("[]"), // JSON string
+    // apis: text("templates").notNull().default("[]"), // JSON string
 });

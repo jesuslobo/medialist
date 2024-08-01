@@ -1,15 +1,18 @@
+import { UserData } from "./global"
 import { ItemData } from "./item"
 
 export interface ListData {
-  // map(arg0: (data: ItemData) => import("react").JSX.Element): import("react").ReactNode;
   id: string
+  userId: UserData['id']
   title: string
-  pincode?: string
-  cover_path?: string | null
+  coverPath?: string
   fav?: boolean
   trash?: boolean
-//   templates?: templates
-//   configurations?: ListConfiguration[]
+  //logs
+  updatedAt: string
+  createdAt: string
+  //   templates?: templates
+  //   configurations?: ListConfiguration[]
 }
 
 // interface ListConfiguration {
