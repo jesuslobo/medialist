@@ -23,7 +23,7 @@ export default function ListsPage() {
   return (
     <>
       <Head>
-        <title>Lists</title>
+        <title>MediaList - Lists</title>
       </Head>
 
       <TitleBar
@@ -47,7 +47,7 @@ export default function ListsPage() {
         </ButtonGroup>
       </TitleBar>
 
-      <main className="grid grid-cols-sm-card gap-x-4 gap-y-4 ">
+      <main className="grid grid-cols-sm-card gap-x-4 gap-y-4 animate-fade-in">
         {Lists.map(list => (
           <ListCard key={'list-' + list.id} list={list} />
         ))}

@@ -1,11 +1,13 @@
 import { db } from '@/db';
 import { usersTable } from '@/db/schema';
-import { argon2Options, lucia, validateAuthCookies, notValidPassword, notValidUsername } from '@/utils/lib/auth';
+import { argon2Options, lucia, notValidPassword, notValidUsername, validateAuthCookies } from '@/utils/lib/auth';
 import { generateID } from '@/utils/lib/generateID';
 import { ServerResponseError } from '@/utils/types/global';
 import { hash } from '@node-rs/argon2';
 import { eq } from 'drizzle-orm';
+import { mkdir } from 'fs/promises';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { join } from 'path';
 
 interface UserLoginData {
     username?: string;
@@ -56,6 +58,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 .insert(usersTable)
                 .values({ id: userID, username, passwordHash })
                 .returning({ id: usersTable.id, username: usersTable.username })
+
+            const userDir = join('public', 'users', userID)
+            await mkdir(userDir, { recursive: true }) // create media directory
 
             const session = await lucia.createSession(userID, {});
             const sessionCookie = lucia.createSessionCookie(session.id).serialize()

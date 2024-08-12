@@ -1,6 +1,6 @@
 
 /** @param host Set host For External Sites */
-export default function httpClient(host: string = 'api') {
+export default function httpClient(host: string = '/api') {
 
     async function get(path?: string, requestInit?: RequestInit) {
         const res = await fetchFn(host, path, { cache: 'no-store', ...requestInit })

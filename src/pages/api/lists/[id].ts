@@ -3,7 +3,7 @@ import { listsTable } from '@/db/schema';
 import { validateAuthCookies } from '@/utils/lib/auth';
 import { validatedID } from '@/utils/lib/generateID';
 import { and, eq } from 'drizzle-orm';
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 
 /** api/lists/[id])
