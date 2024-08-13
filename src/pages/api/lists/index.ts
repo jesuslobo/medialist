@@ -6,7 +6,7 @@ import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOption
 import { generateID } from '@/utils/lib/generateID';
 import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { mkdir } from 'fs/promises';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { join } from 'path';
@@ -17,15 +17,17 @@ import { join } from 'path';
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    const { user } = await validateAuthCookies(req, res);
+    if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
     if (req.method === 'GET') {
-      const { user } = await validateAuthCookies(req, res);
-      if (!user) return res.status(401).json({ message: 'Unauthorized' });
-
       const lists = await db
         .select()
         .from(listsTable)
-        .where(eq(listsTable.userId, user.id))
+        .where(and(
+          eq(listsTable.userId, user.id),
+          eq(listsTable.trash, false)
+        ))
         .orderBy(listsTable.title);
 
       return res.status(200).json(lists);
@@ -33,9 +35,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // currently dev
     if (req.method === 'POST') {
-      const { user } = await validateAuthCookies(req, res);
-      if (!user) return res.status(401).json({ message: 'Unauthorized' });
-
       const id = generateID();
 
       let data: Partial<ListData> = {

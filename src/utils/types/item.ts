@@ -3,7 +3,7 @@ import { ListData } from "./list"
 
 export interface ItemData {
     id: string
-    userID: UserData['id']
+    userId: UserData['id']
     listId: ListData['id']
     title: string
     posterPath?: string
