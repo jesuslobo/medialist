@@ -10,6 +10,20 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        '2xl': { 'min': '1535px' },
+        'xl': { 'min': '1279px' },
+        // 'lg': { 'max': '1023px' },
+        'lg': { 'max': '1279px' },
+        'md': { 'max': '767px' },
+        'sm': { 'max': '639px' },
+      },
+      aspectRatio: {
+        '3/2': '3/2',
+        '2/3': '2/3',
+        '2/5': '2/5',
+        '4/3': '4/3',
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
@@ -49,15 +63,15 @@ const config: Config = {
       themes: {
         dark: {
           colors: {
-            background: "#151515", //18
-            accented: "#2f2f2f", // Custom-named color for dark theme
+            background: "#151515",
+            accented: "#2f2f2f",
             pure: { opposite: "#fff", theme: '#000' }, //opposite of theme, i.e for dark is pure white and vicevirsa
           }
         },
         light: {
           colors: {
             foreground: '#151515',
-            accented: "#e0e0e0", // Custom-named color for dark theme
+            accented: "#e0e0e0",
             pure: { opposite: "#000", theme: '#fff' }, //opposite of theme, i.e for light is pure black and vicevirsa
           }
         },
