@@ -4,6 +4,7 @@ import ListPageItems from "@/components/page/lists/[id]/ListPageItems"
 import ListPageProvider from "@/components/page/lists/[id]/ListPageProvider"
 import ListPageSubNavBar from "@/components/page/lists/[id]/ListPageSubNavBar"
 import TitleBar from "@/components/ui/bars/TitleBar"
+import { validatedID } from "@/utils/lib/generateID"
 import { itemsQueryOptions, setupItemsCache } from "@/utils/lib/tanquery/itemsQuery"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
 import { ListData } from "@/utils/types/list"
@@ -12,7 +13,7 @@ import Head from "next/head"
 import { useRouter } from "next/router"
 import { BiCollection } from "react-icons/bi"
 
-export default function ListPage() {
+function ListPage() {
     const router = useRouter()
     const listId = router.query.id as ListData['id']
 
@@ -47,4 +48,12 @@ export default function ListPage() {
             </ListPageProvider>
         </>
     )
+}
+
+export default function ListPageHOC() {
+    const router = useRouter()
+    const listId = router.query.id as ListData['id']
+    return validatedID(listId)
+        ? <ListPage />
+        : <ErrorPage message="Bad List ID, Page Doesn't Exist" MainMessage="404!" hideTryAgain />
 }
