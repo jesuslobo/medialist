@@ -3,13 +3,20 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { BiArrowBack, BiRevision } from 'react-icons/bi'
 
-export default function ErrorPage({ message, MainMessage }: { message?: string, MainMessage?: string }) {
+export default function ErrorPage({
+    message,
+    MainMessage,
+    hideTryAgain
+}: {
+    message?: string,
+    MainMessage?: string,
+    hideTryAgain?: boolean
+}) {
     const router = useRouter()
 
     const buttonProps: ButtonProps = {
         className: ' shadow-lg',
         size: 'lg',
-
     }
 
     return (
@@ -25,6 +32,7 @@ export default function ErrorPage({ message, MainMessage }: { message?: string, 
                 <div className='flex gap-x-4'>
                     <Button
                         variant='bordered'
+                        color={hideTryAgain ? 'primary' : 'default'}
                         onClick={() => router.back()}
                         {...buttonProps}
                     >
@@ -32,7 +40,7 @@ export default function ErrorPage({ message, MainMessage }: { message?: string, 
                         Go Back
                     </Button>
 
-                    <Button
+                    {!hideTryAgain && <Button
                         variant='ghost'
                         color='primary'
                         onClick={() => router.reload()}
@@ -40,7 +48,7 @@ export default function ErrorPage({ message, MainMessage }: { message?: string, 
                     >
                         <BiRevision className=" text-xl" />
                         Try again
-                    </Button>
+                    </Button>}
                 </div>
             </div>
         </>
