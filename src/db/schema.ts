@@ -70,3 +70,22 @@ export const itemsTable = sqliteTable("items", {
     // configs: text("templates").notNull().default("[]"), // JSON string
     // apis: text("templates").notNull().default("[]"), // JSON string
 });
+
+export const listsTagsTable = sqliteTable("lists_tags", {
+    id: text("id")
+        .notNull()
+        .primaryKey(),
+    listId: text("list_id")
+        .notNull()
+        .references(() => listsTable.id),
+    userId: text("user_id")
+        .notNull()
+        .references(() => usersTable.id),
+    label: text("label")
+        .notNull(),
+    description: text("description"),
+    groupName: text("group_name"),
+    badgeable: integer("badgeable", { mode: "boolean" })
+        .notNull()
+        .default(false),
+});

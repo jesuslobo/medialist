@@ -1,11 +1,14 @@
+import { ListData } from "./list";
+
 export interface TagData {
     id: string;
-    list_id?: string;
-    name: string
+    userId: UserData['id'];
+    listId: ListData['id'];
+    label: string
     description?: string
-    group_name?: string
+    groupName?: string
     badgeable?: boolean
-}
+  }
 
 export interface UserData {
     id: string
