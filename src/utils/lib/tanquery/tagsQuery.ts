@@ -13,13 +13,16 @@ export const tagsQueryOptions = (listId: string) => queryOptions<TagData[]>({
 
 /** - Edit All Tags Cache */
 export const mutateTagCache = (data: TagData, type: "edit" | "add" | "delete") => {
-    const isDelete = type === "delete";
-    const isAdd = type === "add";
     const tagsKey = ['tags', data.listId];
 
     queryClient.setQueryData(tagsKey, (oldData: TagData[]) => {
-        const allTags = isAdd ? oldData
-            : oldData.filter((tag) => tag.id !== data.id); //remove the old image
-        return isDelete ? allTags : [...allTags, data];
+        switch (type) {
+            case 'add':
+                return [...oldData, data];
+            case 'delete':
+                return oldData.filter((tag) => tag.id !== data.id);
+            case 'edit':
+                return oldData.map((tag) => tag.id === data.id ? data : tag);
+        }
     });
 };

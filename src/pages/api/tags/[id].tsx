@@ -1,5 +1,6 @@
 import { db } from '@/db';
 import { listsTagsTable } from '@/db/schema';
+import parseJSONReq from '@/utils/functions/parseJSONReq';
 import { validateAuthCookies } from '@/utils/lib/auth';
 import { validatedID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
@@ -12,6 +13,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
  * Delete: Delete a tag by ID
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+    //need more validation especially for listid
     try {
         const { id: tagID } = req.query;
         if (!validatedID(tagID)) return res.status(400).json({ message: 'Bad Request' });
@@ -31,9 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(200).json(tag[0]);
         }
 
-        //need more validation
         if (req.method === 'PATCH') {
-            const { label, description, groupName, badgeable } = req.body;
+            const { label, description, groupName, badgeable } = parseJSONReq(await req.body);
 
             let tagData: Partial<TagData> = {
                 label,
@@ -51,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 ))
                 .returning()
 
-            return res.status(200).json(data);
+            return res.status(200).json(data[0]);
         }
 
         if (req.method === 'DELETE') {

@@ -3,10 +3,12 @@ import ListsLoading from "@/components/layouts/loading/ListsLoading"
 import ListPageItems from "@/components/page/lists/[id]/ListPageItems"
 import ListPageProvider from "@/components/page/lists/[id]/ListPageProvider"
 import ListPageSubNavBar from "@/components/page/lists/[id]/ListPageSubNavBar"
+import ListPageTagsList from "@/components/page/lists/[id]/tags/ListPageTagsList"
 import TitleBar from "@/components/ui/bars/TitleBar"
 import { validatedID } from "@/utils/lib/generateID"
 import { itemsQueryOptions, setupItemsCache } from "@/utils/lib/tanquery/itemsQuery"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
+import { tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
 import { ListData } from "@/utils/types/list"
 import { useQuery } from "@tanstack/react-query"
 import Head from "next/head"
@@ -19,11 +21,10 @@ function ListPage() {
 
     const { data: list, isSuccess, isPending } = useQuery(singleListQueryOptions(listId))
     const items = useQuery(itemsQueryOptions(listId))
+    const tags = useQuery(tagsQueryOptions(listId))
 
-    const numberOfItems = 0 // for now
-
-    if (isPending || items.isPending) return <ListsLoading />
-    if (!isSuccess || !items.isSuccess) return <ErrorPage message="Failed To Fetch The List" />
+    if (isPending || items.isPending || tags.isPending) return <ListsLoading />
+    if (!isSuccess || !items.isSuccess || !tags.isSuccess) return <ErrorPage message="Failed To Fetch The List" />
 
     setupItemsCache(items.data)
 
@@ -33,9 +34,9 @@ function ListPage() {
                 <title>MediaList - {list.title}</title>
             </Head>
 
-            <ListPageProvider list={list} items={items.data}>
+            <ListPageProvider list={list} items={items.data} tags={tags.data}>
                 <TitleBar
-                    title={`${list.title} (${numberOfItems})`}
+                    title={`${list.title} (${items.data.length})`}
                     className="mb-0 p-5"
                     startContent={<BiCollection className="text-3xl mr-3 flex-none p-0" />}
                     pointedBg
@@ -43,8 +44,10 @@ function ListPage() {
                 </TitleBar>
 
                 <ListPageSubNavBar />
-
-                <ListPageItems />
+                <div className="relative">
+                    <ListPageTagsList tags={tags.data} />
+                    <ListPageItems />
+                </div>
             </ListPageProvider>
         </>
     )

@@ -1,5 +1,6 @@
 import { db } from '@/db';
 import { listsTagsTable } from '@/db/schema';
+import parseJSONReq from '@/utils/functions/parseJSONReq';
 import { validateAuthCookies } from '@/utils/lib/auth';
 import { generateID, validatedID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
@@ -13,7 +14,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const { id: listID } = req.query;
+        const body = parseJSONReq(await req.body);
+        const listID = req.query.id;
+
         if (!validatedID(listID)) return res.status(400).json({ message: 'Bad Request' });
 
         const { user } = await validateAuthCookies(req, res);
@@ -33,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         //need more validation
         if (req.method === 'POST') {
-            const { label, description, groupName, badgeable } = req.body;
+            const { label, description, groupName, badgeable } = body;
             if (!label) return res.status(400).json({ message: 'Bad Request' });
 
             const id = generateID()
@@ -51,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 .values(tagData)
                 .returning()
 
-            return res.status(200).json(tag);
+            return res.status(200).json(tag[0]);
         }
 
         res.status(405).json({ message: 'Method Not Allowed' });
