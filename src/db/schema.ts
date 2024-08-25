@@ -1,5 +1,6 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+// forgot to add ON DELETE CASCADE :D
 export const usersTable = sqliteTable("users", {
     id: text("id")
         .notNull()
@@ -63,6 +64,9 @@ export const itemsTable = sqliteTable("items", {
     trash: integer("trash", { mode: "boolean" })
         .notNull()
         .default(false),
+    tags: text("tags_ids_json", { mode: "json" })
+        .default([])
+        .$type<string[]>(),
     // fav: integer("fav", { mode: "boolean" }).notNull().default(false),
     // createdAt: integer("created_at").notNull(),
     // updatedAt: integer("updated_at").notNull(),

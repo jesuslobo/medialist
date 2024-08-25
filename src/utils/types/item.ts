@@ -1,4 +1,4 @@
-import { UserData } from "./global"
+import { TagData, UserData } from "./global"
 import { ListData } from "./list"
 
 export interface ItemData {
@@ -11,6 +11,7 @@ export interface ItemData {
     description?: string
     // fav?: boolean
     trash?: boolean
+    tags: TagData['id'][]
     // tags: Tag['id'][]
     // progress_state?: itemProgressState
     // links?: Itemlink[]
