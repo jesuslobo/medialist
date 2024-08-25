@@ -2,6 +2,7 @@ import ErrorPage from "@/components/layouts/ErrorPage"
 import ListsLoading from "@/components/layouts/loading/ListsLoading"
 import ListPageItems from "@/components/page/lists/[id]/ListPageItems"
 import ListPageProvider from "@/components/page/lists/[id]/ListPageProvider"
+import ListPageSearchBar from "@/components/page/lists/[id]/ListPageSearchBar"
 import ListPageSubNavBar from "@/components/page/lists/[id]/ListPageSubNavBar"
 import ListPageTagsList from "@/components/page/lists/[id]/tags/ListPageTagsList"
 import TitleBar from "@/components/ui/bars/TitleBar"
@@ -41,11 +42,12 @@ function ListPage() {
                     startContent={<BiCollection className="text-3xl mr-3 flex-none p-0" />}
                     pointedBg
                 >
+                    <ListPageSearchBar />
                 </TitleBar>
 
                 <ListPageSubNavBar />
                 <div className="relative">
-                    <ListPageTagsList tags={tags.data} />
+                    <ListPageTagsList />
                     <ListPageItems />
                 </div>
             </ListPageProvider>

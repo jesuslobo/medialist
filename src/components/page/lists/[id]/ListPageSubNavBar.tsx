@@ -1,14 +1,13 @@
+import { queryClient } from "@/components/providers/RootProviders";
+import ToggleButton from "@/components/ui/buttons/ToggleButton";
 import { Button, ButtonProps, Divider } from "@nextui-org/react";
 import { useRouter } from "next/router";
 import { useContext } from "react";
 import { BiPlus, BiPurchaseTag, BiRevision } from "react-icons/bi";
-import { TbApiApp } from "react-icons/tb";
-import { ListPageContext } from "./ListPageProvider";
 import { CiGrid2H } from "react-icons/ci";
 import { IoGridOutline } from "react-icons/io5";
 import { TfiViewListAlt } from "react-icons/tfi";
-import { queryClient } from "@/components/providers/RootProviders";
-import ToggleButton from "@/components/ui/buttons/ToggleButton";
+import { ListPageContext } from "./ListPageProvider";
 
 export default function ListPageSubNavBar() {
     const router = useRouter();
@@ -30,25 +29,30 @@ export default function ListPageSubNavBar() {
                 <BiPlus className="text-lg" />New Item
             </Button>
 
-            <ToggleButton
-                {...buttonProps}
-                onPress={() => setShowTags(!showTags)}
-            >
-                <BiPurchaseTag className="text-lg" />Tags
-            </ToggleButton>
 
+
+            {/* // APIs should be moved to edit list page
             <Button
                 {...buttonProps}
-            // onPress={() => router.push(`/lists/${listData.id}/api`)}
+                onPress={() => router.push(`/lists/${listData.id}/api`)}
             >
                 <TbApiApp className="text-lg" /> APIs
-            </Button>
+            </Button> */}
 
             <Divider orientation="vertical" className="h-5" />
 
             <div className="flex-grow">
 
             </div>
+
+            <Divider orientation="vertical" className="h-5 ml-auto" />
+
+            <ToggleButton
+                {...buttonProps}
+                onPress={() => setShowTags(!showTags)}
+            >
+                <BiPurchaseTag className="text-lg" />Tags
+            </ToggleButton>
 
             <Divider orientation="vertical" className="h-5 ml-auto" />
 

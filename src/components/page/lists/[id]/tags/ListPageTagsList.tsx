@@ -4,15 +4,11 @@ import { AnimatePresence, motion } from "framer-motion"
 import { useContext, useState } from "react"
 import { ListPageContext } from "../ListPageProvider"
 import ListPageGroupTagCard from "./ListPageGroupTagCard"
-import ListPageTagsSearch from "./ListPageTagsSearch"
 import ListPageNewTag from "./ListPageNewTag"
+import ListPageTagsSearch from "./ListPageTagsSearch"
 
-export default function ListPageTagsList({
-    tags
-}: {
-    tags: TagData[]
-}) {
-    const { showTags, setTagsQuery } = useContext(ListPageContext)
+export default function ListPageTagsList() {
+    const { showTags, setTagsQuery, tags } = useContext(ListPageContext)
 
     const [visibleTags, setVisibleTags] = useState<TagData[]>(tags)
     const groupedTags = sortTagsByGroup(visibleTags)
@@ -23,11 +19,12 @@ export default function ListPageTagsList({
             : q?.concat(tag.label) || [tag.label] //add
     )
 
+    // make it sticky?
     return (
         <AnimatePresence>
             {showTags &&
                 <motion.div
-                    className="z-50 absolute top-0 left-0 rounded-xl min-w-72 max-w-96 max-h-[80vh] overflow-auto md:static md:w-full md:max-w-full md:mb-5"
+                    className="z-50 absolute top-0 right-0 rounded-xl min-w-72 max-w-96 max-h-[80vh] overflow-auto md:static md:w-full md:max-w-full md:mb-5"
                     style={{ scrollbarWidth: 'thin' }}
                     transition={{ duration: 0.2 }}
                     initial={{ opacity: 0 }}

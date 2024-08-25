@@ -18,23 +18,25 @@ export default function ListPageProvider({
     items: ItemData[],
     tags: TagData[]
 }) {
+    const [filterSettings, setFilterSettings] = useState<FilterSettings>({})
     const [tagsQuery, setTagsQuery] = useQueryState('tags', parseAsArrayOf(parseAsString))
 
-    const [visibleItems, setVisibleItems] = useState<ItemData[]>(items)
     const [viewMode, setViewMode] = useLocalStorage<ViewMode>('viewMode-' + list.id, 'cards')
     const [showTags, setShowTags] = useState(false)
 
     return (
         <ListPageContext.Provider value={{
             list,
-            allItems: items,
-            visibleItems,
+            items,
             viewMode,
+            tags,
             setViewMode,
             showTags,
             setShowTags,
             tagsQuery,
             setTagsQuery,
+            filterSettings,
+            setFilterSettings,
         }}>
             {children}
         </ListPageContext.Provider>
@@ -43,8 +45,8 @@ export default function ListPageProvider({
 
 interface ListPageContext {
     list: ListData
-    allItems: ItemData[]
-    visibleItems: ItemData[]
+    items: ItemData[],
+    tags: TagData[]
     viewMode: ViewMode
     setViewMode: Dispatch<SetStateAction<ViewMode>>
     showTags: boolean
@@ -53,7 +55,13 @@ interface ListPageContext {
         | ((old: string[] | null) => string[] | null)
         | null, options?: Options<Shallow> |
             undefined) => Promise<URLSearchParams>
-    tagsQuery: string[] | null
+    tagsQuery: string[] | null,
+    filterSettings: FilterSettings
+    setFilterSettings: Dispatch<SetStateAction<FilterSettings>>
+}
+
+interface FilterSettings {
+    search?: string
 }
 
 type ViewMode = 'cards' | 'cardsList' | 'list';
