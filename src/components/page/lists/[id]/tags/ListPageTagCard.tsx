@@ -36,6 +36,8 @@ export default function ListPageTagsCard({
         mutationFn: (data: TagForm) => httpClient().patch(`tags/${tag.id}`, data),
         onSuccess: (data: TagData) => {
             mutateTagCache(data, 'edit')
+            toggleTagQuery(tag)
+            toggleTagQuery(data)
             mutationEdit.reset()
             setEditMode(false)
         }

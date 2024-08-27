@@ -16,13 +16,18 @@ export const mutateTagCache = (data: TagData, type: "edit" | "add" | "delete") =
     const tagsKey = ['tags', data.listId];
 
     queryClient.setQueryData(tagsKey, (oldData: TagData[]) => {
+        let newData = [...oldData];
+        const index = type !== 'add' && oldData.findIndex((tag) => tag.id === data.id);
+
         switch (type) {
             case 'add':
-                return [...oldData, data];
+                return [...oldData, data].sort((a, b) => a.label.localeCompare(b.label));
             case 'delete':
-                return oldData.filter((tag) => tag.id !== data.id);
+                newData.splice(index as number, 1);
+                return newData;
             case 'edit':
-                return oldData.map((tag) => tag.id === data.id ? data : tag);
+                newData[index as number] = data
+                return newData;
         }
     });
 };
