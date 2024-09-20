@@ -12,53 +12,43 @@ export interface ItemData {
     // fav?: boolean
     trash?: boolean
     tags: TagData['id'][]
-    // tags: Tag['id'][]
+    layout: ItemLayout
     // progress_state?: itemProgressState
-    // links?: Itemlink[]
     // content_fields?: itemField[]
-    // main_fields?: main_fields[]
     // badges?: itemBadgesType[]
     // related?: ItemData['id'][]
-    // configurations: ItemConfiguration
-    // extra_fields?: { name: string, value?: string }[]
 }
 
-export interface ItemImageData {
-    id: string
-    image_path: string
-    title?: string
-    description?: string
-    item_id: string
-}
+// Header Fields:
+export interface ItemBadge extends LogoField { type: "badge" }
 
-export interface ItemMainFields {
-    name: string
-    value: string | number
-    itemId?: string
-    bIsNumber?: boolean
+/** Layout Fields:
+ *  [row] [column]  */
+export type ItemLayout = ItemField[][]
 
-}
+export type ItemField = ItemLabelTextField | ItemLinkField
+export type ItemFieldType = "labelText" | "link" | "text"
 
-// interface ItemConfiguration {
-//     layout?: "1" | "2" | "3" | "4"
+export interface LogoField { label: string, logoPath?: string | File | null }
+
+export interface ItemTextField { type: "text", label: string, }
+export interface ItemLabelTextField { type: "labelText", label: string, body: string, countable?: boolean }
+export interface ItemLinkField extends LogoField { type: "link", url: string }
+
+
+
+// export interface ItemImageData {
+//     id: string
+//     image_path: string
+//     title?: string
+//     description?: string
+//     item_id: string
 // }
 
 
-export interface Itemlink {
-    url?: string
-    logo_path: string
-    label: string
-}
-
-
-export interface ItemBadgesType {
-    logo_path: string
-    label: string
-}
-
-// interface ItemField {
+// export interface ItemBadgesType {
+//     logo_path: string
 //     label: string
-//     body: string
 // }
 
 // export interface itemProgressState {

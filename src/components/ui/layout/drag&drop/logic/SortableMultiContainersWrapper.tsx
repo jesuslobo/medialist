@@ -1,5 +1,5 @@
-import { closestCorners, DndContext, DragEndEvent, DragOverEvent, DragStartEvent, KeyboardSensor, Over, PointerSensor, UniqueIdentifier, useSensor, useSensors } from "@dnd-kit/core";
-import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { closestCorners, DndContext, DragEndEvent, DragOverEvent, DragStartEvent, MouseSensor, Over, TouchSensor, UniqueIdentifier, useSensor, useSensors } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 
 export interface SortableItemType {
@@ -14,6 +14,12 @@ interface props<T extends SortableItemType> {
     containers: Containers<T>,
     setContainers: Dispatch<SetStateAction<Containers<T>>>
     children?: ReactNode
+    onChange?: (
+        fromIndex: number,
+        toIndex: number,
+        fromContainerIndex: number,
+        toContainerIndex: number,
+    ) => void
     /** <DragOverlay> */
     dragOverLay?: (activeItem: T | null) => JSX.Element
 }
@@ -23,14 +29,23 @@ export default function SortableMultiContainersWrapper<T extends SortableItemTyp
     containers,
     setContainers,
     children,
+    onChange,
     dragOverLay
 }: props<T>) {
     const [activeItem, setActiveItem] = useState<T | null>(null);
 
+    // we delay the sensors, otherwise the drag and drop will interfere with the input fields preventing the user from typing
     const sensors = useSensors(
-        useSensor(PointerSensor),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates
+        useSensor(MouseSensor, {
+            activationConstraint: {
+                distance: 5,
+            },
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 200,
+                tolerance: 6,
+            },
         })
     );
 
@@ -92,6 +107,8 @@ export default function SortableMultiContainersWrapper<T extends SortableItemTyp
         newArray[overContainerIndex] = [...itemsBefore, containers[activeContainerIndex][activeIndex], ...itemsAfter]
 
         setContainers(newArray)
+
+        onChange?.(activeIndex, newIndex, activeContainerIndex, overContainerIndex)
     }
 
     function handleDragEnd({ active, over }: DragEndEvent & { over: Over }) {
@@ -113,7 +130,6 @@ export default function SortableMultiContainersWrapper<T extends SortableItemTyp
         let newArray = [...containers]
         newArray[activeContainerIndex] = containers[activeContainerIndex].filter((item) => item.id !== active.id)
         newArray[overContainerIndex] = arrayMove(containers[overContainerIndex], activeIndex, overIndex)
-
         setContainers(newArray)
     }
 

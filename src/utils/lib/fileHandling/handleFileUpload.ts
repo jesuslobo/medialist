@@ -9,7 +9,8 @@ interface Options {
     fileName?: string,
     pathDir?: string,
     prefix?: string,
-    thumbnails?: ThumbnailOptions[]
+    thumbnails?: ThumbnailOptions[],
+    allowedTypes?: string[] // Not implemented yet
 }
 
 type fileName = string

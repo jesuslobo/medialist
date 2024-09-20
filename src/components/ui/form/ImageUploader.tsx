@@ -1,6 +1,6 @@
 import { validImagesMIME } from "@/utils/lib/fileHandling/validImages";
 import { Button } from "@nextui-org/react";
-import { DetailedHTMLProps, HTMLAttributes, useRef, useState } from "react";
+import { DetailedHTMLProps, HTMLAttributes, useEffect, useRef, useState } from "react";
 import { BiX } from "react-icons/bi";
 import { twMerge } from "tailwind-merge";
 
@@ -9,7 +9,8 @@ type DivAttributes = Omit<DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTML
 interface ImageInputProps extends DivAttributes {
     value: File | null
     onChange: (value: File | null) => void
-    children?: ({ error }: { error: string | null }) => JSX.Element
+    children?: ({ error }: { error: string | null }) => JSX.Element,
+    innerContent?: string | JSX.Element
     /** Will Over Ride Types Validation:
      * default: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/jpg', 'image/bmp', 'image/tiff']
      */
@@ -26,6 +27,7 @@ export default function ImageInput({
     className,
     value,
     onChange,
+    innerContent = "Drag Image or Click to Upload",
     extraValidTypes,
     overRideTypes = validImagesMIME,
     ...props
@@ -37,6 +39,10 @@ export default function ImageInput({
     const [error, setError] = useState<string | null>(null)
 
     const validTypes = extraValidTypes ? overRideTypes.concat(extraValidTypes) : overRideTypes
+
+    useEffect(() => {
+        if (value) loadImage(value)
+    },[])
 
     function loadImage(file: File) {
         const fileType = file.type
@@ -103,7 +109,7 @@ export default function ImageInput({
                             <br /> Allowed Types: {validTypes.map(type => type.split('/')[1]).join(', ')}
                         </div>
                     ) ||
-                    <div className="text-center p-3">Drag Image or Click to Upload</div>
+                    <div className="text-center">{innerContent}</div>
 
                 }
             </div>

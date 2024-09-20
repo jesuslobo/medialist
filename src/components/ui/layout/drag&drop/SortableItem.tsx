@@ -8,6 +8,7 @@ type DivAttributes = Omit<HTMLAttributes<HTMLDivElement>, 'id'>
 interface props extends DivAttributes {
     id: string | UniqueIdentifier,
     children?: React.ReactNode,
+    childrenEvents?: (isDragging: boolean, isOver: boolean) => JSX.Element
     styleOnEvent?: (isDragging: boolean, isOver: boolean) => React.CSSProperties
 }
 
@@ -15,6 +16,7 @@ export default function SortableItem({
     id,
     children,
     styleOnEvent,
+    childrenEvents,
     ...props
 }: props) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging, isOver } = useSortable({ id })
@@ -29,6 +31,7 @@ export default function SortableItem({
 
     return (
         <div {...props} ref={setNodeRef} style={style} {...listeners} {...attributes}>
+            {childrenEvents?.(isDragging, isOver)}
             {children}
         </div>
     )

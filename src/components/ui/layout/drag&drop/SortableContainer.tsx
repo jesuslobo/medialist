@@ -12,8 +12,12 @@ interface props<T extends SortableItemType> extends DivAttributes {
     /** Pass fallback Sortable Item */
     fallbackItem?: ({ item }: { item: T }) => JSX.Element
     // props.sortableItem is to pass the component as a prop for cleaner code, and I don't want to disable react/no-children-prop rule
-    /** Pass fallback Sortable Item */
-    children?: (item: T) => JSX.Element // can pass fallbackItem as a children
+    /** Custom Items Iterator
+     *
+     * Don't forget to add  \<SortableItem id={item.id}...>
+     * otherwise items won't be dragable
+     * */
+    children?: React.ReactNode
 }
 
 export default function SortableContainer<T extends SortableItemType>({
@@ -32,11 +36,12 @@ export default function SortableContainer<T extends SortableItemType>({
             strategy={verticalListSortingStrategy}
         >
             <div {...props} ref={setNodeRef}>
-                {items.map((item) => (
-                    <SortableItem id={item.id} key={item.id + 'sortableItem'}>
-                        {item.children || fallbackItem?.({ item }) || children?.(item)}
-                    </SortableItem>
-                ))}
+                {children ||
+                    items.map((item) => (
+                        <SortableItem id={item.id} key={item.id + 'sortableItem'}>
+                            {item.children || fallbackItem?.({ item })}
+                        </SortableItem>
+                    ))}
             </div>
         </SortableContext>
     )
