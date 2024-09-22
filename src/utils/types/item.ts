@@ -26,15 +26,24 @@ export interface ItemBadge extends LogoField { type: "badge" }
  *  [row] [column]  */
 export type ItemLayout = ItemField[][]
 
-export type ItemField = ItemLabelTextField | ItemLinkField
-export type ItemFieldType = "labelText" | "link" | "text"
+export type ItemField = ItemLabelTextField | ItemLinkField | ItemTextField | ItemCardField | ItemTagsField
+export type ItemFieldType = Extract<ItemField, { type: string }>['type'];
 
-export interface LogoField { label: string, logoPath?: string | File | null }
+export interface ItemTagsField { type: "tags" }
 
-export interface ItemTextField { type: "text", label: string, }
+export interface LogoField { label: string, logoPath?: string }
+
+export interface ItemTextField { type: "text", variant: "long" | "short", text: string, }
 export interface ItemLabelTextField { type: "labelText", label: string, body: string, countable?: boolean }
 export interface ItemLinkField extends LogoField { type: "link", url: string }
 
+export interface ItemCardField {
+    type: "card",
+    variant: "small",
+    title: string,
+    description: string,
+    imagePath: string
+}
 
 
 // export interface ItemImageData {

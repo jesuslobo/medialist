@@ -1,6 +1,7 @@
 import { ItemFieldType } from "@/utils/types/item"
 import ItemFormLabelTextField from "./fields/ItemFormLabelTextField"
 import ItemFormLinkField from "./fields/ItemFormLinkField"
+import ItemFormTextField from "./fields/ItemFormTextField"
 
 // Maps a Field to its Component equivalent
 export default function ItemFormFieldsMapper({
@@ -21,6 +22,8 @@ export default function ItemFormFieldsMapper({
             return <ItemFormLabelTextField {...position} />
         case "link":
             return <ItemFormLinkField {...position} />
+        case "text":
+            return <ItemFormTextField  {...position}/>
         default:
             return <></>
     }
