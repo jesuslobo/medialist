@@ -4,7 +4,7 @@ import { HTMLAttributes } from "react"
 import SortableItem from "./SortableItem"
 import { SortableItemType } from "./logic/SortableMultiContainersWrapper"
 
-type DivAttributes = Omit<HTMLAttributes<HTMLDivElement>, 'children'>
+type DivAttributes = Omit<HTMLAttributes<HTMLUListElement>, 'children'>
 
 interface props<T extends SortableItemType> extends DivAttributes {
     id: string
@@ -35,14 +35,14 @@ export default function SortableContainer<T extends SortableItemType>({
             items={items}
             strategy={verticalListSortingStrategy}
         >
-            <div {...props} ref={setNodeRef}>
+            <ul {...props} ref={setNodeRef}>
                 {children ||
                     items.map((item) => (
                         <SortableItem id={item.id} key={item.id + 'sortableItem'}>
                             {item.children || fallbackItem?.({ item })}
                         </SortableItem>
                     ))}
-            </div>
+            </ul>
         </SortableContext>
     )
 }

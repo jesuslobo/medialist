@@ -22,7 +22,7 @@ export default function ItemFormLayoutSection() {
             dragOverLay={(activeItem) => (
                 <DragOverlay>
                     {activeItem &&
-                        <SortableItem id={activeItem.id} >
+                        <SortableItem className="list-none" id={activeItem.id} >
                             {activeItem.children}
                         </SortableItem>
                     }
@@ -33,7 +33,7 @@ export default function ItemFormLayoutSection() {
                 {containers.map((container, rowIndex) => (
                     <SortableContainer
                         key={"container" + rowIndex}
-                        className="space-y-2 bg-accented bg-opacity-50 rounded-xl p-1 w-1/2"
+                        className="space-y-2 bg-accented bg-opacity-50 rounded-xl p-1 w-1/2 list-none"
                         id={rowIndex + "i"}
                         items={container}
                     >

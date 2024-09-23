@@ -3,7 +3,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { HTMLAttributes } from "react";
 
-type DivAttributes = Omit<HTMLAttributes<HTMLDivElement>, 'id'>
+type DivAttributes = Omit<HTMLAttributes<HTMLLIElement>, 'id'>
 
 interface props extends DivAttributes {
     id: string | UniqueIdentifier,
@@ -30,9 +30,9 @@ export default function SortableItem({
     }
 
     return (
-        <div {...props} ref={setNodeRef} style={style} {...listeners} {...attributes}>
+        <li {...props} ref={setNodeRef} style={style} {...listeners} {...attributes}>
             {childrenEvents?.(isDragging, isOver)}
             {children}
-        </div>
+        </li>
     )
 }
