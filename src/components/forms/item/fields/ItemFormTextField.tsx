@@ -25,7 +25,7 @@ export default function ItemFormTextField({
     }
 
     return (
-        <div className="flex gap-x-1 items-center">
+        <article className="flex gap-x-1 items-center">
             {currentField.variant === "short"
                 ? <Input
                     variant="bordered"
@@ -46,6 +46,6 @@ export default function ItemFormTextField({
             >
                 <BiX size={30} />
             </Button>
-        </div>
+        </article>
     )
 }

@@ -24,7 +24,7 @@ export default function ItemFormLabelTextField({
     }
 
     return (
-        <div className="flex gap-x-1 items-center">
+        <article className="flex gap-x-1 items-center">
             <Input
                 placeholder="Label"
                 value={currentField.label}
@@ -45,6 +45,6 @@ export default function ItemFormLabelTextField({
             >
                 <BiX size={30} />
             </Button>
-        </div>
+        </article>
     )
 }
