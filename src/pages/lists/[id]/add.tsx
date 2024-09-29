@@ -6,6 +6,7 @@ import TitleBar from "@/components/ui/bars/TitleBar"
 import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton"
 import { validatedID } from "@/utils/lib/generateID"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
+import { tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
 import { ListData } from "@/utils/types/list"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/router"
@@ -16,10 +17,15 @@ function AddItemPage() {
     const router = useRouter()
     const listId = router.query.id as ListData['id']
 
-    const itemForm = useForm<ItemFormData>()
+    const itemForm = useForm<ItemFormData>({
+        defaultValues: {
+            tags: ["2X6zV9GmSj", "bl8BlAAZVb", "GX88y8M1hp"],
+        }
+    })
     const { handleSubmit, control, formState: { errors }, register } = itemForm
 
     const { data: list, isSuccess, isPending } = useQuery(singleListQueryOptions(listId))
+    const tags = useQuery(tagsQueryOptions(listId))
 
     const mutation = useMutation({
         mutationFn: (formData: FormData) => new Promise((res, rej) => console.log(res(formData))),
@@ -45,16 +51,17 @@ function AddItemPage() {
 
     useEffect(() => {
         setContainers([
-            [{ id: "1", type: "link" }, { id: "2", type: "labelText" }, { id: "3", type: "labelText" }],
-            [{ id: "4", type: "labelText" }, { id: "5", type: "labelText" }, { id: "6", type: "labelText" }],
+            [{ id: "1", type: "link" }, { id: "2", type: "text", variant: "short" }, { id: "3", type: "text", variant: "long" }],
+            [{ id: "4", type: "labelText" }, { id: "5", type: "labelText" }, { id: "6", type: "labelText" }, { id: "7", type: "tags" }],
         ])
     }, [list])
 
-    if (isPending) return <ListsLoading />
-    if (!isSuccess) return <ErrorPage message="Failed To Fetch The List" />
+    if (isPending || tags.isPending) return <ListsLoading />
+    if (!isSuccess || !tags.isSuccess) return <ErrorPage message="Failed To Fetch The List" />
 
     return (
         <ItemFormProvider
+            tags={tags.data}
             list={list}
             itemForm={itemForm}
             containers={containers} // maybe move them to ItemFormLayoutSection

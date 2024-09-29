@@ -1,4 +1,5 @@
 import { SortableItemType } from "@/components/ui/layout/drag&drop/logic/SortableMultiContainersWrapper";
+import { TagData } from "@/utils/types/global";
 import { ItemData, ItemField } from "@/utils/types/item";
 import { ListData } from "@/utils/types/list";
 import { createContext, Dispatch, SetStateAction } from "react";
@@ -9,9 +10,10 @@ interface Props extends ItemFormContext {
 }
 
 interface ItemFormContext {
+    tags: TagData[],
     list: ListData,
     item?: ItemData,
-    itemForm: UseFormReturn<ItemFormData, any, undefined>,
+    itemForm: UseFormReturn<ItemFormData>,
     containers: ItemFormField[][],
     setContainers: Dispatch<SetStateAction<ItemFormField[][]>>
 }
@@ -26,6 +28,7 @@ export interface ItemFormData extends Omit<ItemData, "id" | "createdAt" | "updat
 export const ItemFormContext = createContext({} as ItemFormContext);
 
 export default function ItemFormProvider({
+    tags,
     list,
     item,
     itemForm,
@@ -36,6 +39,7 @@ export default function ItemFormProvider({
 
     return (
         <ItemFormContext.Provider value={{
+            tags,
             list,
             item,
             itemForm,
