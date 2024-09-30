@@ -12,7 +12,7 @@ export interface ItemData {
     // fav?: boolean
     trash?: boolean
     tags: TagData['id'][]
-    layout: ItemLayout
+    layout: ItemLayoutHeader
     // progress_state?: itemProgressState
     // content_fields?: itemField[]
     // badges?: itemBadgesType[]
@@ -22,8 +22,13 @@ export interface ItemData {
 // Header Fields:
 export interface ItemBadge extends LogoField { type: "badge" }
 
-/** Layout Fields:
- *  [row] [column]  */
+// Layout Fields:
+export type ItemLayoutHeader = {
+    type: "one_row" | "left_sidebar" | "right_sidebar" | "two_rows" | "three_rows"
+    layout: ItemLayout
+}
+
+/**  [row] [column]  */
 export type ItemLayout = ItemField[][]
 
 export type ItemField = ItemLabelTextField | ItemLinkField | ItemTextField | ItemCardField | ItemTagsField
