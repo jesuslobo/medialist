@@ -6,6 +6,7 @@ import { DragOverlay } from "@dnd-kit/core"
 import { Divider } from "@nextui-org/react"
 import { Dispatch, SetStateAction, useContext } from "react"
 import ItemFormFieldsMapper from "./ItemFormFieldMapper"
+import ItemFormLayoutAddFieldButton from "./layoutTitleBar/ItemFormLayoutAddFieldButton"
 
 /**
  * All fields are self-contained, they store their own state and update the containers by themselves
@@ -14,10 +15,7 @@ import ItemFormFieldsMapper from "./ItemFormFieldMapper"
  * also the containers array didn't sync correctly with useFieldArray's array
 */
 export default function ItemFormLayoutSection() {
-    const { containers, setContainers, itemForm } = useContext(ItemFormContext)
-    const { getValues } = itemForm
-
-    const layoutType = getValues("layout.type")
+    const { activeTabFields, setActiveTabFields, activeTabHeader } = useContext(ItemFormContext)
 
     const gridTemplate = {
         one_row: "1fr",
@@ -29,27 +27,29 @@ export default function ItemFormLayoutSection() {
 
     return (
         <SortableMultiContainersWrapper
-            containers={containers}
-            setContainers={setContainers}
+            containers={activeTabFields}
+            setContainers={setActiveTabFields}
             dragOverLay={(item) => (
                 <DragOverlay className="bg-pure-theme/20 rounded-xl" />
             )}
         >
             <div
+                key={activeTabHeader?.type}
                 className="grid gap-x-3"
-                style={{ gridTemplateColumns: gridTemplate?.[layoutType] || gridTemplate["left_sidebar"] }}
+                style={{ gridTemplateColumns: gridTemplate?.[activeTabHeader?.type] || gridTemplate["left_sidebar"] }}
             >
-                {containers.map((container, rowIndex) => (
+                {activeTabFields.map((tabFields, rowIndex) => (
                     <SortableContainer
                         key={"container" + rowIndex}
                         className="space-y-3 bg-accented bg-opacity-50 rounded-xl p-2 list-none"
                         id={rowIndex + "i"}
-                        items={container}
+                        items={tabFields}
                     >
-                        {container.map((item, colIndex) => (
+                        <ItemFormLayoutAddFieldButton rowIndex={rowIndex} />
+                        {tabFields.map((item, colIndex) => (
                             <SortableItem id={item.id} key={item.id}>
                                 <ItemFormFieldsMapper rowIndex={rowIndex} colIndex={colIndex} type={item.type} />
-                                {colIndex !== container.length - 1 && <Divider className="mt-3" />}
+                                {colIndex !== tabFields.length - 1 && <Divider className="mt-3" />}
                             </SortableItem>
                         ))}
                     </SortableContainer>
@@ -62,10 +62,10 @@ export default function ItemFormLayoutSection() {
 export function useItemFormLayoutField(
     row: number,
     col: number,
-    setContainers: Dispatch<SetStateAction<ItemFormField[][]>>
+    setFields: Dispatch<SetStateAction<ItemFormField[][]>>
 ) {
     function set(value: object) {
-        setContainers((prev) => {
+        setFields((prev) => {
             let newArray = [...prev]
             newArray[row][col] = { ...newArray[row][col], ...value }
             return newArray
@@ -73,7 +73,7 @@ export function useItemFormLayoutField(
     }
 
     function remove() {
-        setContainers((prev) => {
+        setFields((prev) => {
             let newArray = [...prev]
             newArray[row].splice(col, 1)
             return newArray

@@ -5,12 +5,14 @@ export default function TitleBar({
     className = 'p-5 mb-5',
     children,
     startContent,
+    middleContent,
     pointedBg,
 }: {
     title?: string,
     className?: string,
     children?: React.ReactNode,
     startContent?: React.ReactNode,
+    middleContent?: React.ReactNode,
     pointedBg?: boolean,
 }) {
     return (
@@ -26,7 +28,7 @@ export default function TitleBar({
                     {title}
                 </h1>
             }
-            <div className="flex-grow"></div>
+            <div className="flex-grow">{middleContent}</div>
             <div className=" flex-none shadow-lg rounded-2xl">{children}</div>
         </header>
     )

@@ -6,14 +6,14 @@ import { BsCardText } from "react-icons/bs";
 import { RxText } from "react-icons/rx";
 import { ItemFormContext, ItemFormField } from "../ItemFormProvider";
 
-export default function ItemFormLayoutAddFieldButton() {
-    const { setContainers } = useContext(ItemFormContext)
+export default function ItemFormLayoutAddFieldButton({ rowIndex }: { rowIndex: number }) {
+    const { setActiveTabFields } = useContext(ItemFormContext)
 
     function addField(type: ItemFieldType, variant?: string) {
-        setContainers(prev => {
+        setActiveTabFields(prev => {
             let newArray = [...prev]
             const newField = { id: Date.now().toString(), type, variant } as ItemFormField
-            newArray[prev.length - 1].unshift(newField) // add it at the top of the last row
+            newArray[rowIndex].unshift(newField) // add it at the top of the last row
             return newArray
         })
     }
@@ -21,7 +21,7 @@ export default function ItemFormLayoutAddFieldButton() {
     return (
         <Dropdown>
             <DropdownTrigger>
-                <Button isIconOnly>
+                <Button className="w-full">
                     <BiPlus size={25} />
                 </Button>
             </DropdownTrigger>
@@ -46,6 +46,8 @@ export default function ItemFormLayoutAddFieldButton() {
                         Label: Text
                     </DropdownItem>
                 </DropdownSection>
+                {/* <DropdownSection title="Media">
+                </DropdownSection> */}
                 <DropdownSection title="Other">
                     <DropdownItem
                         onPress={() => addField("link")}

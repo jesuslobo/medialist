@@ -119,7 +119,7 @@ export default function ListPageTagsCard({
                                 <StatusSubmitButton
                                     className="text-foreground flex-grow  rounded-r-sm"
                                     mutation={mutationEdit}
-                                    defaultContent={<> Save Changes <BiSave size={20} /></>}
+                                    defaultContent={<><BiSave size={20} /> Save Changes</>}
                                     onPress={handleSubmit(onSubmit)}
                                 />
                                 <TrashPopoverButton onPress={() => mutationDelete.mutate()} >

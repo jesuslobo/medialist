@@ -12,10 +12,10 @@ export default function ItemFormLabelTextField({
     rowIndex: number,
     colIndex: number
 }) {
-    const { containers, setContainers } = useContext(ItemFormContext)
-    const { set, remove } = useItemFormLayoutField(rowIndex, colIndex, setContainers)
+    const { activeTabFields, setActiveTabFields } = useContext(ItemFormContext)
+    const { set, remove } = useItemFormLayoutField(rowIndex, colIndex, setActiveTabFields)
 
-    const currentField = containers[rowIndex][colIndex] as ItemLabelTextField & { id: number }
+    const currentField = activeTabFields[rowIndex][colIndex] as ItemLabelTextField & { id: number }
 
     const inputProps: InputProps = {
         className: "shadow-sm rounded-xl",

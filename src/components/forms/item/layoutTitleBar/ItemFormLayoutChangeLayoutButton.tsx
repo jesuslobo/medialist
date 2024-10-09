@@ -1,19 +1,16 @@
 import { ItemLayoutHeader } from "@/utils/types/item";
-import type { Selection } from "@nextui-org/react";
+import type { Selection, SharedSelection } from "@nextui-org/react";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/react";
-import { useContext, useMemo, useRef, useState } from "react";
-import { BiGridAlt } from "react-icons/bi";
+import { useContext, useEffect, useState } from "react";
 import { BsLayoutSidebar, BsLayoutSidebarReverse, BsLayoutSplit, BsLayoutThreeColumns, BsSquare } from "react-icons/bs";
 import { ItemFormContext } from "../ItemFormProvider";
 
 export default function ItemFormLayoutChangeLayoutButton() {
-    const { itemForm, setContainers } = useContext(ItemFormContext)
-    const { getValues, setValue } = itemForm
+    const { setActiveTabFields, activeTabHeader, setActiveTabHeader } = useContext(ItemFormContext)
 
-    const defaultValue = getValues("layout.type") || "left_sidebar"
+    const defaultValue = activeTabHeader?.type || "left_sidebar"
     const [selectedLayoutKey, setSelectedLayoutKey] = useState<Selection>(new Set([defaultValue]))
-
-    let previousLayoutKey = useRef<ItemLayoutHeader['type']>(defaultValue) // to keep track of the previous layout, for layout updates
+    const selectedLayout = Array.from(selectedLayoutKey).toString() as ItemLayoutHeader['type']
 
     const iconMappings = new Map<string, React.ReactNode>([
         ["one_row", <BsSquare key="one_row_LayoutIcon" size={20} />],
@@ -31,37 +28,41 @@ export default function ItemFormLayoutChangeLayoutButton() {
         three_rows: 3
     }
 
-    const selectedLayout = useMemo(() => {
-        const newKey = Array.from(selectedLayoutKey).toString() as ItemLayoutHeader['type']
-        setValue("layout.type", newKey)
+    useEffect(() => {
+        setSelectedLayoutKey(new Set([activeTabHeader?.type || "left_sidebar"]))
+    }, [activeTabHeader])
 
-        const oldRowNumber = rowNumbers[previousLayoutKey.current]
-        const newRowNumber = rowNumbers[newKey]
+    function updateLayout(value: SharedSelection) {
+        const newValue = value.currentKey as ItemLayoutHeader['type']
+        setActiveTabHeader(prev => ({ ...prev, type: newValue }))
 
-        // should create/remove containers (rows)
+        const oldRowNumber = rowNumbers[activeTabHeader?.type]
+        const newRowNumber = rowNumbers[newValue]
+
+        // should create/remove rows
         // if going for less rows, we just need to merge the last two rows
-        if (oldRowNumber > newRowNumber) {
-            setContainers(prev => {
-                const lastTwoRows = prev.slice(-2)
-                const mergedRows = lastTwoRows.flat()
-                return [...prev.slice(0, -2), mergedRows]
-            })
-        } else {
-            // if going for more rows, we need to create new rows
-            const diff = newRowNumber - oldRowNumber
-            const newRows = Array.from({ length: diff }, () => [])
-            setContainers(prev => [...prev, ...newRows])
-        }
+        if (activeTabHeader)
+            if (oldRowNumber > newRowNumber) {
+                setActiveTabFields(prev => {
+                    const lastTwoRows = prev.slice(-2)
+                    const mergedRows = lastTwoRows.flat()
+                    return [...prev.slice(0, -2), mergedRows]
+                })
+            } else {
+                // if going for more rows, we need to create new rows
+                const diff = newRowNumber - oldRowNumber
+                const newRows = Array.from({ length: diff }, () => [])
+                setActiveTabFields(prev => [...prev, ...newRows])
+            }
 
-        previousLayoutKey.current = newKey
-        return iconMappings.get(newKey) ?? <BiGridAlt size={20} />
-    }, [selectedLayoutKey]);
+        setSelectedLayoutKey(new Set([activeTabHeader?.type || "left_sidebar"]))
+    }
 
     return (
         <Dropdown>
             <DropdownTrigger>
                 <Button isIconOnly>
-                    {selectedLayout}
+                    {iconMappings.get(selectedLayout)}
                 </Button>
             </DropdownTrigger>
             <DropdownMenu
@@ -69,7 +70,7 @@ export default function ItemFormLayoutChangeLayoutButton() {
                 disallowEmptySelection
                 selectionMode="single"
                 selectedKeys={selectedLayoutKey}
-                onSelectionChange={setSelectedLayoutKey}
+                onSelectionChange={updateLayout}
                 itemClasses={{
                     base: [
                         "flex",
@@ -89,23 +90,23 @@ export default function ItemFormLayoutChangeLayoutButton() {
                 }}
             >
                 <DropdownSection className="columns-5 md:columns-3 ">
-                    <DropdownItem key="one_row"  >
+                    <DropdownItem key="one_row" textValue="oneRow"  >
                         <BsSquare size={20} className="w-full mb-2" />
                         One Row
                     </DropdownItem>
-                    <DropdownItem key="left_sidebar" >
+                    <DropdownItem key="left_sidebar" textValue="leftSidebar" >
                         <BsLayoutSidebar size={20} className="w-full mb-2" />
                         Left Sidebar
                     </DropdownItem>
-                    <DropdownItem key="right_sidebar">
+                    <DropdownItem key="right_sidebar" textValue="rightSidebar">
                         <BsLayoutSidebarReverse size={20} className="w-full mb-2" />
                         Right Sidebar
                     </DropdownItem>
-                    <DropdownItem key="two_rows" >
+                    <DropdownItem key="two_rows" textValue="twoRows" >
                         <BsLayoutSplit size={20} className="w-full mb-2" />
                         Two Rows
                     </DropdownItem>
-                    <DropdownItem key="three_rows" >
+                    <DropdownItem key="three_rows" textValue="threeRows">
                         <BsLayoutThreeColumns size={20} className="w-full mb-2" />
                         Three Rows
                     </DropdownItem>

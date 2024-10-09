@@ -1,5 +1,6 @@
 import ItemFormLayoutSection from "@/components/forms/item/ItemFormLayoutSection"
-import ItemFormProvider, { ItemFormData, ItemFormField } from "@/components/forms/item/ItemFormProvider"
+import ItemFormProvider, { ItemFormData, ItemFormLayoutTab } from "@/components/forms/item/ItemFormProvider"
+import ItemFormLayoutTitleBar from "@/components/forms/item/layoutTitleBar/ItemFormLayoutTitleBar"
 import ErrorPage from "@/components/layouts/ErrorPage"
 import ListsLoading from "@/components/layouts/loading/ListsLoading"
 import TitleBar from "@/components/ui/bars/TitleBar"
@@ -38,7 +39,7 @@ function AddItemPage() {
     })
 
     function onSubmit(data: ItemFormData) {
-        console.log({ data, containers })
+        console.log({ data, layoutTabs })
         const formData = new FormData()
 
         formData.append('title', data.title)
@@ -47,14 +48,19 @@ function AddItemPage() {
         mutation.mutate(formData)
     }
 
-    const [containers, setContainers] = useState<ItemFormField[][]>([])
+    const [layoutTabs, setLayoutTabs] = useState<ItemFormLayoutTab[]>([])
+    const [activeTabIndex, setActiveTabIndex] = useState(0)
 
     useEffect(() => {
-        setContainers([
-            [{ id: "1", type: "link" }, { id: "2", type: "text", variant: "short" }, { id: "3", type: "text", variant: "long" }],
-            [{ id: "4", type: "labelText" }, { id: "5", type: "labelText" }, { id: "6", type: "labelText" }, { id: "7", type: "tags" }],
+        setLayoutTabs([
+            [
+                { type: "left_sidebar", label: "Main" },
+                [{ id: "1", type: "link" }, { id: "2", type: "text", variant: "short" }, { id: "3", type: "text", variant: "long" }],
+                [{ id: "5", type: "labelText" }, { id: "6", type: "labelText" }, { id: "7", type: "tags" }],
+            ] as any,
+            [{ type: "right_sidebar", label: "Title" }, [], []]
         ])
-    }, [list])
+    }, [])
 
     if (isPending || tags.isPending) return <ListsLoading />
     if (!isSuccess || !tags.isSuccess) return <ErrorPage message="Failed To Fetch The List" />
@@ -64,22 +70,27 @@ function AddItemPage() {
             tags={tags.data}
             list={list}
             itemForm={itemForm}
-            containers={containers} // maybe move them to ItemFormLayoutSection
-            setContainers={setContainers}
+            layoutTabs={layoutTabs}
+            setLayoutTabs={setLayoutTabs}
+            activeTabIndex={activeTabIndex}
         >
             <h1>Add Item Page</h1>
             <StatusSubmitButton
                 mutation={mutation}
                 onPress={handleSubmit(onSubmit)}
             />
-
             <TitleBar
                 className="bg-accented py-3 px-5 my-3"
-                title="Layout"
+                title="Header"
             >
 
             </TitleBar>
-
+            <ItemFormLayoutTitleBar
+                layoutTabs={layoutTabs}
+                setLayoutTabs={setLayoutTabs}
+                activeTabIndex={activeTabIndex}
+                setActiveTabIndex={setActiveTabIndex}
+            />
             <ItemFormLayoutSection />
         </ItemFormProvider>
     )

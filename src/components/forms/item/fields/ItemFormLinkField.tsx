@@ -14,10 +14,10 @@ export default function ItemFormLinkField({
     rowIndex: number,
     colIndex: number
 }) {
-    const { containers, setContainers } = useContext(ItemFormContext)
-    const { set, remove } = useItemFormLayoutField(rowIndex, colIndex, setContainers)
+    const { activeTabFields, setActiveTabFields } = useContext(ItemFormContext)
+    const { set, remove } = useItemFormLayoutField(rowIndex, colIndex, setActiveTabFields)
 
-    const currentField = containers[rowIndex][colIndex] as ItemLinkField & { id: number, logoPath: File | null }
+    const currentField = activeTabFields[rowIndex][colIndex] as ItemLinkField & { id: number, logoPath: File | null }
 
     const inputProps: InputProps = {
         className: "shadow-sm rounded-xl",

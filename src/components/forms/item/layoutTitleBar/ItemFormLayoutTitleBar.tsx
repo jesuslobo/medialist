@@ -1,19 +1,55 @@
 import TitleBar from "@/components/ui/bars/TitleBar";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/react";
-import { BiDotsVerticalRounded } from "react-icons/bi";
-import ItemFormLayoutAddFieldButton from "./ItemFormLayoutAddFieldButton";
+import { Dispatch, SetStateAction, useContext } from "react";
+import { BiDotsVerticalRounded, BiPlus } from "react-icons/bi";
+import { ItemFormContext, ItemFormLayoutTab } from "../ItemFormProvider";
 import ItemFormLayoutChangeLayoutButton from "./ItemFormLayoutChangeLayoutButton";
+import ItemFormLayoutTabs from "./ItemFormLayoutTabs";
 
-export default function ItemFormLayoutTitleBar() {
+export default function ItemFormLayoutTitleBar({
+    layoutTabs,
+    setLayoutTabs,
+    activeTabIndex,
+    setActiveTabIndex,
+}: {
+    layoutTabs: ItemFormLayoutTab[],
+    setLayoutTabs: Dispatch<SetStateAction<ItemFormLayoutTab[]>>,
+    activeTabIndex: number,
+    setActiveTabIndex: Dispatch<SetStateAction<number>>,
+}) {
+    const { activeTabHeader, setActiveTabHeader } = useContext(ItemFormContext)
+
+    function addTab() {
+        const oldTabsNum = layoutTabs.length
+        setLayoutTabs(prev => {
+            let newArray = [...prev]
+            newArray.push([{ type: "left_sidebar", label: `Tab ( ${oldTabsNum + 1} )` }, [], []])
+            return newArray
+        })
+        setActiveTabIndex(oldTabsNum)
+    }
+
+
     return (
         <TitleBar
             className="bg-accented py-3 px-5 my-3"
             title="Layout"
+            middleContent={
+                <div className="flex items-center justify-center pl-10">
+                    <ItemFormLayoutTabs
+                        layoutTabs={layoutTabs}
+                        setLayoutTabs={setLayoutTabs}
+                        activeTabIndex={activeTabIndex}
+                        setActiveTabIndex={setActiveTabIndex}
+                    />
+                    <Button onPress={addTab} radius="full" size="sm" variant="flat" isIconOnly >
+                        <BiPlus size={15} />
+                    </Button>
+                </div>
+            }
         >
             <div className="flex items-center gap-x-2">
-                <ItemFormLayoutAddFieldButton />
                 <ItemFormLayoutChangeLayoutButton />
-
                 <Dropdown>
                     <DropdownTrigger>
                         <Button isIconOnly>

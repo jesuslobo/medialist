@@ -8,7 +8,7 @@ import ItemFormTagsSearchDropDown from "./ItemFormTagsSearchDropDown"
  * - and enforced field, unremovable
  * - only one per Item
  * - only here to allow for custom postioning
- * - it doesn't store its own values in the containers state, instead it uses a saperate useFieldArray
+ * - it doesn't store its own values in the layoutTabs state, instead it uses a saperate useFieldArray
  */
 export default function ItemFormTagsField() {
     const { itemForm, tags } = useContext(ItemFormContext)
