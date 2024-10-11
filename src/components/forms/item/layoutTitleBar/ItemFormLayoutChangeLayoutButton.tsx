@@ -40,13 +40,14 @@ export default function ItemFormLayoutChangeLayoutButton() {
         const newRowNumber = rowNumbers[newValue]
 
         // should create/remove rows
-        // if going for less rows, we just need to merge the last two rows
+        // if going for less rows, we just need to merge the last rows
         if (activeTabHeader)
             if (oldRowNumber > newRowNumber) {
                 setActiveTabFields(prev => {
-                    const lastTwoRows = prev.slice(-2)
-                    const mergedRows = lastTwoRows.flat()
-                    return [...prev.slice(0, -2), mergedRows]
+                    const diff = oldRowNumber - newRowNumber
+                    const newRows = prev.slice(-diff)
+                    const mergedRows = newRows.flat()
+                    return [...prev.slice(0, -diff), mergedRows]
                 })
             } else {
                 // if going for more rows, we need to create new rows
