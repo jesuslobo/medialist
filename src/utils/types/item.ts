@@ -13,24 +13,31 @@ export interface ItemData {
     trash?: boolean
     tags: TagData['id'][]
     layout: ItemLayoutTab[]
+    header: ItemHeader
     // progress_state?: itemProgressState
-    // content_fields?: itemField[]
     // badges?: itemBadgesType[]
     // related?: ItemData['id'][]
 }
 
-// Header Fields:
+// # Item Header:
+export interface ItemHeader {
+    type: "poster_on_top" | "poster_inside" | "poster_beside"
+    badges: ItemBadge[]
+}
+
+// ## Header Fields:
 export interface ItemBadge extends LogoField { type: "badge" }
 
+// # Item Layout:
 export type ItemLayoutTab = [ItemLayoutHeader, ...ItemLayout]
 
-// Layout Fields:
+// ## Layout Fields:
 export type ItemLayoutHeader = {
     type: "one_row" | "left_sidebar" | "right_sidebar" | "two_rows" | "three_rows"
     label: String
 }
 
-/**  [row] [column]  */
+/** ### [row] [column]  */
 export type ItemLayout = ItemField[][]
 
 export type ItemField = ItemLabelTextField | ItemLinkField | ItemTextField | ItemCardField | ItemTagsField
@@ -51,7 +58,6 @@ export interface ItemCardField {
     description: string,
     imagePath: string
 }
-
 
 // export interface ItemImageData {
 //     id: string

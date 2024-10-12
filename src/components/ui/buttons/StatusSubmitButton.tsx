@@ -11,7 +11,6 @@ interface StatusSubmitButtonProps extends Omit<ButtonProps, 'onPress'> {
     defaultContent?: JSX.Element | string,
     savedContent?: JSX.Element | string,
     errorContent?: JSX.Element | string,
-    isDisabled?: boolean
 }
 
 /** Submit Button With Indicators for Error and Success */

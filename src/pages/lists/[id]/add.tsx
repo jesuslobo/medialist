@@ -1,18 +1,22 @@
+import ItemFormHeaderSection from "@/components/forms/item/ItemFormHeaderSection"
+import ItemFormHeaderTitleBar from "@/components/forms/item/ItemFormHeaderTitleBar"
 import ItemFormLayoutSection from "@/components/forms/item/ItemFormLayoutSection"
 import ItemFormProvider, { ItemFormData, ItemFormLayoutTab } from "@/components/forms/item/ItemFormProvider"
 import ItemFormLayoutTitleBar from "@/components/forms/item/layoutTitleBar/ItemFormLayoutTitleBar"
 import ErrorPage from "@/components/layouts/ErrorPage"
 import ListsLoading from "@/components/layouts/loading/ListsLoading"
-import TitleBar from "@/components/ui/bars/TitleBar"
 import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton"
 import { validatedID } from "@/utils/lib/generateID"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
 import { tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
 import { ListData } from "@/utils/types/list"
 import { useMutation, useQuery } from "@tanstack/react-query"
+import Head from "next/head"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
+import { BiCheckDouble, BiRevision } from "react-icons/bi"
+import { FaSave } from "react-icons/fa"
 
 function AddItemPage() {
     const router = useRouter()
@@ -20,6 +24,9 @@ function AddItemPage() {
 
     const itemForm = useForm<ItemFormData>({
         defaultValues: {
+            header: {
+                type: "poster_beside",
+            },
             tags: ["2X6zV9GmSj", "bl8BlAAZVb", "GX88y8M1hp"],
         }
     })
@@ -51,14 +58,14 @@ function AddItemPage() {
     const [layoutTabs, setLayoutTabs] = useState<ItemFormLayoutTab[]>([])
     const [activeTabIndex, setActiveTabIndex] = useState(0)
 
+    // will be moved to the provider, so it will only be loaded when the list is loaded
     useEffect(() => {
         setLayoutTabs([
             [
                 { type: "left_sidebar", label: "Main" },
-                [{ id: "1", type: "link" }, { id: "2", type: "text", variant: "short" }, { id: "3", type: "text", variant: "long" }],
-                [{ id: "5", type: "labelText" }, { id: "6", type: "labelText" }, { id: "7", type: "tags" }],
+                [{ id: "1", type: "tags" }],
+                [],
             ] as any,
-            [{ type: "right_sidebar", label: "Title" }, [], []]
         ])
     }, [])
 
@@ -74,17 +81,22 @@ function AddItemPage() {
             setLayoutTabs={setLayoutTabs}
             activeTabIndex={activeTabIndex}
         >
-            <h1>Add Item Page</h1>
-            <StatusSubmitButton
-                mutation={mutation}
-                onPress={handleSubmit(onSubmit)}
-            />
-            <TitleBar
-                className="bg-accented py-3 px-5 my-3"
-                title="Header"
-            >
+            <Head>
+                <title>MediaList - {list.title} - Add Item</title>
+            </Head>
+            <ItemFormHeaderTitleBar>
+                <StatusSubmitButton
+                    color="primary"
+                    mutation={mutation}
+                    onPress={handleSubmit(onSubmit)}
+                    defaultContent={<FaSave className="text-xl" />}
+                    savedContent={<BiCheckDouble className="text-xl" />}
+                    errorContent={<BiRevision className="text-xl" />}
+                    isIconOnly
+                />
+            </ItemFormHeaderTitleBar>
+            <ItemFormHeaderSection />
 
-            </TitleBar>
             <ItemFormLayoutTitleBar
                 layoutTabs={layoutTabs}
                 setLayoutTabs={setLayoutTabs}
