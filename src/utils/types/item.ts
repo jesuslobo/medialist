@@ -78,3 +78,10 @@ export interface ItemCardField {
 //     color: "default" | "primary" | "secondary" | "success" | "warning" | "danger" | undefined
 //     name: string
 // }
+
+/** Item PUT & POST response */
+export interface ItemSaveResponse {
+    item: ItemData
+    newTags: TagData[]
+    // newImages: 
+}

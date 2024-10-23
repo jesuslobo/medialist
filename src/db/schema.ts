@@ -1,3 +1,5 @@
+import { ItemFormLayoutTab } from "@/components/forms/item/ItemFormProvider";
+import { ItemHeader, ItemLayoutTab } from "@/utils/types/item";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 // forgot to add ON DELETE CASCADE :D
@@ -67,6 +69,13 @@ export const itemsTable = sqliteTable("items", {
     tags: text("tags_ids_json", { mode: "json" })
         .default([])
         .$type<string[]>(),
+    layout: text("layout_json", { mode: "json" })
+        .default([])
+        .$type<ItemLayoutTab[]>(),
+    header: text("header_json", { mode: "json" })
+        .default({})
+        .$type<ItemHeader>(),
+
     // fav: integer("fav", { mode: "boolean" }).notNull().default(false),
     // createdAt: integer("created_at").notNull(),
     // updatedAt: integer("updated_at").notNull(),

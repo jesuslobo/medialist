@@ -1,14 +1,17 @@
 import ItemFormHeaderSection from "@/components/forms/item/ItemFormHeaderSection"
 import ItemFormHeaderTitleBar from "@/components/forms/item/ItemFormHeaderTitleBar"
 import ItemFormLayoutSection from "@/components/forms/item/ItemFormLayoutSection"
-import ItemFormProvider, { ItemFormData, ItemFormLayoutTab } from "@/components/forms/item/ItemFormProvider"
+import ItemFormProvider, { ItemFormData, ItemFormField, ItemFormLayoutTab, ItemFormLogoField } from "@/components/forms/item/ItemFormProvider"
 import ItemFormLayoutTitleBar from "@/components/forms/item/layoutTitleBar/ItemFormLayoutTitleBar"
 import ErrorPage from "@/components/layouts/ErrorPage"
 import ListsLoading from "@/components/layouts/loading/ListsLoading"
 import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton"
-import { validatedID } from "@/utils/lib/generateID"
+import { generateID, validatedID } from "@/utils/lib/generateID"
+import httpClient from "@/utils/lib/httpClient"
+import { mutateItemCache } from "@/utils/lib/tanquery/itemsQuery"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
-import { tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
+import { mutateTagCache, tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
+import { ItemSaveResponse } from "@/utils/types/item"
 import { ListData } from "@/utils/types/list"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import Head from "next/head"
@@ -30,28 +33,56 @@ function AddItemPage() {
             tags: ["2X6zV9GmSj", "bl8BlAAZVb", "GX88y8M1hp"],
         }
     })
-    const { handleSubmit, control, formState: { errors }, register } = itemForm
+    const { handleSubmit } = itemForm
 
     const { data: list, isSuccess, isPending } = useQuery(singleListQueryOptions(listId))
     const tags = useQuery(tagsQueryOptions(listId))
 
     const mutation = useMutation({
-        mutationFn: (formData: FormData) => new Promise((res, rej) => console.log(res(formData))),
-        onSuccess: (data) => console.log(data),
-        // mutationFn: (formData: FormData) => httpClient().post(`lists/${listId}/items`, formData),
-        // onSuccess: (data) => {
-        //     mutateItemCache(data, "add")
-        //     router.push(`/lists/${data.id}`)
-        // },
+        mutationFn: (formData: FormData) => httpClient().post(`lists/${listId}/items`, formData),
+        onSuccess: ({ item, newTags }: ItemSaveResponse) => {
+            mutateItemCache(item, "add")
+            newTags?.forEach(tag => mutateTagCache(tag, "add"))
+
+            router.push(`/lists/${listId}/${item.id}`)
+        },
     })
 
     function onSubmit(data: ItemFormData) {
-        console.log({ data, layoutTabs })
         const formData = new FormData()
 
+        const logoFieldsTypes = ["badge", "link"]
+
+        let layout = layoutTabs.map((tab) =>
+            tab.map((row, rowIndex) =>
+                rowIndex === 0
+                    ? row //header
+                    : (row as ItemFormField[]).map((field) => {
+                        if (logoFieldsTypes.includes(field.type)) {
+                            const id = generateID(10)
+                            const fieldT = field as ItemFormLogoField
+                            if (fieldT?.logoPath)
+                                formData.append(`logoFields[${id}]`, fieldT.logoPath as File)
+
+                            return { ...field, logoPath: fieldT?.logoPath && id, id: undefined }
+                        } else {
+                            return { ...field, id: undefined, }
+                        }
+                    })
+            )
+        )
+
+        //Header
+        formData.append('header', JSON.stringify(data.header))
         formData.append('title', data.title)
-        formData.append('cover', data.cover as File)
-        formData.append('poster', data.poster as File)
+        formData.append('description', data.description as string)
+        if (data.cover) formData.append('cover', data.cover as File)
+        if (data.poster) formData.append('poster', data.poster as File)
+
+        //Layout
+        formData.append('layout', JSON.stringify(layout))
+        formData.append('tags', JSON.stringify(data.tags))
+
         mutation.mutate(formData)
     }
 

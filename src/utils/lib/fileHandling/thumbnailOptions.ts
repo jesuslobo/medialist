@@ -19,13 +19,14 @@ export const coverThumbnailsOptions: Record<string, ThumbnailOptions[]> & {
     itemPoster: ThumbnailOptions[];
     itemCover: ThumbnailOptions[];
     itemImage: ThumbnailOptions[];
-    logoCover: ThumbnailOptions[];
+    logo: ThumbnailOptions[];
 } = {
     listCover: [{ w: 300 }],
     itemPoster: [{ w: 300 }, { w: 700 }, {}],
+    // itemPoster: [{ h: 300 }, { h: 700 }, {}], 
     itemCover: [{ w: 300 }, { w: 700 }, {}],
     itemImage: [{ w: 300 }, { w: 700 }, {}],
-    logoCover: [{ w: 50 }],
+    logo: [{ w: 50 }],
 }
 
 /**
