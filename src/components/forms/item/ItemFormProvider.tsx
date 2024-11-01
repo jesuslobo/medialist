@@ -25,6 +25,7 @@ interface ItemFormContext {
 
 export type ItemFormField = SortableItemType & ItemField
 export type ItemFormLayoutTab = [ItemLayoutHeader, ...ItemFormField[][]]
+export type ItemFormLogoField = ItemFormField & { id: number, logoPath: File | null }
 
 export interface ItemFormData extends Omit<ItemData, "id" | "createdAt" | "updatedAt" | 'coverPath' | 'posterPath' | 'userId'> {
     cover: File | null

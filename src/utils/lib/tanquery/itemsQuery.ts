@@ -1,8 +1,8 @@
 import { queryClient } from '@/components/providers/RootProviders'
 import { ItemData } from '@/utils/types/item'
+import { ListData } from '@/utils/types/list'
 import { queryOptions } from '@tanstack/react-query'
 import httpClient from '../httpClient'
-import { ListData } from '@/utils/types/list'
 
 export const trashItemsKey = ['items', { trash: true }]
 
@@ -28,20 +28,25 @@ export const setupItemsCache = (items: ItemData[]) =>
 /** - Edit All Items Cache
  * all items of a list share the same cache*/
 export const mutateItemCache = (data: ItemData, type: "edit" | "add" | "delete") => {
-    const isDelete = type === "delete";
-    const isAdd = type === "add";
-    const isEdit = type === "edit";
     const listItemsKey = ['items', data.listId, { trash: false }];
 
     if (queryClient.getQueryData(listItemsKey)) // for the list page
         queryClient.setQueryData(listItemsKey, (oldData: ItemData[]) => {
-            if (isEdit) return oldData.map((item) => item.id === data.id ? data : item)
+            const index = type !== 'add' && oldData.findIndex((item) => item.id === data.id);
 
-            const allItems = isAdd ? oldData
-                : oldData.filter((list) => list.id !== data.id); //remove the old list
-            return isDelete
-                ? allItems
-                : [...allItems, data].sort((a, b) => a.title.localeCompare(b.title)); //sort based on title
+            switch (type) {
+                case 'add':
+                    oldData.push(data);
+                    oldData.sort((a, b) => a.title.localeCompare(b.title));
+                    return oldData;
+                case 'delete':
+                    oldData.splice(index as number, 1);
+                    return oldData;
+                case 'edit':
+                    oldData[index as number] = data
+                    oldData.sort((a, b) => a.title.localeCompare(b.title));
+                    return oldData;
+            }
         });
 
     if (queryClient.getQueryData(trashItemsKey)) // for trash page

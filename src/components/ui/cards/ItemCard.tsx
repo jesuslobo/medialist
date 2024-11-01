@@ -17,7 +17,7 @@ export default function ItemCard({
     const router = useRouter()
 
     function onPressFn() {
-        router.push(`/items/${item.id} `)
+        router.push(`/lists/${item.listId}/${item.id} `)
     }
 
     return (

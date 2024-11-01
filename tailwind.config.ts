@@ -10,6 +10,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      scale: {
+        '100.5': '1.005',
+        '101': '1.01',
+        '102.5': '1.025',
+      },
       screens: {
         '2xl': { 'min': '1535px' },
         'xl': { 'min': '1279px' },
