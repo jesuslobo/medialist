@@ -1,5 +1,6 @@
 import ErrorPage from "@/components/layouts/ErrorPage"
 import ItemPageHeader from "@/components/page/lists/[id]/[itemId]/ItemPageHeader"
+import ItemPageLayout from "@/components/page/lists/[id]/[itemId]/ItemPageLayout"
 import { ItemPageProvider } from "@/components/page/lists/[id]/[itemId]/ItemPageProvider"
 import { validatedID } from "@/utils/lib/generateID"
 import { itemQueryOptions } from "@/utils/lib/tanquery/itemsQuery"
@@ -12,7 +13,6 @@ import Head from "next/head"
 import { useRouter } from "next/router"
 
 function ItemsPage() {
-
     const router = useRouter()
     const itemId = router.query.itemId as ItemData['id']
     const listId = router.query.id as ListData['id']
@@ -24,20 +24,17 @@ function ItemsPage() {
         <div className="flex justify-center items-center">
             <Spinner />
         </div >)
-    if (!isSuccess || !allTags.isSuccess) return <ErrorPage message="Failed To Fetch The List" />
+    if (!isSuccess || !allTags.isSuccess) return <ErrorPage message="Failed To Fetch The Item" />
 
     const itemTags = allTags.data.filter(tag => item.tags.includes(tag.id))
 
     return (
-        <ItemPageProvider item={item}>
+        <ItemPageProvider item={item} tags={itemTags}>
             <Head>
                 <title>MediaList - {item.title}</title>
             </Head>
             <ItemPageHeader />
-            <main>
-
-            </main>
-
+            <ItemPageLayout />
         </ItemPageProvider>
     )
 }

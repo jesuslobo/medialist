@@ -7,8 +7,7 @@ import ItemFormTagsField from "./fields/tags/ItemFormTagsField"
 // Maps a Field to its Component equivalent
 export default function ItemFormFieldsMapper({
     type,
-    rowIndex,
-    colIndex,
+    ...position
     // children,
 }: {
     type: ItemFieldType
@@ -16,7 +15,6 @@ export default function ItemFormFieldsMapper({
     colIndex: number
     // children?: React.ReactNode
 }) {
-    const position = { rowIndex, colIndex }
 
     switch (type) {
         case "tags":
