@@ -1,22 +1,26 @@
 import ImageInput from "@/components/ui/form/ImageUploader";
-import { Input, Textarea } from "@nextui-org/react";
+import { Button, Input, Textarea } from "@nextui-org/react";
 import { useContext } from "react";
-import { Controller } from "react-hook-form";
-import { ItemFormContext } from "./ItemFormProvider";
+import { Controller, FieldPath } from "react-hook-form";
+import { BiRevision } from "react-icons/bi";
+import { ItemFormContext, ItemFormData } from "./ItemFormProvider";
 
 export default function ItemFormHeaderSection() {
     const { itemForm } = useContext(ItemFormContext)
     const { control, register } = itemForm
     return (
-        <div className=" grid grid-cols-3 gap-x-3">
-            <div className="p-2 space-y-3 bg-accented bg-opacity-50 rounded-xl">
+        <section className=" grid grid-cols-3 gap-x-3">
+            <section className="p-2 space-y-3 bg-accented bg-opacity-50 rounded-xl">
                 <Controller
                     control={control}
                     name="poster"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                         <ImageInput
                             className="h-44"
-                            innerContent="Drop Image or Click to Add Poster"
+                            innerContent={fieldState.isDirty
+                                ? <ResetButton field="poster" />
+                                : "Drop Image or Click to Add Poster"
+                            }
                             {...field}
                         />
                     )}
@@ -27,15 +31,18 @@ export default function ItemFormHeaderSection() {
                     isRequired
                     {...register("title", { required: true })}
                 />
-            </div>
-            <div className="p-2 space-y-3 bg-accented bg-opacity-50 rounded-xl col-span-2">
+            </section>
+            <section className="p-2 space-y-3 bg-accented bg-opacity-50 rounded-xl col-span-2">
                 <Controller
                     control={control}
                     name="cover"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                         <ImageInput
                             className="h-44"
-                            innerContent="Drop Image or Click to Add Cover"
+                            innerContent={fieldState.isDirty
+                                ? <ResetButton field="cover" />
+                                : "Drop Image or Click to Add Cover"
+                            }
                             {...field}
                         />
                     )}
@@ -45,7 +52,17 @@ export default function ItemFormHeaderSection() {
                     placeholder="Description"
                     {...register("description")}
                 />
-            </div>
-        </div>
+            </section>
+        </section>
+    )
+}
+
+const ResetButton = ({ field }: { field: FieldPath<ItemFormData> }) => {
+    const { itemForm } = useContext(ItemFormContext)
+    const { control, register, resetField } = itemForm
+    return (
+        <Button onPress={() => resetField(field)} size="lg" isIconOnly>
+            <BiRevision size={30} />
+        </Button>
     )
 }

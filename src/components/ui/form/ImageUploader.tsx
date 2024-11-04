@@ -7,7 +7,7 @@ import { twMerge } from "tailwind-merge";
 type DivAttributes = Omit<DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>, 'onDrop' | 'onDragOver' | 'onDragLeave' | 'onClick' | 'onChange' | 'children'>
 
 interface ImageInputProps extends DivAttributes {
-    value: File | null
+    value: File | null | string
     onChange: (value: File | null) => void
     children?: ({ error }: { error: string | null }) => JSX.Element,
     innerContent?: string | JSX.Element
@@ -42,9 +42,15 @@ export default function ImageInput({
 
     useEffect(() => {
         if (value) loadImage(value)
-    },[])
+    }, [value])
 
-    function loadImage(file: File) {
+    function loadImage(file: File | string) {
+        if (typeof file === 'string') {
+            setImage(file)
+            return null
+        }
+        if (!(file instanceof File)) return null
+
         const fileType = file.type
         if (!validTypes.includes(fileType)) {
             setError(`Invalid File Type ${fileType.split('/')[1] || ''}`)
@@ -110,7 +116,6 @@ export default function ImageInput({
                         </div>
                     ) ||
                     <div className="text-center">{innerContent}</div>
-
                 }
             </div>
 

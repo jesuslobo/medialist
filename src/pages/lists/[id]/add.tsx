@@ -16,7 +16,7 @@ import { ListData } from "@/utils/types/list"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { BiCheckDouble, BiRevision } from "react-icons/bi"
 import { FaSave } from "react-icons/fa"
@@ -30,7 +30,7 @@ function AddItemPage() {
             header: {
                 type: "poster_beside",
             },
-            tags: ["2X6zV9GmSj", "bl8BlAAZVb", "GX88y8M1hp"],
+            tags: [],
         }
     })
     const { handleSubmit } = itemForm
@@ -47,6 +47,10 @@ function AddItemPage() {
             router.push(`/lists/${listId}/${item.id}`)
         },
     })
+
+    const [layoutTabs, setLayoutTabs] = useState<ItemFormLayoutTab[]>([])
+    const [activeTabIndex, setActiveTabIndex] = useState(0)
+
 
     function onSubmit(data: ItemFormData) {
         const formData = new FormData()
@@ -85,20 +89,6 @@ function AddItemPage() {
 
         mutation.mutate(formData)
     }
-
-    const [layoutTabs, setLayoutTabs] = useState<ItemFormLayoutTab[]>([])
-    const [activeTabIndex, setActiveTabIndex] = useState(0)
-
-    // will be moved to the provider, so it will only be loaded when the list is loaded
-    useEffect(() => {
-        setLayoutTabs([
-            [
-                { type: "left_sidebar", label: "Main" },
-                [{ id: "1", type: "tags" }],
-                [],
-            ] as any,
-        ])
-    }, [])
 
     if (isPending || tags.isPending) return <ListsLoading />
     if (!isSuccess || !tags.isSuccess) return <ErrorPage message="Failed To Fetch The List" />

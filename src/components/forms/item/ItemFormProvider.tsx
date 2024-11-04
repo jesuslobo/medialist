@@ -2,7 +2,7 @@ import { SortableItemType } from "@/components/ui/layout/drag&drop/logic/Sortabl
 import { TagData } from "@/utils/types/global";
 import { ItemData, ItemField, ItemLayoutHeader } from "@/utils/types/item";
 import { ListData } from "@/utils/types/list";
-import { createContext, Dispatch, SetStateAction } from "react";
+import { createContext, Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { UseFormReturn } from "react-hook-form";
 
 interface Props extends Omit<ItemFormContext, "setActiveTabFields" | "setActiveTabHeader" | "activeTabFields" | "activeTabHeader"> {
@@ -28,8 +28,8 @@ export type ItemFormLayoutTab = [ItemLayoutHeader, ...ItemFormField[][]]
 export type ItemFormLogoField = ItemFormField & { id: number, logoPath: File | null }
 
 export interface ItemFormData extends Omit<ItemData, "id" | "createdAt" | "updatedAt" | 'coverPath' | 'posterPath' | 'userId'> {
-    cover: File | null
-    poster: File | null
+    cover: File | null | string
+    poster: File | null | string
 }
 
 export const ItemFormContext = createContext({} as ItemFormContext);
@@ -51,7 +51,6 @@ export default function ItemFormProvider({
     function setActiveTabHeader(value: ItemLayoutHeader | setActiveTabHeaderCallBack) {
         if (!layoutTabs?.[activeTabIndex]?.[0]) return
 
-        // setActiveTabHeaderFn(value)
         setLayoutTabs(prev => {
             let newTabs = [...prev]
             const prevHeader = prev[activeTabIndex]?.[0] as ItemLayoutHeader
@@ -78,6 +77,37 @@ export default function ItemFormProvider({
         })
     }
 
+    // initializing form default values
+    useEffect(() => {
+        const defaultTemplate = [
+            [
+                { type: "left_sidebar", label: "Main" },
+                [{ id: "1", type: "tags" }],
+                [],
+            ]
+        ]
+
+        // adding ids to the fields
+        let idGen = 1
+        const layout = item?.layout
+            && item?.layout.map(tab =>
+                tab.map((column, i) => i !== 0
+                    ? (column as ItemField[]).map(field => ({ ...field, id: String(++idGen) }))
+                    : column // header
+                ))
+
+        setLayoutTabs(layout || defaultTemplate as any)
+
+        if (item) {
+            const { coverPath, posterPath, layout, ...itemData } = item
+            const itemSrc = `/users/${item.userId}/${item.listId}/${item.id}`
+
+            const cover = coverPath ? `${itemSrc}/${coverPath}` : null
+            const poster = posterPath ? `${itemSrc}/${posterPath}` : null
+            itemForm.reset({ ...itemData, cover, poster })
+        }
+    }, [item])
+
     return (
         <ItemFormContext.Provider value={{
             tags,
@@ -87,7 +117,7 @@ export default function ItemFormProvider({
             activeTabFields,
             setActiveTabFields,
             activeTabHeader,
-            setActiveTabHeader
+            setActiveTabHeader,
         }}>
             {children}
         </ItemFormContext.Provider>

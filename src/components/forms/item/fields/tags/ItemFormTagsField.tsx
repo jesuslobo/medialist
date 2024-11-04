@@ -20,7 +20,7 @@ export default function ItemFormTagsField() {
     })
 
     const idToName = (id: string) => tags.find(tag => tag.id === id)?.label
-    const currentTags = getValues("tags").map(id => { return { id, label: idToName(id) || id } }).filter(Boolean)
+    const currentTags = getValues("tags")?.map(id => { return { id, label: idToName(id) || id } }).filter(Boolean) || []
 
     let currentTagsIDs = [] as string[]
     let currentNewTags = [] as string[]
@@ -55,7 +55,7 @@ export default function ItemFormTagsField() {
                 setSelectedTags={setTags}
             />
 
-            <div className="max-h-80 overflow-auto flex gap-2">
+            <div className="max-h-80 overflow-auto flex gap-2 flex-wrap">
                 {currentTags.map((tag, index) => (
                     <Chip
                         key={"tag-" + tag.id}

@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query"
 import Head from "next/head"
 import { useRouter } from "next/router"
 
-function ItemsPage() {
+function ItemPage() {
     const router = useRouter()
     const itemId = router.query.itemId as ItemData['id']
     const listId = router.query.id as ListData['id']
@@ -39,12 +39,12 @@ function ItemsPage() {
     )
 }
 
-export default function ItemsPageHOC() {
+export default function ItemPageHOC() {
     const router = useRouter()
     const itemId = router.query.itemId as ItemData['id']
     const listId = router.query.id as ListData['id']
 
     return validatedID(listId) && validatedID(itemId)
-        ? <ItemsPage />
+        ? <ItemPage />
         : <ErrorPage message="Bad Item ID, Page Doesn't Exist" MainMessage="404!" hideTryAgain />
 }
