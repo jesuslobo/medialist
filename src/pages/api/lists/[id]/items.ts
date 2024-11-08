@@ -1,17 +1,14 @@
 import { db } from '@/db';
-import { itemsTable, listsTagsTable } from '@/db/schema';
+import { itemsTable, listsTable, listsTagsTable } from '@/db/schema';
 import { validateAuthCookies } from '@/utils/lib/auth';
-import handleFileUpload from '@/utils/lib/fileHandling/handleFileUpload';
-import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { generateID, validatedID } from '@/utils/lib/generateID';
+import $handleItemForm from '@/utils/server/handleItemForm';
 import { TagData } from '@/utils/types/global';
-import { ItemData, ItemField, ItemLayoutTab, ItemSaveResponse, LogoField } from '@/utils/types/item';
+import { ItemSaveResponse } from '@/utils/types/item';
 import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
 import { and, eq } from 'drizzle-orm';
-import { mkdir } from 'fs/promises';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { join } from 'path';
 
 /** api/lists/[id]/items
  * Get: Get all items of a list
@@ -41,128 +38,71 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'POST') {
             const itemId = generateID()
 
-            let data = {
-                id: itemId,
-                userId: user.id,
-                listId,
-                tags: [] as string[],
-            } as ItemData & { rawTags: string[] };
+            const [lists, tags] = await Promise.all([
+                await db // should check if list exists , so change qurty
+                    .select({ id: listsTable.id })
+                    .from(listsTable)
+                    .where(and(
+                        eq(listsTable.userId, user.id),
+                        eq(listsTable.id, listId),
+                    )),
+                await db
+                    .select({ id: listsTagsTable.id, listId: listsTagsTable.listId })
+                    .from(listsTagsTable)
+                    .where(and(
+                        eq(listsTagsTable.userId, user.id),
+                        eq(listsTagsTable.listId, listId),
+                    ))
+            ])
 
-            const itemDir = join('public', 'users', user.id, listId, itemId);
-            const thumbnailsDir = join(itemDir, 'thumbnails')
-            await mkdir(thumbnailsDir, { recursive: true });
+            if (lists.length === 0 || tags.length !== 0 && tags[0].listId !== listId)
+                return res.status(400).json({ message: 'Bad Request' });
+
+            const list = lists[0];
+
+            const form = await $handleItemForm(user.id, list.id, itemId)
+            const { handleFields, handleFiles, handleTags, mapLayoutsToLogos } = form;
+
+            form.data['id'] = itemId;
+            form.data['userId'] = user.id;
+            form.data['listId'] = list.id;
 
             const bb = busboy({
                 headers: req.headers,
                 limits: { fields: 5, files: 30, fileSize: 1024 * 1024 * 50 } // 50MB
             })
 
-            let logoPaths = new Map<String, LogoField['logoPath']>()
-
-            bb.on('field', (name, val) => {
-                if (name === 'title') data.title = val;
-                if (name === 'description') data.description = val;
-                if (name === 'header') data.header = JSON.parse(val);
-                if (name === 'tags') data.rawTags = JSON.parse(val);
-                if (name === 'layout') {
-                    const layout = JSON.parse(val) as ItemLayoutTab[];
-                    data.layout = layout
-                }
-            })
-
-            bb.on('file', (name, file, info) => {
-                if (name.includes('logoFields')) {
-                    const id = name
-                    const logoPath = handleFileUpload(file, itemDir, {
-                        thumbnails: coverThumbnailsOptions.logo,
-                        fileName: info.filename
-                    })
-                    logoPaths.set(id, logoPath)
-                }
-
-                if (name === 'poster')
-                    data.posterPath = handleFileUpload(file, itemDir, {
-                        thumbnails: coverThumbnailsOptions.itemPoster,
-                        fileName: info.filename
-                    })
-
-                if (name === 'cover')
-                    data.coverPath = handleFileUpload(file, itemDir, {
-                        thumbnails: coverThumbnailsOptions.itemCover,
-                        fileName: info.filename
-                    })
-                file.resume()
-            })
+            bb.on('field', handleFields)
+            bb.on('file', handleFiles)
 
             bb.on('finish', async () => {
-                if (!data.title) res.status(400).json({ message: 'Invalid Request' });
+                if (!form.data.title)
+                    res.status(400).json({ message: 'Bad Request' });
 
-                data.layout = data.layout?.map(tab =>
-                    tab.map((row, rowIndex) =>
-                        rowIndex === 0
-                            ? row // header
-                            : (row as ItemField[]).map(field => {
-                                if ((field as LogoField)?.logoPath) {
-                                    const fieldT = field as LogoField;
-                                    const id = `logoFields[${fieldT.logoPath}]`
-                                    return { ...field, logoPath: logoPaths.get(id), id: undefined }
-                                } else {
-                                    return { ...field, id: undefined }
-                                }
-                            })
-                    )
-                ) as ItemLayoutTab[] || []
+                form.data.layout = mapLayoutsToLogos()
 
-                const tags = await db
-                    .select({ id: listsTagsTable.id })
-                    .from(listsTagsTable)
-                    .where(and(
-                        eq(listsTagsTable.userId, user.id),
-                        eq(listsTagsTable.listId, data.listId as ListData['id']),
-                    ))
-
-                let newTags = [] as string[]
-
-                data.rawTags.forEach(tag => {
-                    // tag could be a new tag name or an existing tag id
-                    // if A user can type a tag of 10 letters that can escape validation
-                    if (tag.length !== 10) {
-                        newTags.push(tag) // no need to check if it exists
-                    } else if (tags.some(t => t.id === tag)) {
-                        data.tags.push(tag)
-                    } else {
-                        newTags.push(tag)
-                    }
-                })
-
-                let newTagsData = [] as TagData[]
-                if (newTags.length) {
-                    newTagsData = newTags.map(tag => {
-                        let tagData = {
-                            id: generateID(),
-                            userId: user.id,
-                            listId: data.listId as ListData['id'],
-                            label: tag,
-                        }
-                        data.tags.push(tagData.id)
-                        return tagData
-                    })
-
-                    await db.insert(listsTagsTable).values(newTagsData)
+                let newTagsData: { id: string }[] = []
+                // new tags
+                if (form.data.rawTags.length > 0) {
+                    newTagsData = handleTags(tags);
+                    if (newTagsData.length > 0)
+                        await db.insert(listsTagsTable).values(newTagsData as TagData[])
                 }
 
                 const item = await db
                     .insert(itemsTable)
-                    .values(data)
+                    .values(form.data)
                     .returning();
 
                 res.status(201).json({
                     item: item[0],
                     newTags: newTagsData // for cache update on the client
                 } as ItemSaveResponse);
+
                 console.log('[Created] api/lists/[id]/items:', item[0].id + ' ' + item[0].title);
-                res.status(201).json({ data });
-            }).on('error', () =>
+            })
+
+            bb.on('error', () =>
                 res.status(500).json({ message: 'Internal Server Error' })
             )
 
