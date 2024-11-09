@@ -1,30 +1,20 @@
-
 /** @param host Set host For External Sites */
 export default function httpClient(host: string = '/api') {
 
+    const stringifyObjects = (data?: FormData | object | object[],) => {
+        if (!data) return
+        const isFormData = typeof data === 'object' && data instanceof FormData
+        return isFormData ? data : JSON.stringify(data)
+    }
+
+    const apiFactory: ApiFactory = async (method, path, data, requestInit) => {
+        const body = stringifyObjects(data);
+        const res = await fetchFn(host, path, { method, body, ...requestInit });
+        return await res.json();
+    };
+
     async function get(path?: string, requestInit?: RequestInit) {
         const res = await fetchFn(host, path, { cache: 'no-store', ...requestInit })
-        return await res.json()
-    }
-
-    async function post(path?: string, data?: FormData | object | object[], requestInit?: RequestInit) {
-        const isFormData = typeof data === 'object' && data instanceof FormData
-        const body = data ? (isFormData ? data : JSON.stringify(data)) : undefined
-
-        const res = await fetchFn(host, path, { method: 'POST', body, ...requestInit })
-        return await res.json()
-    }
-
-    async function put(path?: string, data?: FormData | object | object[], requestInit?: RequestInit) {
-        const isFormData = typeof data === 'object' && data instanceof FormData
-        const body = data ? (isFormData ? data : JSON.stringify(data)) : undefined
-
-        const res = await fetchFn(host, path, { method: 'PUT', body, ...requestInit })
-        return await res.json()
-    }
-
-    async function patch(path?: string, data?: object | object[], requestInit?: RequestInit) {
-        const res = await fetchFn(host, path, { method: 'PATCH', body: JSON.stringify(data), ...requestInit })
         return await res.json()
     }
 
@@ -34,15 +24,32 @@ export default function httpClient(host: string = '/api') {
         return await res.json()
     }
 
+    const post: ApiMethod = async (...props) => await apiFactory('POST', ...props)
+    const put: ApiMethod = async (...props) => await apiFactory('PUT', ...props)
+    const patch: ApiMethod = async (...props) => await apiFactory('PATCH', ...props)
+
     return ({
         get,
+        delete: delete$,
         post,
         put,
         patch,
-        delete: delete$
     })
 
 }
+
+type ApiFactory = (
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+    path?: string,
+    data?: FormData | object | object[],
+    requestInit?: RequestInit,
+) => Promise<any>;
+
+type ApiMethod = (
+    path?: string,
+    data?: FormData | object | object[],
+    requestInit?: RequestInit,) =>
+    Promise<any>;
 
 async function fetchFn(host: string, path: string | undefined, requestInit?: RequestInit) {
     try {

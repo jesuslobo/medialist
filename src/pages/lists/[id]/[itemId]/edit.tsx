@@ -1,11 +1,11 @@
 import ItemFormHeaderSection from "@/components/forms/item/ItemFormHeaderSection"
 import ItemFormHeaderTitleBar from "@/components/forms/item/ItemFormHeaderTitleBar"
 import ItemFormLayoutSection from "@/components/forms/item/ItemFormLayoutSection"
-import ItemFormProvider, { ItemFormData, ItemFormLayoutTab } from "@/components/forms/item/ItemFormProvider"
+import ItemFormProvider, { ItemFormData, ItemFormField, ItemFormLayoutTab, ItemFormLogoField } from "@/components/forms/item/ItemFormProvider"
 import ItemFormLayoutTitleBar from "@/components/forms/item/layoutTitleBar/ItemFormLayoutTitleBar"
 import ErrorPage from "@/components/layouts/ErrorPage"
 import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton"
-import { validatedID } from "@/utils/lib/generateID"
+import { generateID, validatedID } from "@/utils/lib/generateID"
 import httpClient from "@/utils/lib/httpClient"
 import { itemQueryOptions, mutateItemCache } from "@/utils/lib/tanquery/itemsQuery"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
@@ -16,7 +16,7 @@ import { Button, Spinner } from "@nextui-org/react"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { BiCheckDouble, BiRevision, BiX } from "react-icons/bi"
 import { FaSave } from "react-icons/fa"
@@ -34,22 +34,68 @@ function EditItemPage() {
     const { handleSubmit, formState: { dirtyFields } } = itemForm
 
     const mutation = useMutation({
-        mutationFn: (formData: FormData) => new Promise((resolve) => resolve("d")),
-        // mutationFn: (formData: FormData) => httpClient().put(``, formData),
-        // onSuccess: ({ item, newTags }: ItemSaveResponse) => {
-        //     mutateItemCache(item, "edit")
-        //     newTags?.forEach(tag => mutateTagCache(tag, "add"))
+        mutationFn: (formData: FormData) => httpClient().patch(`items/${itemId}`, formData),
+        onSuccess: ({ item, newTags }: ItemSaveResponse) => {
+            mutateItemCache(item, "edit")
+            newTags?.forEach(tag => mutateTagCache(tag, "add"))
 
-        //     router.push(`/lists/${listId}/${item.id}`)
-        // },
+            router.push(`/lists/${listId}/${item.id}`)
+        },
     })
 
     function onSubmit(data: ItemFormData) {
-        console.log({ data, layoutTabs })
-        // image: string => preserved, File => new, null => removed
-        // const formData = new FormData()
-        // dirtyFields
-        // mutate
+        const formData = new FormData()
+        const logoFieldsTypes = ["badge", "link"]
+
+        let layout = layoutTabs.map((tab) =>
+            tab.map((row, rowIndex) =>
+                rowIndex === 0
+                    ? row //header
+                    : (row as ItemFormField[]).map((field) => {
+                        if (logoFieldsTypes.includes(field.type)) {
+                            const id = generateID(10)
+                            const fieldT = field as ItemFormLogoField
+                            let logoPath = fieldT?.logoPath as string | File | null
+                            if (fieldT.logoPath instanceof File) {
+                                formData.append(`logoFields[${id}]`, fieldT.logoPath as File)
+                                logoPath = id
+                            }
+
+                            return { ...field, logoPath, id: undefined }
+                        } else {
+                            return { ...field, id: undefined, }
+                        }
+                    })
+            )
+        )
+
+        if (dirtyFields.tags)
+            formData.append('tags', JSON.stringify(data.tags))
+
+        if (dirtyFields.layout)
+            formData.append('layout', JSON.stringify(layoutTabs))
+
+        //Header
+        if (dirtyFields.header)
+            formData.append('header', JSON.stringify(data.header))
+        if (dirtyFields.title)
+            formData.append('title', data.title)
+        if (dirtyFields.description)
+            formData.append('description', data?.description || '')
+        if (dirtyFields.cover) {
+            formData.append('cover', data.cover as File | string)
+        }
+
+        if (dirtyFields.poster) {
+            formData.append('poster', data.poster as File | string)
+        }
+
+        //Layout
+        formData.append('layout', JSON.stringify(layout))
+        if (dirtyFields.tags)
+            formData.append('tags', JSON.stringify(data.tags))
+
+        mutation.mutate(formData)
     }
 
     const [layoutTabs, setLayoutTabs] = useState<ItemFormLayoutTab[]>([])
@@ -59,7 +105,7 @@ function EditItemPage() {
         <div className="flex justify-center items-center">
             <Spinner />
         </div >)
-    if (!isSuccess || !tags.isSuccess || !list.isSuccess)
+    if (!isSuccess || !tags.isSuccess || !list.isSuccess || item.listId !== listId)
         return <ErrorPage message="Failed To Fetch The Item" />
 
     return (

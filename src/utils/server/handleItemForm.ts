@@ -8,12 +8,12 @@ import { generateID } from "../lib/generateID";
 import { TagData } from "../types/global";
 import { ItemData, ItemField, ItemLayoutTab, LogoField } from "../types/item";
 
-interface ItemFormData extends ItemData {
+export interface HandleItemFormData extends ItemData {
     rawTags: string[]
 }
 
 /** Any Extra logic should be in BB's onFinish */
-export default async function $handleItemForm(userId: string, listId: string, itemId: string) {
+export default async function $handleItemForm<T extends HandleItemFormData = HandleItemFormData>(userId: string, listId: string, itemId: string) {
     let logoPaths = new Map<String, LogoField['logoPath']>()
 
     const itemDir = join('public', 'users', userId, listId, itemId);
@@ -24,13 +24,13 @@ export default async function $handleItemForm(userId: string, listId: string, it
 
     let data = {
         tags: [] as string[],
-    } as ItemFormData;
+    } as T;
 
     return {
         /** BusBoy onFields */
         handleFields: (name: string, value: string) => handleFields(name, value, data),
         /** BusBoy onFiles */
-        handleFiles: (name: string, stream: internal.Readable & { truncated?: boolean }, info: busboy.FileInfo, disableStreamResume: Boolean) =>
+        handleFiles: (name: string, stream: internal.Readable & { truncated?: boolean }, info: busboy.FileInfo, disableStreamResume?: Boolean) =>
             handleFiles(name, stream, info, data, logoPaths, itemDir, disableStreamResume),
         /** Directly assemble the addresses of new logos to their fields */
         mapLayoutsToLogos: () => mapFieldsToLogos(data, logoPaths),
@@ -38,13 +38,13 @@ export default async function $handleItemForm(userId: string, listId: string, it
         handleTags: (tagsData: { id: string }[]) => handleTags(tagsData, data, userId, listId),
         data,
         dir: {
-            itemDir,
-            thumbnailsDir
+            item: itemDir,
+            thumbnails: thumbnailsDir
         },
     }
 };
 
-function handleFields(name: string, value: string, data: ItemFormData) {
+function handleFields(name: string, value: string, data: HandleItemFormData) {
     switch (name) {
         case 'title': data.title = value; break
         case 'description': data.description = value; break
@@ -62,7 +62,7 @@ function handleFiles(
     name: string,
     stream: internal.Readable & { truncated?: boolean },
     info: busboy.FileInfo,
-    data: ItemFormData,
+    data: HandleItemFormData,
     logoPaths: Map<String, LogoField['logoPath']>,
     itemDir: string,
     disableStreamResume?: Boolean
@@ -92,7 +92,7 @@ function handleFiles(
         stream.resume()
 }
 
-function mapFieldsToLogos(data: ItemFormData, logoPaths: Map<String, LogoField['logoPath']>) {
+function mapFieldsToLogos(data: HandleItemFormData, logoPaths: Map<String, LogoField['logoPath']>) {
     return data.layout?.map(tab =>
         tab.map((row, rowIndex) =>
             rowIndex === 0
@@ -101,7 +101,9 @@ function mapFieldsToLogos(data: ItemFormData, logoPaths: Map<String, LogoField['
                     if ((field as LogoField)?.logoPath) {
                         const fieldT = field as LogoField;
                         const id = `logoFields[${fieldT.logoPath}]`
-                        return { ...field, logoPath: logoPaths.get(id), id: undefined }
+                        let logoPath = fieldT?.logoPath;
+                        if (logoPaths.get(id)) logoPath = logoPaths.get(id)
+                        return { ...field, logoPath, id: undefined }
                     } else {
                         return { ...field, id: undefined }
                     }
@@ -110,7 +112,7 @@ function mapFieldsToLogos(data: ItemFormData, logoPaths: Map<String, LogoField['
     ) as ItemLayoutTab[] || []
 }
 
-function handleTags(tagsData: { id: string }[], data: ItemFormData, userId: string, listId: string) {
+function handleTags(tagsData: { id: string }[], data: HandleItemFormData, userId: string, listId: string) {
     let newTags = [] as string[]
 
     data.rawTags.forEach(tag => {

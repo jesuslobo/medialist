@@ -79,9 +79,9 @@ export interface ItemCardField {
 //     name: string
 // }
 
-/** Item PUT & POST response */
+/** Item Patch & POST response */
 export interface ItemSaveResponse {
     item: ItemData
     newTags: TagData[]
-    // newImages: 
+    // newImages:
 }
