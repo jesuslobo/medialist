@@ -10,6 +10,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      boxShadow: {
+        'custom-md': 'rgb(0 0 0 / 35%) 0px 0px 20px 0px',
+      },
+      zIndex: {
+        '-1': '-1',
+      },
       scale: {
         '100.5': '1.005',
         '101': '1.01',
@@ -39,6 +45,7 @@ const config: Config = {
         'sm-card': 'repeat(auto-fill,minmax(130px,1fr))',
         'md-card': 'repeat(auto-fill,minmax(170px,1fr))',
         'bg-card': 'repeat(auto-fill,minmax(210px,1fr))',
+        'sidebar': '90px auto',
       },
       gridTemplateRows: {
         'sm-card': 'repeat(auto-fill,minmax(130px,1fr))',
