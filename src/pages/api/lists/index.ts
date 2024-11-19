@@ -1,7 +1,7 @@
 import { db } from '@/db';
 import { listsTable } from '@/db/schema';
 import { validateAuthCookies } from '@/utils/lib/auth';
-import handleFileUpload from '@/utils/lib/fileHandling/handleFileUpload';
+import $handleFileUpload from '@/utils/server/fileHandling/handleFileUpload';
 import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { generateID } from '@/utils/lib/generateID';
 import { ListData } from '@/utils/types/list';
@@ -50,15 +50,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const bb = busboy({
         headers: req.headers,
-        limits: { fields: 1, files: 1, fileSize: 1024 * 1024 * 100 } // 100MB
+        limits: { fields: 1, files: 2, fileSize: 1024 * 1024 * 100 } // 100MB
       })
 
       bb.on('file', (name, file, info) => {
         if (name === 'cover')
-          data.coverPath = handleFileUpload(file, listDir, {
+          data.coverPath = $handleFileUpload(file, listDir, {
             thumbnails: coverThumbnailsOptions.listCover,
             fileName: info.filename
           })
+        file.resume()
       })
 
       bb.on('field', (name, val, info) => {

@@ -1,9 +1,9 @@
 import { createWriteStream } from "fs";
 import path from "path";
 import internal from "stream";
-import { generateID } from "../generateID";
-import { thumbnailName, ThumbnailOptions } from "./thumbnailOptions";
-import { webpTransformer } from "./webpTransformer";
+import { generateID } from "../../lib/generateID";
+import { thumbnailName, ThumbnailOptions } from "../../lib/fileHandling/thumbnailOptions";
+import { $webpTransformer } from "../lib/webpTransformer";
 
 interface Options {
     fileName?: string,
@@ -17,7 +17,7 @@ type fileName = string
 
 /** Maybe add support for plugins?  such as support for S3 transformer*/
 /** Uploading A Streamed File */
-export default function handleFileUpload(
+export default function $handleFileUpload(
     fileStream: internal.Readable & { truncated?: boolean; },
     pathDir: string,
     options?: Options,
@@ -39,7 +39,7 @@ export default function handleFileUpload(
             options.thumbnails.forEach((option) => {
                 const thumbnailPath = path.join(pathDir, thumbnailName(fileName, option))
                 const thumbnailStream = createWriteStream(thumbnailPath)
-                fileStream.pipe(webpTransformer(option.w, option.h)).pipe(thumbnailStream)
+                fileStream.pipe($webpTransformer(option.w, option.h)).pipe(thumbnailStream)
             })
 
         return fileName as fileName

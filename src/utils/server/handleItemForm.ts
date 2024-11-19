@@ -2,7 +2,7 @@ import busboy from "busboy";
 import { access, mkdir } from "fs/promises";
 import { join } from "path";
 import internal from "stream";
-import handleFileUpload from "../lib/fileHandling/handleFileUpload";
+import $handleFileUpload from "./fileHandling/handleFileUpload";
 import { coverThumbnailsOptions } from "../lib/fileHandling/thumbnailOptions";
 import { generateID } from "../lib/generateID";
 import { TagData } from "../types/global";
@@ -69,7 +69,7 @@ function handleFiles(
 ) {
     if (name.includes('logoFields')) {
         const id = name
-        const logoPath = handleFileUpload(stream, itemDir, {
+        const logoPath = $handleFileUpload(stream, itemDir, {
             thumbnails: coverThumbnailsOptions.logo,
             fileName: info.filename
         })
@@ -77,13 +77,13 @@ function handleFiles(
     }
 
     if (name === 'poster')
-        data.posterPath = handleFileUpload(stream, itemDir, {
+        data.posterPath = $handleFileUpload(stream, itemDir, {
             thumbnails: coverThumbnailsOptions.itemPoster,
             fileName: info.filename
         })
 
     if (name === 'cover')
-        data.coverPath = handleFileUpload(stream, itemDir, {
+        data.coverPath = $handleFileUpload(stream, itemDir, {
             thumbnails: coverThumbnailsOptions.itemCover,
             fileName: info.filename
         })
