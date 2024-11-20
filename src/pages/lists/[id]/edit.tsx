@@ -25,27 +25,26 @@ function EditListPage() {
     const { handleSubmit, formState: { dirtyFields } } = listForm
 
     const mutation = useMutation({
-        // mutationFn: (formData: FormData) => httpClient().patch('lists', formData),
-        // onSuccess: (data) => {
-        //     mutateListCache(data, "edit")
-        //     router.push(`/lists/${data.id}`)
-        // },
+        mutationFn: (formData: FormData) => httpClient().patch(`lists/${listId}`, formData),
+        onSuccess: (data: ListData) => {
+            mutateListCache(data, "edit")
+            router.push(`/lists/${data.id}`)
+        },
     })
 
     if (isPending) return <ListsLoading />
     if (!isSuccess) return <ErrorPage message="List Not Found" MainMessage="404!" hideTryAgain />
 
     function onSubmit(data: ListFormData) {
+        if (!Object.keys(dirtyFields).length) return
+
         const formData = new FormData()
         if (dirtyFields.title)
             formData.append('title', data.title)
         if (dirtyFields.cover)
-            formData.append('cover', data.cover as File)
+            formData.append('cover', data.cover as File | string)
 
-        formData.forEach((value, key) => {
-            console.log(key, value)
-        })
-        // mutation.mutate(formData)
+        mutation.mutate(formData)
     }
 
     return (
