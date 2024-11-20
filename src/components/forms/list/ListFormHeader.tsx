@@ -1,24 +1,31 @@
 import ImageInput from "@/components/ui/form/ImageUploader";
-import { Input } from "@nextui-org/react";
+import { Button, Input } from "@nextui-org/react";
 import { useContext } from "react";
-import { Controller } from "react-hook-form";
-import { ListFormContext } from "./ListFormProvider";
+import { Controller, FieldPath } from "react-hook-form";
+import { BiRevision } from "react-icons/bi";
+import { ListFormContext, ListFormData } from "./ListFormProvider";
 
 export default function ListFormHeader() {
     const { listForm } = useContext(ListFormContext)
     const { control } = listForm
 
     return (
-        <header className="grid grid-cols-4 md:grid-cols-1 gap-5 ">
+        <section className="grid grid-cols-4 md:grid-cols-1 gap-5 ">
             <Controller
                 control={control}
                 name="cover"
-                render={({ field }) => (
-                    <ImageInput className="aspect-square md:aspect-auto md:w-full md:h-44" {...field} />
+                render={({ field, fieldState }) => (
+                    <ImageInput className="aspect-square md:aspect-auto md:w-full md:h-44"
+                        innerContent={fieldState.isDirty
+                            ? <ResetButton field="cover" />
+                            : "Drop Image or Click to Add Cover"
+                        }
+                        {...field}
+                    />
                 )}
             />
 
-            <div className="col-span-3 md:col-span-1">
+            <section className="col-span-3 md:col-span-1">
 
                 <Controller
                     control={control}
@@ -34,8 +41,17 @@ export default function ListFormHeader() {
                         />
                     )}
                 />
-            </div>
-        </header>
+            </section>
+        </section>
     )
+}
 
-};
+const ResetButton = ({ field }: { field: FieldPath<ListFormData> }) => {
+    const { listForm } = useContext(ListFormContext)
+    const { resetField } = listForm
+    return (
+        <Button onPress={() => resetField(field)} size="lg" isIconOnly>
+            <BiRevision size={30} />
+        </Button>
+    )
+}
