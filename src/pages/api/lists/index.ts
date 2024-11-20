@@ -1,15 +1,11 @@
 import { db } from '@/db';
 import { listsTable } from '@/db/schema';
 import { validateAuthCookies } from '@/utils/lib/auth';
-import $handleFileUpload from '@/utils/server/fileHandling/handleFileUpload';
-import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { generateID } from '@/utils/lib/generateID';
-import { ListData } from '@/utils/types/list';
+import $handleListForm from '@/utils/server/handleListForm';
 import busboy from 'busboy';
 import { and, eq } from 'drizzle-orm';
-import { mkdir } from 'fs/promises';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { join } from 'path';
 
 /** api/lists/
  * Get: Get all lists of a user
@@ -37,34 +33,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === 'POST') {
       const id = generateID();
 
-      let data: Partial<ListData> = {
-        id,
-        userId: user.id,
-        title: undefined,
-        coverPath: undefined
-      }
-
-      const listDir = join('public', 'users', user.id, id);
-      const thumbnailsDir = join(listDir, 'thumbnails')
-      await mkdir(thumbnailsDir, { recursive: true });
+      const form = await $handleListForm(user.id, id);
+      const { handleFields, handleFiles, data } = form;
 
       const bb = busboy({
         headers: req.headers,
         limits: { fields: 1, files: 2, fileSize: 1024 * 1024 * 100 } // 100MB
       })
 
-      bb.on('file', (name, file, info) => {
-        if (name === 'cover')
-          data.coverPath = $handleFileUpload(file, listDir, {
-            thumbnails: coverThumbnailsOptions.listCover,
-            fileName: info.filename
-          })
-        file.resume()
-      })
-
-      bb.on('field', (name, val, info) => {
-        if (name === 'title') data.title = val;
-      })
+      bb.on('file', handleFiles)
+      bb.on('field', handleFields)
 
       bb.on('close', async () => {
         if (!data.title) return res.status(400).json({ message: 'Invalid Request' });
@@ -78,11 +56,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         res.status(201).json(list[0]);
       })
-      // bb.on('close', () => {
-      //   console.log('Done parsing form!');
-      //   res.writeHead(200, { Connection: 'close', Location: '/' });
-      //   res.end();
-      // })
 
       bb.on('error', () =>
         res.status(500).json({ message: 'Internal Server Error' })
