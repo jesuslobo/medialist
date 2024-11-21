@@ -5,13 +5,16 @@ import { useRouter } from "next/router";
 import { useContext } from "react";
 import { BiPlus, BiPurchaseTag, BiRevision } from "react-icons/bi";
 import { CiGrid2H } from "react-icons/ci";
+import { FaDiamond } from "react-icons/fa6";
 import { IoGridOutline } from "react-icons/io5";
+import { LuDiamond } from "react-icons/lu";
 import { TfiViewListAlt } from "react-icons/tfi";
 import { ListPageContext } from "./ListPageProvider";
+import { badgeColors } from "@/utils/types/global";
 
 export default function ListPageSubNavBar() {
     const router = useRouter();
-    const { list, viewMode, setViewMode, showTags, setShowTags } = useContext(ListPageContext)
+    const { list, viewMode, setViewMode, showTags, setShowTags, tags, tagsQuery, toggleTagQuery } = useContext(ListPageContext)
 
     const buttonProps: ButtonProps = {
         size: "sm",
@@ -19,6 +22,9 @@ export default function ListPageSubNavBar() {
         type: "button",
         className: "bg-accented",
     }
+
+    //I wanted to use memo but I will uprgade to react 19 anyway so no need
+    const badgeableTags = tags.filter(tag => tag.badgeable)
 
     return (
         <div className=" flex items-center gap-2 mt-2 mb-5 animate-fade-in">
@@ -41,8 +47,23 @@ export default function ListPageSubNavBar() {
 
             <Divider orientation="vertical" className="h-5" />
 
-            <div className="flex-grow">
-
+            <div className="flex-grow flex gap-x-2">
+                {badgeableTags.map(tag => {
+                    const isToggled = tagsQuery?.includes(tag.label)
+                    return (
+                        <ToggleButton
+                            key={tag.id}
+                            color="default"
+                            activeColor={badgeColors.get(tag.badgeable || "")}
+                            isToggled={isToggled}
+                            setIsToggled={() => toggleTagQuery(tag)}
+                            {...buttonProps}
+                        >
+                            {isToggled ? <FaDiamond className="text-md" /> : <LuDiamond className="text-md" />}
+                            {tag.label}
+                        </ToggleButton>
+                    )
+                })}
             </div>
 
             <Divider orientation="vertical" className="h-5 ml-auto" />

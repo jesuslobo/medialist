@@ -8,16 +8,10 @@ import ListPageNewTag from "./ListPageNewTag"
 import ListPageTagsSearch from "./ListPageTagsSearch"
 
 export default function ListPageTagsList() {
-    const { showTags, setTagsQuery, tags } = useContext(ListPageContext)
+    const { showTags, tags } = useContext(ListPageContext)
 
     const [visibleTags, setVisibleTags] = useState<TagData[]>(tags)
     const groupedTags = sortTagsByGroup(visibleTags)
-
-    const toggleTagQuery = (tag: TagData) => setTagsQuery(q =>
-        q?.includes(tag.label)
-            ? q?.length === 1 ? null : q?.filter(tagLabel => tagLabel !== tag.label) //remove
-            : q?.concat(tag.label) || [tag.label] //add
-    )
 
     // make it sticky?
     return (
@@ -42,7 +36,6 @@ export default function ListPageTagsList() {
                                 key={group.groupName || "ungrouped"}
                                 tagsGroups={groupedTags}
                                 tagGroup={group}
-                                toggleTagQuery={toggleTagQuery}
                             />
                         )}
                     </div>

@@ -24,6 +24,12 @@ export default function ListPageProvider({
     const [viewMode, setViewMode] = useLocalStorage<ViewMode>('viewMode-' + list.id, 'cards')
     const [showTags, setShowTags] = useState(false)
 
+    const toggleTagQuery = (tag: TagData) => setTagsQuery(q =>
+        q?.includes(tag.label)
+            ? q?.length === 1 ? null : q?.filter(tagLabel => tagLabel !== tag.label) //remove
+            : q?.concat(tag.label) || [tag.label] //add
+    )
+
     return (
         <ListPageContext.Provider value={{
             list,
@@ -37,6 +43,7 @@ export default function ListPageProvider({
             setTagsQuery,
             filterSettings,
             setFilterSettings,
+            toggleTagQuery,
         }}>
             {children}
         </ListPageContext.Provider>
@@ -57,7 +64,8 @@ interface ListPageContext {
             undefined) => Promise<URLSearchParams>
     tagsQuery: string[] | null,
     filterSettings: FilterSettings
-    setFilterSettings: Dispatch<SetStateAction<FilterSettings>>
+    setFilterSettings: Dispatch<SetStateAction<FilterSettings>>,
+    toggleTagQuery: (tag: TagData) => void
 }
 
 interface FilterSettings {

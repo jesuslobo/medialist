@@ -2,6 +2,9 @@ import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions"
 import { useContext } from "react"
 import { itemPageContext } from "../ItemPageProvider"
 import ItemPagePoster from "./ItemPagePoster"
+import { Chip } from "@nextui-org/react"
+import { badgeColors } from "@/utils/types/global"
+import { twJoin } from "tailwind-merge"
 
 export default function ItemPageHeaderBody() {
     const { item } = useContext(itemPageContext)
@@ -21,10 +24,11 @@ export default function ItemPageHeaderBody() {
                     className={`w-full bg-cover bg-center rounded-xl flex items-end ${(coverSrc || posterSrc) ? " pt-52" : ""}`}
                     style={{ backgroundImage }}
                 >
-                    <div className="bg-pure-theme bg-opacity-75 backdrop-blur-lg w-full px-10 py-8 rounded-lg scale-100.5">
-                        <h1 className="text-4xl capitalize font-bold">{item.title}</h1>
+                    <section className="bg-pure-theme bg-opacity-75 backdrop-blur-lg w-full px-10 py-8 rounded-lg scale-100.5">
+                        <h1 className="text-4xl capitalize font-bold whitespace-pre-wrap">{item.title}</h1>
+                        <Badges className="opacity-80 py-2"/>
                         <p className="text-opacity-85">{item.description}</p>
-                    </div>
+                    </section>
                 </div>
             )
         case "poster_on_top":
@@ -38,10 +42,11 @@ export default function ItemPageHeaderBody() {
                         style={{ gridTemplateColumns: posterSrc ? 'minmax(10vw, 22vw) minmax(22vw, 75vw)' : '1fr' }}
                     >
                         {posterSrc && <ItemPagePoster className="-mt-24 pb-5" />}
-                        <div className="px-10 pb-8 pt-4">
+                        <section className="px-10 pb-8 pt-4">
                             <h1 className="text-4xl capitalize font-bold">{item.title}</h1>
-                            <p className="text-opacity-85">{item.description}</p>
-                        </div>
+                            <Badges />
+                            <p className="text-opacity-85 whitespace-pre-wrap">{item.description}</p>
+                        </section>
                         {/* layout sidebar */}
                     </div>
                 </div>
@@ -59,13 +64,26 @@ export default function ItemPageHeaderBody() {
                         }}
                     >
                         {posterSrc && <ItemPagePoster />}
-                        <div className="px-10 pb-8 pt-4">
+                        <section className="px-10 pb-8 pt-4">
                             <h1 className="text-4xl capitalize font-bold">{item.title}</h1>
+                            <Badges />
                             <p className="text-opacity-85">{item.description}</p>
-                        </div>
+                        </section>
                     </div>
                 </div>
             )
     }
 
+}
+
+function Badges({ className }: { className?: string }) {
+    const { tags } = useContext(itemPageContext)
+    const badgeable = tags.filter(tag => tag.badgeable)
+    return (
+        <div className={twJoin(className, "flex flex-wrap gap-1")}>
+            {badgeable.map(tag => tag.badgeable && (
+                <Chip key={tag.id} size="sm" className="px-2" color={badgeColors.get(tag.badgeable)}>{tag.label}</Chip>
+            ))}
+        </div>
+    )
 }

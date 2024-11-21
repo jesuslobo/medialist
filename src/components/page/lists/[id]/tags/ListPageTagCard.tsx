@@ -4,31 +4,31 @@ import TrashPopoverButton from "@/components/ui/buttons/TrashPopoverButton"
 import { TagGroup } from "@/utils/functions/sortTagsByGroup"
 import httpClient from "@/utils/lib/httpClient"
 import { mutateTagCache } from "@/utils/lib/tanquery/tagsQuery"
-import { TagData } from "@/utils/types/global"
-import { Autocomplete, AutocompleteItem, Button, ButtonGroup, Divider, Input } from "@nextui-org/react"
+import { badgeColors, TagData } from "@/utils/types/global"
+import { Autocomplete, AutocompleteItem, Button, ButtonGroup, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Input, Selection } from "@nextui-org/react"
 import { useMutation } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "framer-motion"
 import { useContext, useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, UseFormSetValue } from "react-hook-form"
 import { BiSave, BiSolidPencil, BiTrash } from "react-icons/bi"
+import { FaDiamond } from "react-icons/fa6"
+import { LuDiamond } from "react-icons/lu"
 import { ListPageContext } from "../ListPageProvider"
 
 type TagForm = Omit<TagData, 'id' | 'userId' | 'listId'>
 
 export default function ListPageTagsCard({
     tag,
-    toggleTagQuery,
     tagsGroups
 }: {
     tag: TagData,
-    toggleTagQuery: (tag: TagData) => void
     tagsGroups: TagGroup[]
 
 }) {
-    const { tagsQuery } = useContext(ListPageContext)
+    const { tagsQuery, toggleTagQuery } = useContext(ListPageContext)
     const [editMode, setEditMode] = useState(false)
 
-    const { handleSubmit, register } = useForm<TagForm>({
+    const { handleSubmit, register, setValue } = useForm<TagForm>({
         defaultValues: tag
     })
 
@@ -78,7 +78,7 @@ export default function ListPageTagsCard({
 
             <AnimatePresence>
                 {editMode &&
-                    <motion.div
+                    <motion.article
                         key={tag.id + '-edit'}
                         className="overflow-hidden"
                         initial={{ height: 0 }}
@@ -122,6 +122,8 @@ export default function ListPageTagsCard({
                                     defaultContent={<><BiSave size={20} /> Save Changes</>}
                                     onPress={handleSubmit(onSubmit)}
                                 />
+                                <BadgeButton setValue={setValue} tag={tag} />
+
                                 <TrashPopoverButton onPress={() => mutationDelete.mutate()} >
                                     {({ isTrashOpen }) =>
                                         <Button
@@ -137,9 +139,55 @@ export default function ListPageTagsCard({
 
                             <Divider />
                         </form>
-                    </motion.div>
+                    </motion.article>
                 }
             </AnimatePresence>
         </>
+    )
+}
+
+function BadgeButton({
+    tag,
+    setValue,
+}: {
+    tag: TagData,
+    setValue: UseFormSetValue<TagForm>
+}) {
+    const [badgeable, _setBadgeable] = useState<Selection>(new Set([tag.badgeable || ""]))
+    const badge = Array.from(badgeable).toString() as TagData['badgeable']
+
+    function setBadgeable(badge: Selection) {
+        setValue('badgeable', Array.from(badge).toString() as TagData['badgeable'])
+        _setBadgeable(badge)
+    }
+
+    return (
+        <Dropdown>
+            <DropdownTrigger>
+                <Button color={badge ? badgeColors.get(badge) : "default"} className="rounded-sm" isIconOnly>
+                    {badge ? <FaDiamond size={20} /> : <LuDiamond size={20} />}
+                </Button>
+            </DropdownTrigger>
+            <DropdownMenu
+                aria-label="Change Tag Color Layout"
+                selectionMode="single"
+                selectedKeys={badgeable}
+                onSelectionChange={setBadgeable}
+            >
+                <DropdownSection>
+                    {Array.from(badgeColors).map(([name, color]) => color
+                        ? <DropdownItem
+                            key={name}
+                            color={color}
+                            className=" text-center flex items-center justify-center"
+                            startContent={<span className={`bg-${color} hover:bg-foreground-400 h-6 aspect-square rounded-full`} />}
+                        >
+                            <span>{name}</span>
+                        </DropdownItem>
+                        : <></>
+                    )}
+                </DropdownSection>
+            </DropdownMenu>
+        </Dropdown >
     )
 }

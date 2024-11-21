@@ -1,4 +1,4 @@
-import { ItemFormLayoutTab } from "@/components/forms/item/ItemFormProvider";
+import { TagData } from "@/utils/types/global";
 import { ItemHeader, ItemLayoutTab } from "@/utils/types/item";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
@@ -98,7 +98,7 @@ export const listsTagsTable = sqliteTable("lists_tags", {
         .notNull(),
     description: text("description"),
     groupName: text("group_name"),
-    badgeable: integer("badgeable", { mode: "boolean" })
-        .notNull()
-        .default(false),
+    badgeable: text("badgeable")
+        .default('')
+        .$type<TagData['badgeable']>(),
 });

@@ -7,8 +7,18 @@ export interface TagData {
     label: string
     description?: string
     groupName?: string
-    badgeable?: boolean
-  }
+    badgeable?: "Default" | "Blue" | "Green" | "Yellow" | "Red" | "Purple"
+}
+
+type color = "default" | "primary" | "secondary" | "success" | "warning" | "danger" | undefined
+export const badgeColors = new Map<string, color>([
+    ["Default", "default"],
+    ["Blue", "primary"],
+    ["Purple", "secondary"],
+    ["Green", "success"],
+    ["Yellow", "warning"],
+    ["Red", "danger"],
+])
 
 export interface UserData {
     id: string

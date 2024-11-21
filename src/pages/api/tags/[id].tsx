@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 label,
                 description,
                 groupName,
-                badgeable: badgeable == 'true' ? true : false
+                badgeable: badgeable || ""
             }
 
             const data = await db

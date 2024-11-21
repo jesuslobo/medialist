@@ -1,5 +1,6 @@
 import { TagGroup } from "@/utils/functions/sortTagsByGroup";
-import { TagData } from "@/utils/types/global";
+import { useContext } from "react";
+import { ListPageContext } from "../ListPageProvider";
 import ListPageTagsCard from "./ListPageTagCard";
 
 export default function ListPageGroupTagCard({
@@ -7,13 +8,12 @@ export default function ListPageGroupTagCard({
         groupName,
         groupTags
     },
-    toggleTagQuery,
     tagsGroups //annoying props drilling but it's fine for now
 }: {
     tagGroup: TagGroup,
-    toggleTagQuery: (tag: TagData) => void,
     tagsGroups: TagGroup[]
 }) {
+
     return (
         <>
             {groupName &&
@@ -26,7 +26,6 @@ export default function ListPageGroupTagCard({
                     tag={tag}
                     key={tag.id + 'card'}
                     tagsGroups={tagsGroups}
-                    toggleTagQuery={toggleTagQuery}
                 />
             ))}
         </>
