@@ -1,15 +1,16 @@
 import { db } from '@/db';
 import { listsTable } from '@/db/schema';
 import { validateAuthCookies } from '@/utils/lib/auth';
-import { coverThumbnailsOptions, thumbnailName } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { validatedID } from '@/utils/lib/generateID';
 import $deleteFile from '@/utils/server/fileHandling/deleteFile';
-import $handleListForm, { HandleListFormData } from '@/utils/server/handleListForm';
+import { $listFormOptions } from '@/utils/server/lib/config/formData.options';
+import $getDir from '@/utils/server/lib/getDir';
+import $processFormData, { ProcessedFormData } from '@/utils/server/lib/processFormData';
 import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
 import { and, eq } from 'drizzle-orm';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { join } from 'path';
 
 /** api/lists/[id]
  * Get: Get a list by id
@@ -60,30 +61,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const list = listReq[0] as ListData // original list
 
-      const form = await $handleListForm<listForm>(user.id, list.id);
-      const { handleFields, handleFiles, data } = form;
+      const dir = await $getDir(user.id, list.id, true);
+      const form = await $processFormData<ListData & ProcessedFormData>($listFormOptions(dir.list));
+      const { processFiles, processFields, data } = form;
 
       const bb = busboy({
         headers: req.headers,
         limits: { fields: 2, files: 2, fileSize: 1024 * 1024 * 100 } // 100MB
       })
 
-      bb.on('file', handleFiles)
-      bb.on('field', (name, value) => {
-        handleFields(name, value)
-        switch (name) { // when the cover is deleted, the client will send a null => Boolean(JSON.parse(null)) = false
-          case 'cover': form.data.coverIsDeleted = !Boolean(JSON.parse(value)); break
-        }
-      })
+      bb.on('file', processFiles)
+      bb.on('field', processFields)
 
       bb.on('finish', async () => {
-        if (form.data.coverIsDeleted && !form.data.coverPath)
-          form.data.coverPath = null as any // drizzle does not accept undefined
-
-        const deletedMedia = deletedMediaPaths(form.data, list, form.dir.list)
-        Promise.all(deletedMedia.map(path => $deleteFile(path)))
-
-        delete form.data.coverIsDeleted
+        if (data.coverPath !== undefined && list.coverPath && list.coverPath !== data.coverPath)
+          $deleteFile(coverThumbnailsOptions.listCover, dir.list, list.coverPath);
 
         const updatedList = await db.update(listsTable).set(form.data).where(
           and(
@@ -116,21 +108,3 @@ export const config = {
     bodyParser: false,
   },
 };
-
-function deletedMediaPaths(formData: listForm, oldData: ListData, listDir: string) {
-  let deletedMedia = []
-
-  if ((formData.coverPath || formData.coverIsDeleted) && typeof oldData.coverPath === 'string') {
-    deletedMedia.push(join(listDir, oldData.coverPath))
-    coverThumbnailsOptions.listCover.forEach(thumbnailOption => {
-      const thumbnailPath = join(listDir, thumbnailName(oldData.coverPath as string, thumbnailOption))
-      deletedMedia.push(thumbnailPath)
-    })
-  }
-  return deletedMedia
-}
-
-
-interface listForm extends HandleListFormData {
-  coverIsDeleted?: boolean
-}

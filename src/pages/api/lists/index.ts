@@ -2,7 +2,10 @@ import { db } from '@/db';
 import { listsTable } from '@/db/schema';
 import { validateAuthCookies } from '@/utils/lib/auth';
 import { generateID } from '@/utils/lib/generateID';
-import $handleListForm from '@/utils/server/handleListForm';
+import { $listFormOptions } from '@/utils/server/lib/config/formData.options';
+import $getDir from '@/utils/server/lib/getDir';
+import $processFormData, { ProcessedFormData } from '@/utils/server/lib/processFormData';
+import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
 import { and, eq } from 'drizzle-orm';
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -29,20 +32,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json(lists);
     }
 
-    // currently dev
     if (req.method === 'POST') {
       const id = generateID();
 
-      const form = await $handleListForm(user.id, id);
-      const { handleFields, handleFiles, data } = form;
+      const dir = await $getDir(user.id, id, true);
+      const form = await $processFormData<ListData & ProcessedFormData>($listFormOptions(dir.list));
+      const { processFiles, processFields, data } = form;
 
       const bb = busboy({
         headers: req.headers,
         limits: { fields: 1, files: 2, fileSize: 1024 * 1024 * 100 } // 100MB
       })
 
-      bb.on('file', handleFiles)
-      bb.on('field', handleFields)
+      bb.on('file', processFiles)
+      bb.on('field', processFields)
 
       bb.on('close', async () => {
         if (!data.title) return res.status(400).json({ message: 'Invalid Request' });
@@ -57,9 +60,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         res.status(201).json(list[0]);
       })
 
-      bb.on('error', () =>
+      bb.on('error', (error) => {
+        console.log("[Error] api/lists: ", error)
         res.status(500).json({ message: 'Internal Server Error' })
-      )
+      })
 
       return req.pipe(bb);
     }
