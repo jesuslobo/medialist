@@ -1,8 +1,8 @@
 import { db } from '@/server/db';
 import { itemsTable, listsTable, listsTagsTable } from '@/server/db/schema';
-import { validateAuthCookies } from '@/utils/lib/auth';
-import { generateID, validatedID } from '@/utils/lib/generateID';
+import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $processItemForm from '@/server/utils/lib/form/processItemForm';
+import { generateID, validatedID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { ItemSaveResponse } from '@/utils/types/item';
 import { ListData } from '@/utils/types/list';
@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { id: listId } = req.query as { id: ListData['id'] };
         if (!validatedID(listId)) return res.status(400).json({ message: 'Bad Request' });
 
-        const { user } = await validateAuthCookies(req, res);
+        const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
         if (req.method === 'GET') {

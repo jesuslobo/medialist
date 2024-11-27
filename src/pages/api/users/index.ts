@@ -1,18 +1,16 @@
 import { db } from '@/server/db';
 import { usersTable } from '@/server/db/schema';
-import { argon2Options, lucia, notValidPassword, notValidUsername, validateAuthCookies } from '@/utils/lib/auth';
+import { $hashPassword } from '@/server/utils/auth/auth';
+import { $setSessionTokenCookie, $validateAuthCookies } from '@/server/utils/auth/cookies';
+import { $createSession, $generateSessionToken } from '@/server/utils/auth/session';
 import { generateID } from '@/utils/lib/generateID';
+import { validatePassword, validateUsername } from '@/utils/lib/validate';
 import { ServerResponseError } from '@/utils/types/global';
-import { hash } from '@node-rs/argon2';
 import { eq } from 'drizzle-orm';
 import { mkdir } from 'fs/promises';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { join } from 'path';
 
-interface UserLoginData {
-    username?: string;
-    password?: string;
-}
 /** api/users
  * Get: Returns the Authenticated User's Data
  * Post: User Register
@@ -20,7 +18,7 @@ interface UserLoginData {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         if (req.method === 'GET') {
-            const { user } = await validateAuthCookies(req, res);
+            const { user } = await $validateAuthCookies(req, res);
             if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
             return res.status(200).json(user);
@@ -28,16 +26,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (req.method === 'POST') {
             const body = await req.body;
-            const { username, password } = JSON.parse(body || {})
+            const { username: reqUser, password } = JSON.parse(body || {})
+            const username = reqUser.toLowerCase()
+
             if (!username || !password) return res.status(400).json({ message: 'Invalid Request' })
 
-            if (notValidUsername(username))
+            if (!validateUsername(username))
                 return res.status(400).json({
                     cause: { username: "Invalid Username" },
                     message: 'Invalid Request'
                 } as Error)
 
-            if (notValidPassword(password))
+            if (!validatePassword(password))
                 return res.status(400).json({
                     cause: { password: "Invalid Password" },
                     message: 'Invalid Request'
@@ -50,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 message: 'Invalid Request'
             } as ServerResponseError)
 
-            const passwordHash = await hash(password, argon2Options)
+            const passwordHash = await $hashPassword(password)
 
             const userID = generateID()
 
@@ -62,10 +62,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const userDir = join('public', 'users', userID)
             await mkdir(userDir, { recursive: true }) // create media directory
 
-            const session = await lucia.createSession(userID, {});
-            const sessionCookie = lucia.createSessionCookie(session.id).serialize()
+            const token = $generateSessionToken();
+            const session = await $createSession(token, user[0].id);
 
-            res.appendHeader('Set-Cookie', sessionCookie).status(200).json(user[0])
+            $setSessionTokenCookie(res, token, session.expiresAt)
+            res.status(200).json(user[0])
         }
 
         res.status(405).json({ message: 'Method Not Allowed' });

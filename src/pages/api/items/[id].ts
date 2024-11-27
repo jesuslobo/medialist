@@ -1,10 +1,10 @@
 import { db } from '@/server/db';
 import { itemsTable, listsTagsTable } from '@/server/db/schema';
-import { validateAuthCookies } from '@/utils/lib/auth';
-import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
-import { validatedID } from '@/utils/lib/generateID';
+import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFile from '@/server/utils/file/deleteFile';
 import $processItemForm from '@/server/utils/lib/form/processItemForm';
+import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { validatedID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { ItemData, ItemLayoutTab, ItemSaveResponse, LogoField } from '@/utils/types/item';
 import busboy from 'busboy';
@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { id } = req.query;
         if (!validatedID(id)) return res.status(400).json({ message: 'Bad Request' });
 
-        const { user } = await validateAuthCookies(req, res);
+        const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
         if (req.method === 'GET') {

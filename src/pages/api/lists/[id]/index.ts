@@ -1,12 +1,12 @@
 import { db } from '@/server/db';
 import { listsTable } from '@/server/db/schema';
-import { validateAuthCookies } from '@/utils/lib/auth';
+import { $validateAuthCookies } from '@/server/utils/auth/cookies';
+import $deleteFile from '@/server/utils/file/deleteFile';
+import $getDir from '@/server/utils/file/getDir';
+import { $listFormOptions } from '@/server/utils/lib/form/formData.options';
+import $processFormData, { ProcessedFormData } from '@/server/utils/lib/processFormData';
 import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { validatedID } from '@/utils/lib/generateID';
-import $deleteFile from '@/server/utils/file/deleteFile';
-import { $listFormOptions } from '@/server/utils/lib/form/formData.options';
-import $getDir from '@/server/utils/file/getDir';
-import $processFormData, { ProcessedFormData } from '@/server/utils/lib/processFormData';
 import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
 import { and, eq } from 'drizzle-orm';
@@ -22,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { id } = req.query as { id: ListData['id'] };
     if (!validatedID(id)) return res.status(400).json({ message: 'Bad Request' });
 
-    const { user } = await validateAuthCookies(req, res);
+    const { user } = await $validateAuthCookies(req, res);
     if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
     if (req.method === 'GET') {

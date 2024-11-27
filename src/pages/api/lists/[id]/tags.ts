@@ -1,7 +1,7 @@
 import { db } from '@/server/db';
 import { listsTagsTable } from '@/server/db/schema';
+import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import parseJSONReq from '@/utils/functions/parseJSONReq';
-import { validateAuthCookies } from '@/utils/lib/auth';
 import { generateID, validatedID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { ListData } from '@/utils/types/list';
@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (!validatedID(listID)) return res.status(400).json({ message: 'Bad Request' });
 
-        const { user } = await validateAuthCookies(req, res);
+        const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
         if (req.method === 'GET') {

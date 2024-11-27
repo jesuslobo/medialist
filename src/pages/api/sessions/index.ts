@@ -1,13 +1,15 @@
 import { db } from '@/server/db';
 import { usersTable } from '@/server/db/schema';
+import { $verifyPassword } from '@/server/utils/auth/auth';
+import { $setSessionTokenCookie, $validateAuthCookies } from '@/server/utils/auth/cookies';
+import { $createSession, $generateSessionToken, $invalidateSession } from '@/server/utils/auth/session';
 import parseJSONReq from '@/utils/functions/parseJSONReq';
-import { argon2Options, lucia, validateAuthCookies, notValidPassword, notValidUsername } from '@/utils/lib/auth';
-import { verify } from '@node-rs/argon2';
+import { validatePassword, validateUsername } from '@/utils/lib/validate';
 import { eq } from 'drizzle-orm';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 /** api/sessions
- * Get: Returns All Sessions (Not Yet Implemented)
+ * Get: Returns All Sessions (Not Implemented)
  * Post: Create a Session - Login
  * Delete: Destroy a Session - Logout
  */
@@ -16,52 +18,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === 'POST') {
       const body = parseJSONReq(await req.body);
 
-      const { username, password } = body;
+      const { username, password } = body as { username: string, password: string };
       if (!username || !password) return res.status(400).json({ message: 'Invalid Request' })
 
-      if (notValidUsername(username))
+      if (!validateUsername(username))
         return res.status(400).json({
           cause: { username: "Invalid Username" },
           message: 'Invalid Request'
         } as Error)
 
-      if (notValidPassword(password))
+      if (!validatePassword(password))
         return res.status(400).json({
           cause: { password: "Invalid Password" },
           message: 'Invalid Request'
         } as Error)
 
-        // should be an exact match, i fear it might not be case sensitive
       const users = await db
         .select()
         .from(usersTable)
-        .where(eq(usersTable.username, username))
+        .where(eq(usersTable.username, username.toLowerCase()));
 
-      const userExists = users[0]
-      if (!userExists) return res.status(400).json({ message: 'Invalid Username Or Password' })
+      if (!users[0]) return res.status(400).json({ message: 'Invalid Username Or Password' })
+      const { passwordHash, ...user } = users[0];
 
-      const validPassword = await verify(users[0].passwordHash, password, argon2Options)
+      const validPassword = await $verifyPassword(password, passwordHash);
       if (!validPassword) return res.status(400).json({ message: 'Invalid Username Or Password' })
 
-      const session = await lucia.createSession(userExists.id, {});
-      const sessionCookie = lucia.createSessionCookie(session.id).serialize();
+      const token = $generateSessionToken();
+      const session = await $createSession(token, user.id);
 
-      res
-        .appendHeader('Set-Cookie', sessionCookie)
-        .status(200)
-        .json({
-          username: userExists.username,
-          id: userExists.id
-        });
+      $setSessionTokenCookie(res, token, session.expiresAt);
+      res.status(200).json(user);
     }
 
     if (req.method === 'DELETE') {
-      const { session } = await validateAuthCookies(req, res);
+      const { session } = await $validateAuthCookies(req, res);
       if (!session) return res.status(401).json({ message: 'Unauthorized' });
 
-      await lucia.invalidateSession(session.id);
-      const sessionCookie = lucia.createBlankSessionCookie().serialize();
-      res.appendHeader('Set-Cookie', sessionCookie).status(200).json({ message: 'Logged Out' });
+      await $invalidateSession(session.id);
+      res.status(200).json({ message: 'Logged Out' });
     }
 
     res.status(405).json({ message: 'Method Not Allowed' });
