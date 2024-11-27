@@ -57,7 +57,7 @@ function EditItemPage() {
                             const fieldT = field as ItemFormLogoField
                             let logoPath = fieldT?.logoPath as string | File | null
                             if (fieldT.logoPath instanceof File) {
-                                formData.append(`logoFields[${id}]`, fieldT.logoPath as File)
+                                formData.append(`logoPaths[${id}]`, fieldT.logoPath as File)
                                 logoPath = id
                             }
 
@@ -92,8 +92,8 @@ function EditItemPage() {
 
         //Layout
         formData.append('layout', JSON.stringify(layout))
-        if (dirtyFields.tags)
-            formData.append('tags', JSON.stringify(data.tags))
+        // apply garbage collection of not existing old tags
+        formData.append('tags', JSON.stringify(data.tags))
 
         mutation.mutate(formData)
     }

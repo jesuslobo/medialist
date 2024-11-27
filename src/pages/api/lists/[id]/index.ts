@@ -4,7 +4,7 @@ import { validateAuthCookies } from '@/utils/lib/auth';
 import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { validatedID } from '@/utils/lib/generateID';
 import $deleteFile from '@/utils/server/fileHandling/deleteFile';
-import { $listFormOptions } from '@/utils/server/lib/config/formData.options';
+import { $listFormOptions } from '@/utils/server/lib/form/formData.options';
 import $getDir from '@/utils/server/lib/getDir';
 import $processFormData, { ProcessedFormData } from '@/utils/server/lib/processFormData';
 import { ListData } from '@/utils/types/list';

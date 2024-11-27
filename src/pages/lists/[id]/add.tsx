@@ -66,7 +66,7 @@ function AddItemPage() {
                             const id = generateID(10)
                             const fieldT = field as ItemFormLogoField
                             if (fieldT?.logoPath)
-                                formData.append(`logoFields[${id}]`, fieldT.logoPath as File)
+                                formData.append(`logoPaths[${id}]`, fieldT.logoPath as File)
 
                             return { ...field, logoPath: fieldT?.logoPath && id, id: undefined }
                         } else {

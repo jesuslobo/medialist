@@ -1,16 +1,15 @@
 import { db } from '@/db';
 import { itemsTable, listsTagsTable } from '@/db/schema';
 import { validateAuthCookies } from '@/utils/lib/auth';
-import { coverThumbnailsOptions, thumbnailName } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { validatedID } from '@/utils/lib/generateID';
 import $deleteFile from '@/utils/server/fileHandling/deleteFile';
-import $handleItemForm, { HandleItemFormData } from '@/utils/server/handleItemForm';
+import $processItemForm from '@/utils/server/lib/form/processItemForm';
 import { TagData } from '@/utils/types/global';
-import { ItemData, ItemSaveResponse, LogoField } from '@/utils/types/item';
+import { ItemData, ItemLayoutTab, ItemSaveResponse, LogoField } from '@/utils/types/item';
 import busboy from 'busboy';
 import { and, eq } from 'drizzle-orm';
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { join } from 'path';
 
 /** api/items/[id]
  * Get:  gets an item by id
@@ -55,23 +54,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     eq(listsTagsTable.listId, itemReq[0].listId),
                 ))
 
-            const form = await $handleItemForm<ItemForm>(user.id, item.listId, item.id)
-            const { handleFields, handleFiles, handleTags, mapLayoutsToLogos, dir } = form;
+            const form = await $processItemForm(user.id, item.listId, item.id)
+            const { processFiles, processFields, handleTags, mapLayoutsToLogos, dir, data } = form;
 
             const bb = busboy({
                 headers: req.headers,
                 limits: { fields: 7, files: 30, fileSize: 1024 * 1024 * 50 } // 50MB
             })
 
+            bb.on('field', processFields)
+            bb.on('file', processFiles)
 
-            bb.on('field', (name, value) => {
-                handleFields(name, value)
-                switch (name) { // for deleted covers
-                    case 'poster': form.data.posterIsDeleted = !Boolean(JSON.parse(value)); break
-                    case 'cover': form.data.coverIsDeleted = !Boolean(JSON.parse(value)); break
-                }
-            })
-            bb.on('file', handleFiles)
             bb.on('finish', async () => {
                 form.data.layout = mapLayoutsToLogos()
 
@@ -84,19 +77,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         await db.insert(listsTagsTable).values(newTagsData as TagData[])
                 }
 
-                if (form.data.posterIsDeleted && !form.data.posterPath)
-                    form.data.posterPath = null as any // drizzle does not accept undefined
+                if (data.coverPath !== undefined && item.coverPath && item.coverPath !== data.coverPath)
+                    $deleteFile(coverThumbnailsOptions.itemCover, dir.item, item.coverPath);
 
-                if (form.data.coverIsDeleted && !form.data.coverPath)
-                    form.data.coverPath = null as any // drizzle does not accept undefined
+                if (data.posterPath !== undefined && item.posterPath && item.posterPath !== data.posterPath)
+                    $deleteFile(coverThumbnailsOptions.itemPoster, dir.item, item.posterPath);
 
-                const deletedMedia = deletedMediaPaths(form.data, item as ItemData, dir.item)
-
-                // the user does not have to wait for the media to be deleted
-                Promise.all(deletedMedia.map(path => $deleteFile(path)))
-
-                delete form.data.posterIsDeleted
-                delete form.data.coverIsDeleted
+                const oldLogoPaths = extractLogoPaths(item.layout as ItemLayoutTab[])
+                const newLogoPaths = new Set(extractLogoPaths(form.data.layout))
+                const deletedLogos = oldLogoPaths.filter(logoPath => !newLogoPaths.has(logoPath))
+                deletedLogos.forEach(logoPath => logoPath &&
+                    $deleteFile(coverThumbnailsOptions.logo, dir.item, logoPath)
+                )
 
                 const updatedItem = await db
                     .update(itemsTable)
@@ -135,46 +127,8 @@ export const config = {
     api: {
         bodyParser: false,
     },
-};
-
-function deletedMediaPaths(formData: ItemForm, oldData: ItemData, itemDir: string) {
-    let deletedMedia = []
-
-    // if cover and poster changed delete the old ones if they exist
-    if ((formData.coverPath || formData.coverIsDeleted) && typeof oldData.coverPath === 'string') {
-        deletedMedia.push(join(itemDir, oldData.coverPath))
-        coverThumbnailsOptions.itemCover.forEach(thumbnailOption => {
-            const thumbnailPath = join(itemDir, thumbnailName(oldData.coverPath as string, thumbnailOption))
-            deletedMedia.push(thumbnailPath)
-        })
-    }
-
-    if ((formData.posterPath || formData.posterIsDeleted) && typeof oldData.posterPath === 'string') {
-        deletedMedia.push(join(itemDir, oldData.posterPath))
-        coverThumbnailsOptions.itemPoster.forEach(thumbnailOption => {
-            const thumbnailPath = join(itemDir, thumbnailName(oldData.posterPath as string, thumbnailOption))
-            deletedMedia.push(thumbnailPath)
-        })
-    }
-
-    const originalLogoPaths = oldData.layout?.flat(2).map(f => (f as LogoField)?.logoPath)
-    const newLogoPaths = new Set(formData.layout.flat(2).map(f => (f as LogoField)?.logoPath))
-
-    //if a logo exists in the orignal item layout but not in the new one => delete it
-    originalLogoPaths?.forEach(logoPath => {
-        if (!newLogoPaths.has(logoPath) && logoPath) {
-            deletedMedia.push(join(itemDir, logoPath))
-            coverThumbnailsOptions.logo.forEach(thumbnailOption => {
-                const thumbnailPath = join(itemDir, thumbnailName(logoPath as string, thumbnailOption))
-                deletedMedia.push(thumbnailPath)
-            })
-        }
-    })
-
-    return deletedMedia
 }
 
-interface ItemForm extends HandleItemFormData {
-    coverIsDeleted?: boolean
-    posterIsDeleted?: boolean
+function extractLogoPaths(layout: ItemLayoutTab[]) {
+    return layout.flat(Infinity).map(f => (f as LogoField)?.logoPath)
 }

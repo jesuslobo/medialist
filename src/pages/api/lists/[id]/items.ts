@@ -2,7 +2,7 @@ import { db } from '@/db';
 import { itemsTable, listsTable, listsTagsTable } from '@/db/schema';
 import { validateAuthCookies } from '@/utils/lib/auth';
 import { generateID, validatedID } from '@/utils/lib/generateID';
-import $handleItemForm from '@/utils/server/handleItemForm';
+import $processItemForm from '@/utils/server/lib/form/processItemForm';
 import { TagData } from '@/utils/types/global';
 import { ItemSaveResponse } from '@/utils/types/item';
 import { ListData } from '@/utils/types/list';
@@ -60,8 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             const list = lists[0];
 
-            const form = await $handleItemForm(user.id, list.id, itemId)
-            const { handleFields, handleFiles, handleTags, mapLayoutsToLogos } = form;
+            const form = await $processItemForm(user.id, list.id, itemId)
+            const { processFiles, processFields, handleTags, mapLayoutsToLogos } = form;
 
             form.data['id'] = itemId;
             form.data['userId'] = user.id;
@@ -72,8 +72,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 limits: { fields: 5, files: 30, fileSize: 1024 * 1024 * 50 } // 50MB
             })
 
-            bb.on('field', handleFields)
-            bb.on('file', handleFiles)
+            bb.on('field', processFields)
+            bb.on('file', processFiles)
 
             bb.on('finish', async () => {
                 if (!form.data.title)
@@ -83,7 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 let newTagsData: { id: string }[] = []
                 // new tags
-                if (form.data.rawTags.length > 0) {
+                if (form.data?.tags && form.data.tags.length > 0) {
                     newTagsData = handleTags(tags);
                     if (newTagsData.length > 0)
                         await db.insert(listsTagsTable).values(newTagsData as TagData[])
