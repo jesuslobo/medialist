@@ -1,5 +1,5 @@
-import { db } from '@/db';
-import { listsTagsTable } from '@/db/schema';
+import { db } from '@/server/db';
+import { listsTagsTable } from '@/server/db/schema';
 import parseJSONReq from '@/utils/functions/parseJSONReq';
 import { validateAuthCookies } from '@/utils/lib/auth';
 import { generateID, validatedID } from '@/utils/lib/generateID';

@@ -1,5 +1,5 @@
-import { db } from "@/db";
-import { sessionsTable, usersTable } from "@/db/schema";
+import { db } from "@/server/db";
+import { sessionsTable, usersTable } from "@/server/db/schema";
 import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
 import type { Session, User } from "lucia";
 import { Lucia, TimeSpan } from "lucia";

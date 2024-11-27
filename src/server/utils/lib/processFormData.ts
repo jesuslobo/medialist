@@ -1,7 +1,7 @@
 import busboy from "busboy";
 import internal from "stream";
-import { ThumbnailOptions } from "../../lib/fileHandling/thumbnailOptions";
-import $handleFileUpload from "../fileHandling/handleFileUpload";
+import { ThumbnailOptions } from "../../../utils/lib/fileHandling/thumbnailOptions";
+import $handleFileUpload from "../file/handleFileUpload";
 
 /** function that will parseForm to fields */
 export default async function $processFormData<T extends ProcessedFormData>(options: ProcessFormDataOptions) {

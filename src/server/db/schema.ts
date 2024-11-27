@@ -1,5 +1,6 @@
 import { TagData } from "@/utils/types/global";
 import { ItemHeader, ItemLayoutTab } from "@/utils/types/item";
+import { InferSelectModel } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 // forgot to add ON DELETE CASCADE :D
@@ -23,8 +24,9 @@ export const sessionsTable = sqliteTable("sessions", {
     userId: text("user_id")
         .notNull()
         .references(() => usersTable.id),
-    expiresAt: integer("expires_at")
-        .notNull()
+    expiresAt: integer("expires_at", {
+        mode: "timestamp"
+    }).notNull()
 });
 
 export const listsTable = sqliteTable("lists", {
@@ -102,3 +104,6 @@ export const listsTagsTable = sqliteTable("lists_tags", {
         .default('')
         .$type<TagData['badgeable']>(),
 });
+
+export type User = InferSelectModel<typeof usersTable>;
+export type Session = InferSelectModel<typeof sessionsTable>;

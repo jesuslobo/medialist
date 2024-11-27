@@ -1,5 +1,5 @@
-import { db } from '@/db';
-import { usersTable } from '@/db/schema';
+import { db } from '@/server/db';
+import { usersTable } from '@/server/db/schema';
 import parseJSONReq from '@/utils/functions/parseJSONReq';
 import { argon2Options, lucia, validateAuthCookies, notValidPassword, notValidUsername } from '@/utils/lib/auth';
 import { verify } from '@node-rs/argon2';
@@ -31,6 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           message: 'Invalid Request'
         } as Error)
 
+        // should be an exact match, i fear it might not be case sensitive
       const users = await db
         .select()
         .from(usersTable)

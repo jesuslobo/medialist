@@ -1,5 +1,5 @@
-import { db } from '@/db';
-import { usersTable } from '@/db/schema';
+import { db } from '@/server/db';
+import { usersTable } from '@/server/db/schema';
 import { argon2Options, lucia, notValidPassword, notValidUsername, validateAuthCookies } from '@/utils/lib/auth';
 import { generateID } from '@/utils/lib/generateID';
 import { ServerResponseError } from '@/utils/types/global';

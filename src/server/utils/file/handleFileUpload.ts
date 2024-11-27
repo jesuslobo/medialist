@@ -1,8 +1,8 @@
 import { createWriteStream } from "fs";
 import path from "path";
 import internal from "stream";
-import { generateID } from "../../lib/generateID";
-import { thumbnailName, ThumbnailOptions } from "../../lib/fileHandling/thumbnailOptions";
+import { generateID } from "../../../utils/lib/generateID";
+import { thumbnailName, ThumbnailOptions } from "../../../utils/lib/fileHandling/thumbnailOptions";
 import { $webpTransformer } from "../lib/webpTransformer";
 
 interface Options {

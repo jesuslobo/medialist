@@ -1,8 +1,8 @@
-import { generateID } from "../../../lib/generateID";
-import { TagData } from "../../../types/global";
-import { ItemData, ItemField, ItemLayoutTab, LogoField } from "../../../types/item";
+import { generateID } from "../../../../utils/lib/generateID";
+import { TagData } from "../../../../utils/types/global";
+import { ItemData, ItemField, ItemLayoutTab, LogoField } from "../../../../utils/types/item";
 import { $itemFormOptions } from "./formData.options";
-import $getDir from "../getDir";
+import $getDir from "../../file/getDir";
 import $processFormData, { ProcessedFormData } from "../processFormData";
 
 type ItemServerForm = ItemData & ProcessedFormData & {

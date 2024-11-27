@@ -1,12 +1,12 @@
-import { db } from '@/db';
-import { listsTable } from '@/db/schema';
+import { db } from '@/server/db';
+import { listsTable } from '@/server/db/schema';
 import { validateAuthCookies } from '@/utils/lib/auth';
 import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { validatedID } from '@/utils/lib/generateID';
-import $deleteFile from '@/utils/server/fileHandling/deleteFile';
-import { $listFormOptions } from '@/utils/server/lib/form/formData.options';
-import $getDir from '@/utils/server/lib/getDir';
-import $processFormData, { ProcessedFormData } from '@/utils/server/lib/processFormData';
+import $deleteFile from '@/server/utils/file/deleteFile';
+import { $listFormOptions } from '@/server/utils/lib/form/formData.options';
+import $getDir from '@/server/utils/file/getDir';
+import $processFormData, { ProcessedFormData } from '@/server/utils/lib/processFormData';
 import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
 import { and, eq } from 'drizzle-orm';
