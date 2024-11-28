@@ -53,10 +53,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const passwordHash = await $hashPassword(password)
 
             const userID = generateID()
+            const createdAt = new Date(Date.now())
 
             const user = await db
                 .insert(usersTable)
-                .values({ id: userID, username, passwordHash })
+                .values({
+                    id: userID,
+                    username,
+                    passwordHash,
+                    createdAt,
+                    updatedAt: createdAt
+                })
                 .returning({ id: usersTable.id, username: usersTable.username })
 
             const userDir = join('public', 'users', userID)

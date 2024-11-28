@@ -50,11 +50,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       bb.on('close', async () => {
         if (!data.title) return res.status(400).json({ message: 'Invalid Request' });
 
+        const createdAt = new Date(Date.now());
         const list = await db.insert(listsTable).values({
           id: id,
           title: data.title,
           coverPath: data.coverPath,
           userId: user.id,
+          createdAt,
+          updatedAt: createdAt,
         }).returning();
 
         res.status(201).json(list[0]);

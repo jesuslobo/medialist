@@ -14,6 +14,8 @@ export interface ItemData {
     tags: TagData['id'][]
     layout: ItemLayoutTab[]
     header: ItemHeader
+    createdAt: Date
+    updatedAt: Date
     // progress_state?: itemProgressState
     // badges?: itemBadgesType[]
     // related?: ItemData['id'][]

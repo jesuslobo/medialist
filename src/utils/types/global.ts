@@ -8,6 +8,8 @@ export interface TagData {
     description?: string
     groupName?: string
     badgeable?: "Default" | "Blue" | "Green" | "Yellow" | "Red" | "Purple"
+    createdAt: Date
+    updatedAt: Date
 }
 
 type color = "default" | "primary" | "secondary" | "success" | "warning" | "danger" | undefined

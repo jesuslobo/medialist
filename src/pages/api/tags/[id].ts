@@ -40,7 +40,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 label,
                 description,
                 groupName,
-                badgeable: badgeable || ""
+                badgeable: badgeable || "",
+                updatedAt: new Date(Date.now())
             }
 
             const data = await db

@@ -9,15 +9,15 @@ export interface ListData {
   fav?: boolean
   trash?: boolean
   //logs
-  updatedAt: string
-  createdAt: string
-  //   templates?: templates
-  //   configurations?: ListConfiguration[]
+  createdAt: Date
+  updatedAt: Date
+  configs: ListConfigs
+  // templates: ItemLayoutTab
 }
 
-// interface ListConfiguration {
-//   defaultLayout: "1" | "2" | "3";
-// }
+interface ListConfigs {
+  aspectRatio: [number, number]; // [width, height]
+}
 
 // export interface templates {
 //   main?: object // main layout

@@ -75,6 +75,8 @@ function handleTags(tagsData: { id: string }[], data: ItemServerForm, userId: st
                 userId,
                 listId,
                 label,
+                createdAt: new Date(Date.now()),
+                updatedAt: new Date(Date.now())
             }
             data.tags.push(tagData.id)
             return tagData

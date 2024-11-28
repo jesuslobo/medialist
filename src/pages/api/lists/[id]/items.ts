@@ -89,6 +89,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                         await db.insert(listsTagsTable).values(newTagsData as TagData[])
                 }
 
+                form.data.createdAt = new Date(Date.now())
+                form.data.updatedAt = new Date(Date.now())
+
                 const item = await db
                     .insert(itemsTable)
                     .values(form.data)

@@ -90,6 +90,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     $deleteFile(coverThumbnailsOptions.logo, dir.item, logoPath)
                 )
 
+                form.data.updatedAt = new Date(Date.now())
+
                 const updatedItem = await db
                     .update(itemsTable)
                     .set(form.data)

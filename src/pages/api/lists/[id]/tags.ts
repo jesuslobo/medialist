@@ -47,7 +47,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 listId: listID as ListData['id'],
                 description,
                 groupName,
-                badgeable: badgeable || ""
+                badgeable: badgeable || "",
+                createdAt: new Date(Date.now()),
+                updatedAt: new Date(Date.now())
             }
 
             const tag = await db.insert(listsTagsTable)

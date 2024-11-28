@@ -1,6 +1,6 @@
 import { TagData } from "@/utils/types/global";
 import { ItemHeader, ItemLayoutTab } from "@/utils/types/item";
-import { InferSelectModel } from "drizzle-orm";
+import { InferSelectModel, sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 // forgot to add ON DELETE CASCADE :D
@@ -13,8 +13,14 @@ export const usersTable = sqliteTable("users", {
         .unique(),
     passwordHash: text("password_hash")
         .notNull(),
-    // createdAt: integer("created_at").notNull(),
-    // updatedAt: integer("updated_at").notNull(),
+    createdAt: integer("created_at", {
+        mode: "timestamp"
+    }).notNull(),
+    // .default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", {
+        mode: "timestamp"
+    }).notNull()
+    // .default(sql`(unixepoch())`),
 });
 
 export const sessionsTable = sqliteTable("sessions", {
@@ -42,9 +48,13 @@ export const listsTable = sqliteTable("lists", {
     trash: integer("trash", { mode: "boolean" })
         .notNull()
         .default(false),
+    createdAt: integer("created_at", {
+        mode: "timestamp"
+    }).notNull(),
+    updatedAt: integer("updated_at", {
+        mode: "timestamp"
+    }).notNull()
     // fav: integer("fav", { mode: "boolean" }).notNull().default(false),
-    // createdAt: integer("created_at").notNull(),
-    // updatedAt: integer("updated_at").notNull(),
     // templates: text("templates").notNull().default("[]"), // JSON string
     // configs: text("templates").notNull().default("[]"), // JSON string
     // apis: text("templates").notNull().default("[]"), // JSON string
@@ -77,10 +87,13 @@ export const itemsTable = sqliteTable("items", {
     header: text("header_json", { mode: "json" })
         .default({})
         .$type<ItemHeader>(),
-
+    createdAt: integer("created_at", {
+        mode: "timestamp"
+    }).notNull(),
+    updatedAt: integer("updated_at", {
+        mode: "timestamp"
+    }).notNull()
     // fav: integer("fav", { mode: "boolean" }).notNull().default(false),
-    // createdAt: integer("created_at").notNull(),
-    // updatedAt: integer("updated_at").notNull(),
     // templates: text("templates").notNull().default("[]"), // JSON string
     // configs: text("templates").notNull().default("[]"), // JSON string
     // apis: text("templates").notNull().default("[]"), // JSON string
@@ -103,6 +116,12 @@ export const listsTagsTable = sqliteTable("lists_tags", {
     badgeable: text("badgeable")
         .default('')
         .$type<TagData['badgeable']>(),
+    createdAt: integer("created_at", {
+        mode: "timestamp"
+    }).notNull(),
+    updatedAt: integer("updated_at", {
+        mode: "timestamp"
+    }).notNull()
 });
 
 export type User = InferSelectModel<typeof usersTable>;

@@ -77,6 +77,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (data.coverPath !== undefined && list.coverPath && list.coverPath !== data.coverPath)
           $deleteFile(coverThumbnailsOptions.listCover, dir.list, list.coverPath);
 
+        form.data.updatedAt = new Date(Date.now())
+
         const updatedList = await db.update(listsTable).set(form.data).where(
           and(
             eq(listsTable.userId, user.id),
