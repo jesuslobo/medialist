@@ -27,10 +27,21 @@ function handleFields(
     data: ProcessedFormData,
 ) {
     for (let fieldName in options) {
-        if (typeof options[fieldName] === "object") continue
+        if (typeof options[fieldName] === "object" && value === "null")
+            return data[fieldName] = null;
+
         if (name === fieldName) {
-            const isJSON = options[fieldName] === "JSON"
-            data[fieldName as keyof ProcessedFormData] = isJSON ? JSON.parse(value) : value === "null" ? null : value;
+            const type = options[fieldName]
+            switch (type) {
+                case "JSON":
+                    data[fieldName] = JSON.parse(value); break;
+                case "Boolean":
+                    data[fieldName] = value === "true"; break;
+                case "Number":
+                    data[fieldName] = Number(value); break;
+                default:
+                    data[fieldName] = value === "null" ? null : value;
+            }
             return
         }
     }
@@ -82,7 +93,7 @@ type File = {
 
 export interface ProcessFormDataOptions {
     /** Default is String */
-    [key: FieldName]: File | "JSON" | "String";
+    [key: FieldName]: File | "JSON" | "String" | "Boolean" | "Number"
 }
 
-export interface ProcessedFormData { [key: string]: object | string | boolean | null }
+export interface ProcessedFormData { [key: string]: object | string | boolean | Number | null }
