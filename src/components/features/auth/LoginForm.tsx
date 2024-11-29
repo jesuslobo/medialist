@@ -3,6 +3,7 @@ import { mutateUserCache } from "@/utils/lib/tanquery/usersQuery";
 import { ServerResponseError, UserData } from "@/utils/types/global";
 import { Input } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
+import Head from "next/head";
 import { Controller, useForm } from "react-hook-form";
 import StatusSubmitButton from "../../ui/buttons/StatusSubmitButton";
 
@@ -24,54 +25,67 @@ function LoginForm() {
     }
 
     return (
-        <form className=" flex justify-center flex-wrap gap-y-3 max-w-[30rem]">
-            <Controller
-                control={control}
-                name="username"
-                rules={{ required: true }}
-                render={({ field }) =>
-                    <Input
-                        isInvalid={Boolean(errors.username || resErrorCause?.username)}
-                        color={(errors.username || resErrorCause?.username) ? "danger" : undefined}
-                        errorMessage={errors.username?.message || resErrorCause?.username}
-                        className="shadow-sm rounded-xl max-w-[30rem] "
-                        type="text"
-                        label="Username"
-                        {...field}
-                    />
-                } />
-
-            <Controller
-                control={control}
-                name="password"
-                rules={{
-                    required: true,
-                    minLength: { value: 6, message: "Password must be at least 6 characters" },
-                }}
-                render={({ field }) =>
-                    <Input
-                        isInvalid={Boolean(errors.password || resErrorCause?.password)}
-                        color={(errors.password || resErrorCause?.password) ? "danger" : undefined}
-                        errorMessage={errors.password?.message || resErrorCause?.password}
-                        className="shadow-sm rounded-xl max-w-[30rem] "
-                        type="password"
-                        label="Password"
-                        {...field}
-                    />
-                } />
+        <form className="flex justify-center flex-col gap-y-3" onSubmit={e => e.preventDefault()}>
+            <Head>
+                <title>MediaList - Login</title>
+            </Head>
+            <section className="py-3 text-center">
+                <p className="text-7xl py-3 -ml-5">👋</p>
+                <h1 className="text-2xl ">Welcome Back!</h1>
+                <p className=" text-foreground-500">Log In to Your Account</p>
+            </section>
+            <section className="space-y-2 animate-fade-in">
+                <Controller
+                    control={control}
+                    name="username"
+                    rules={{ required: true }}
+                    render={({ field }) =>
+                        <Input
+                            label="Username"
+                            variant="bordered"
+                            placeholder="Enter your username"
+                            isInvalid={Boolean(errors.username || resErrorCause?.username)}
+                            color={(errors.username || resErrorCause?.username) ? "danger" : undefined}
+                            errorMessage={errors.username?.message || resErrorCause?.username}
+                            {...field}
+                        />
+                    } />
+                <Controller
+                    control={control}
+                    name="password"
+                    rules={{
+                        required: true,
+                        minLength: { value: 6, message: "Password must be at least 6 characters" },
+                    }}
+                    render={({ field }) =>
+                        <Input
+                            label="Password"
+                            type="password"
+                            variant="bordered"
+                            placeholder="Enter your password"
+                            isInvalid={Boolean(errors.password || resErrorCause?.password)}
+                            color={(errors.password || resErrorCause?.password) ? "danger" : undefined}
+                            errorMessage={errors.password?.message || resErrorCause?.password}
+                            {...field}
+                        />
+                    } />
+            </section>
 
             {mutation.isError &&
-                <label className="text-red-500 w-full text-center">{mutation.error.message}</label>
+                <span className="bg-danger/45 w-full text-center p-1 rounded-lg">{mutation.error.message}</span>
             }
 
             <StatusSubmitButton
+                className="w-full font-semibold"
+                color="primary"
+                type="submit"
+                size="md"
                 mutation={mutation}
                 onPress={handleSubmit(onSubmit)}
                 defaultContent="Login"
                 savedContent="Logged In"
-                type="submit"
-                size="lg"
             />
+            {/* <button className="text-center text-sm text-foreground-500">Forgot Password?</button> for future */}
         </form>
     )
 
