@@ -3,6 +3,7 @@ import { ProcessFormDataOptions } from "../processFormData";
 
 const $listFormOptions = (dir: string) => ({
   title: 'String',
+  trash: "Boolean",
   coverPath: {
     dir,
     thumbnailOptions: coverThumbnailsOptions.listCover,
@@ -16,6 +17,7 @@ const $itemFormOptions = (dir: string) => ({
   header: 'JSON',
   tags: 'JSON',
   layout: "JSON",
+  trash: "Boolean",
   posterPath: {
     dir,
     thumbnailOptions: coverThumbnailsOptions.itemPoster,

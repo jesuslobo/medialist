@@ -1,33 +1,37 @@
+import { AuthContext } from "@/components/providers/AuthProvider";
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
-import { ItemData } from "@/utils/types/item";
-import { ListData } from "@/utils/types/list";
 import { Button, Card, Checkbox, Chip, cn, Image } from "@nextui-org/react";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { BiTrashAlt } from "react-icons/bi";
 import { BsEye } from "react-icons/bs";
 
-export default function TrashCardCheckBox({
-    data,
-    isItem,
-}: {
-    data: ItemData | ListData
-    isItem?: boolean
-}) {
+interface TrashData {
+    id: string;
+    listId: string | null; // listId of items, so its null for lists
+    title: string;
+    coverPath: string | null;  // coverPath for lists, posterPath for items
+    updatedAt: Date;
+}
+
+export default function TrashCardCheckBox({ data }: { data: TrashData }) {
+    const isItem = Boolean(data.listId)
+
     const [imageIsLoaded, setImageIsLoaded] = useState(true);
+    const { userData } = useContext(AuthContext)
     const router = useRouter()
-    const imgSrc = isItem && (data as ItemData).posterPath ? `/users/${(data as ItemData).userId}/${(data as ItemData).listId}/${data.id}/${thumbnailName((data as ItemData).posterPath as string, { w: 300 })}`
-        : data.coverPath ? `/users/${data.userId}/${data.id}/${thumbnailName(data.coverPath, { w: 300 })}` : null
+    const imgSrc = isItem && data.coverPath ? `/users/${userData.id}/${data.listId}/${data.id}/${thumbnailName(data.coverPath as string, { w: 300 })}`
+        : data.coverPath ? `/users/${userData.id}/${data.id}/${thumbnailName(data.coverPath, { w: 300 })}` : null
 
     function pushLink() {
-        if (isItem) router.push(`/lists/${(data as ItemData).listId}/${data.id}`)
+        if (isItem) router.push(`/lists/${data.listId}/${data.id}`)
         else router.push(`/lists/${data.id}`)
     }
 
     return (
         <Checkbox
             key={data.title}
-            value={isItem ? 'item-' + data.id : data.id}
+            value={isItem ? 'i-' + data.id : data.id}
             color="danger"
             icon={<BiTrashAlt />}
             size="lg"

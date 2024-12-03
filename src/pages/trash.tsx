@@ -2,55 +2,67 @@ import ErrorPage from "@/components/layouts/ErrorPage";
 import ListsLoading from "@/components/layouts/loading/ListsLoading";
 import TrashCardCheckBox from "@/components/page/trash/TrashCardCheckBox";
 import TitleBar from "@/components/ui/bars/TitleBar";
+import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton";
 import ToggleButton from "@/components/ui/buttons/ToggleButton";
 import httpClient from "@/utils/lib/httpClient";
+import { mutateItemCache } from "@/utils/lib/tanquery/itemsQuery";
+import { mutateListCache } from "@/utils/lib/tanquery/listsQuery";
 import { ItemData } from "@/utils/types/item";
 import { ListData } from "@/utils/types/list";
-import { Button, CheckboxGroup } from "@nextui-org/react";
+import { Button, CheckboxGroup, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useState } from "react";
-import { BiCheckCircle, BiGridAlt, BiRevision, BiSolidCheckCircle, BiTrashAlt } from "react-icons/bi";
+import { BiCheckCircle, BiCheckDouble, BiRevision, BiSolidCheckCircle, BiTrashAlt } from "react-icons/bi";
+
+interface DeleteEntity {
+    id: string;
+    listId: string | null; // listId of items, so its null for lists
+    title: string;
+    coverPath: string | null;  // coverPath for lists, posterPath for items
+    updatedAt: Date;
+}
 
 export default function TrashPage() {
-    const items = useQuery<ItemData[]>({
-        queryKey: ['items', { trash: true }],
-        queryFn: () => httpClient().get('items?trash=true')
+    const trashData = useQuery<DeleteEntity[]>({
+        queryKey: ['trash'],
+        queryFn: () => httpClient().get('trash')
     })
 
-    const lists = useQuery<ListData[]>({
-        queryKey: ['lists', { trash: true }],
-        queryFn: () => httpClient().get('lists?trash=true')
+    const deleteMutation = useMutation({
+        mutationFn: (data: ServerData) => httpClient().delete('trash', data),
+        onSuccess: refresh,
     })
 
-    const mutation = useMutation({
-        mutationFn: (data) => new Promise((res) => res("success")),
-        onSuccess: () => { },
+    const restoreMutation = useMutation({
+        mutationFn: (data: ServerData) => httpClient().patch('trash', data),
+        onSuccess: (data: { items: ItemData[], lists: ListData[] }) => {
+            data.items.forEach(item => mutateItemCache(item, "add"))
+            data.lists.forEach(list => mutateListCache(list, "add"))
+            refresh()
+        },
     })
 
     const [selected, setSelected] = useState<string[]>([]);
     const selectedIDs = extractIDs(selected)
-    const isAllSlected = items.data && lists.data ? selected.length === items.data.length + lists.data.length : false
+    const isAllSlected = trashData.data ? selected.length === trashData.data.length : false
 
     const [visibility, setVisibility] = useState<'items' | 'lists' | 'both'>('both') // what to show
-    const isBothVisible = visibility === 'both'
+
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     function selectAll() {
         if (isAllSlected) return setSelected([])
-
-        const allItems = items.data?.map(item => 'item-' + item.id) || []
-        const allLists = lists.data?.map(list => list.id) || []
-        setSelected([...allItems, ...allLists])
+        setSelected([...trashData.data!.map(item => item.id)])
     }
 
-    function deleteSelected() {
-        const { items: itemIDs, lists: listIDs } = selectedIDs
-
-        // mutation.mutate({ itemIDs, listIDs })
+    function refresh() {
+        trashData.refetch()
+        setSelected([])
     }
 
-    if (items.isLoading || lists.isLoading) return <ListsLoading />
-    if (!items.isSuccess || !lists.isSuccess) return <ErrorPage message="Failed To Fetch The Data" />
+    if (trashData.isLoading) return <ListsLoading />
+    if (!trashData.isSuccess) return <ErrorPage message="Failed To Fetch The Data" />
 
     return (
         <>
@@ -63,12 +75,27 @@ export default function TrashPage() {
                 className="bg-pure-theme p-5"
             >
                 <div className=" flex items-center justify-center gap-x-2">
-                    <Button isDisabled={selected.length === 0} title="Delete All" isIconOnly>
-                        <BiTrashAlt className="text-xl" />
-                    </Button>
-                    <Button isDisabled={selected.length === 0} title="Restore" isIconOnly>
-                        <BiRevision className="text-xl" />
-                    </Button>
+                    <StatusSubmitButton
+                        title="Delete All"
+                        mutation={deleteMutation}
+                        onPress={onOpen}
+                        defaultContent={<BiTrashAlt className="text-xl" />}
+                        savedContent={<BiCheckDouble className="text-xl" />}
+                        errorContent={<BiRevision className="text-xl" />}
+                        isDisabled={selected.length === 0}
+                        isIconOnly
+                    />
+                    <StatusSubmitButton
+                        title="Restore"
+                        mutation={restoreMutation}
+                        onPress={() => restoreMutation.mutate(selectedIDs)}
+                        defaultContent={<BiRevision className="text-xl" />}
+                        savedContent={<BiCheckDouble className="text-xl" />}
+                        errorContent={<BiRevision className="text-xl" />}
+                        isDisabled={selected.length === 0}
+                        isIconOnly
+                    />
+
                     <ToggleButton
                         isToggled={isAllSlected}
                         toggledChildren={<BiSolidCheckCircle className="text-xl" />}
@@ -102,28 +129,61 @@ export default function TrashPage() {
 
             <CheckboxGroup value={selected} onChange={setSelected}>
                 <main className="grid grid-cols-3 lg:grid-cols-2 sm:flex sm:flex-col gap-3 items-start">
-                    {lists.data?.map((list, i) => (visibility === "lists" || isBothVisible)
-                        && <TrashCardCheckBox key={list.id + i} data={list} />
-                    )}
-                    {items.data?.map((item, i) => (visibility === "items" || isBothVisible)
-                        && <TrashCardCheckBox key={item.id + i} data={item} isItem />
+                    {trashData.data?.map((item, i) =>
+                        visibility === 'items' && !item.listId
+                            ? null
+                            : visibility === 'lists' && item.listId
+                                ? null
+                                : <TrashCardCheckBox key={item.id + i} data={item} />
                     )}
                 </main>
             </CheckboxGroup>
+
+            <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
+                <DeleteModal onPress={() => deleteMutation.mutate(selectedIDs)} />
+            </Modal>
         </>
     )
 }
 
+interface ServerData {
+    items: string[]
+    lists: string[]
+}
+
 function extractIDs(IDs: string[]) {
     let result = {
-        items: [] as string[],
-        lists: [] as string[]
-    }
+        items: [],
+        lists: []
+    } as ServerData
 
     IDs.forEach(id => {
-        if (id.startsWith('item-')) result.items.push(id.replace('item-', ''))
-        else result.lists.push
+        if (id.startsWith('i-')) result.items.push(id.replace('i-', ''))
+        else result.lists.push(id)
     })
 
     return result
+}
+
+function DeleteModal({ onPress }: { onPress: () => void }) {
+    return (
+        <ModalContent>
+            {(onClose) => (
+                <>
+                    <ModalHeader className="flex flex-col gap-1">Are You Sure?</ModalHeader>
+                    <ModalBody>
+                        <p>Deleting this is <b>permanent</b> and <b>cannot be undone.</b></p>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="danger" variant="bordered" onPress={onPress}>
+                            Delete Permanently
+                        </Button>
+                        <Button color="primary" onPress={onClose}>
+                            Cancel
+                        </Button>
+                    </ModalFooter>
+                </>
+            )}
+        </ModalContent>
+    )
 }
