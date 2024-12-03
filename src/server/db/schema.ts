@@ -3,7 +3,6 @@ import { ItemHeader, ItemLayoutTab } from "@/utils/types/item";
 import { InferSelectModel, sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
-// forgot to add ON DELETE CASCADE :D
 export const usersTable = sqliteTable("users", {
     id: text("id")
         .notNull()
@@ -15,12 +14,12 @@ export const usersTable = sqliteTable("users", {
         .notNull(),
     createdAt: integer("created_at", {
         mode: "timestamp"
-    }).notNull(),
-    // .default(sql`(unixepoch())`),
+    }).notNull()
+        .default(sql`(unixepoch())`),
     updatedAt: integer("updated_at", {
         mode: "timestamp"
     }).notNull()
-    // .default(sql`(unixepoch())`),
+        .default(sql`(unixepoch())`),
 });
 
 export const sessionsTable = sqliteTable("sessions", {
@@ -29,10 +28,15 @@ export const sessionsTable = sqliteTable("sessions", {
         .primaryKey(),
     userId: text("user_id")
         .notNull()
-        .references(() => usersTable.id),
+        .references(() => usersTable.id, { onDelete: "cascade" }),
     expiresAt: integer("expires_at", {
         mode: "timestamp"
     }).notNull()
+        .default(sql`(unixepoch())`),
+    createdAt: integer("created_at", {
+        mode: "timestamp"
+    }).notNull()
+        .default(sql`(unixepoch())`),
 });
 
 export const listsTable = sqliteTable("lists", {
@@ -41,22 +45,24 @@ export const listsTable = sqliteTable("lists", {
         .primaryKey(),
     userId: text("user_id")
         .notNull()
-        .references(() => usersTable.id),
+        .references(() => usersTable.id, { onDelete: "cascade" }),
     title: text("title")
         .notNull(),
     coverPath: text("cover_path"),
+    configs: text("configs_json").notNull().default("{}"),
     trash: integer("trash", { mode: "boolean" })
         .notNull()
         .default(false),
     createdAt: integer("created_at", {
         mode: "timestamp"
-    }).notNull(),
+    }).notNull()
+        .default(sql`(unixepoch())`),
     updatedAt: integer("updated_at", {
         mode: "timestamp"
     }).notNull()
+        .default(sql`(unixepoch())`),
     // fav: integer("fav", { mode: "boolean" }).notNull().default(false),
     // templates: text("templates").notNull().default("[]"), // JSON string
-    // configs: text("templates").notNull().default("[]"), // JSON string
     // apis: text("templates").notNull().default("[]"), // JSON string
 });
 
@@ -66,10 +72,10 @@ export const itemsTable = sqliteTable("items", {
         .primaryKey(),
     userId: text("user_id")
         .notNull()
-        .references(() => usersTable.id),
+        .references(() => usersTable.id, { onDelete: "cascade" }),
     listId: text("list_id")
         .notNull()
-        .references(() => listsTable.id),
+        .references(() => listsTable.id, { onDelete: "cascade" }),
     title: text("title")
         .notNull(),
     posterPath: text("poster_path"),
@@ -89,10 +95,12 @@ export const itemsTable = sqliteTable("items", {
         .$type<ItemHeader>(),
     createdAt: integer("created_at", {
         mode: "timestamp"
-    }).notNull(),
+    }).notNull()
+        .default(sql`(unixepoch())`),
     updatedAt: integer("updated_at", {
         mode: "timestamp"
     }).notNull()
+        .default(sql`(unixepoch())`),
     // fav: integer("fav", { mode: "boolean" }).notNull().default(false),
     // templates: text("templates").notNull().default("[]"), // JSON string
     // configs: text("templates").notNull().default("[]"), // JSON string
@@ -105,10 +113,10 @@ export const listsTagsTable = sqliteTable("lists_tags", {
         .primaryKey(),
     listId: text("list_id")
         .notNull()
-        .references(() => listsTable.id),
+        .references(() => listsTable.id, { onDelete: "cascade" }),
     userId: text("user_id")
         .notNull()
-        .references(() => usersTable.id),
+        .references(() => usersTable.id, { onDelete: "cascade" }),
     label: text("label")
         .notNull(),
     description: text("description"),
@@ -118,10 +126,12 @@ export const listsTagsTable = sqliteTable("lists_tags", {
         .$type<TagData['badgeable']>(),
     createdAt: integer("created_at", {
         mode: "timestamp"
-    }).notNull(),
+    }).notNull()
+        .default(sql`(unixepoch())`),
     updatedAt: integer("updated_at", {
         mode: "timestamp"
     }).notNull()
+        .default(sql`(unixepoch())`),
 });
 
 export type User = InferSelectModel<typeof usersTable>;
