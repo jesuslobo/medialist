@@ -9,7 +9,7 @@ import httpClient from "../httpClient";
 export const usersQueryOptions = () => queryOptions<UserData>({
     queryKey: ['user'],
     queryFn: () => httpClient().get('users'),
-    retry: 3,
+    retry: 2,
 })
 
 /** Edit userData's Cache */

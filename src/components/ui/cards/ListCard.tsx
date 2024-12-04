@@ -1,12 +1,10 @@
-import { AuthContext } from "@/components/providers/AuthProvider";
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
 import { ListData } from "@/utils/types/list";
 import { Card, CardBody, CardFooter, Image } from "@nextui-org/react";
 import { useRouter } from "next/router";
-import { useContext, useState } from "react";
+import { useState } from "react";
 
 export default function ListCard({ list }: { list: ListData }) {
-    const { userData } = useContext(AuthContext)
     const [imageIsLoaded, setImageIsLoaded] = useState(true);
     const router = useRouter()
 
@@ -25,7 +23,7 @@ export default function ListCard({ list }: { list: ListData }) {
                         radius="lg"
                         alt={list.title}
                         className=" object-cover aspect-square bg-accented shadow-lg"
-                        src={`/users/${userData.id}/${list.id}/${thumbnailName(list.coverPath, { w: 300 })}`}
+                        src={`/users/${list.userId}/${list.id}/${thumbnailName(list.coverPath, { w: 300 })}`}
                         onError={() => setImageIsLoaded(false)}
                     />
                     : <Card

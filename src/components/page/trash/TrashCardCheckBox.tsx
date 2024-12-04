@@ -1,8 +1,8 @@
-import { AuthContext } from "@/components/providers/AuthProvider";
+import { useUser } from "@/components/providers/AuthProvider";
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
 import { Button, Card, Checkbox, Chip, cn, Image } from "@nextui-org/react";
 import { useRouter } from "next/router";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { BiTrashAlt } from "react-icons/bi";
 import { BsEye } from "react-icons/bs";
 
@@ -18,10 +18,10 @@ export default function TrashCardCheckBox({ data }: { data: TrashData }) {
     const isItem = Boolean(data.listId)
 
     const [imageIsLoaded, setImageIsLoaded] = useState(true);
-    const { userData } = useContext(AuthContext)
+    const { user } = useUser()
     const router = useRouter()
-    const imgSrc = isItem && data.coverPath ? `/users/${userData.id}/${data.listId}/${data.id}/${thumbnailName(data.coverPath as string, { w: 300 })}`
-        : data.coverPath ? `/users/${userData.id}/${data.id}/${thumbnailName(data.coverPath, { w: 300 })}` : null
+    const imgSrc = isItem && data.coverPath ? `/users/${user.id}/${data.listId}/${data.id}/${thumbnailName(data.coverPath as string, { w: 300 })}`
+        : data.coverPath ? `/users/${user.id}/${data.id}/${thumbnailName(data.coverPath, { w: 300 })}` : null
 
     function pushLink() {
         if (isItem) router.push(`/lists/${data.listId}/${data.id}`)
