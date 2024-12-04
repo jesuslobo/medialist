@@ -29,6 +29,9 @@ export const sessionsTable = sqliteTable("sessions", {
     userId: text("user_id")
         .notNull()
         .references(() => usersTable.id, { onDelete: "cascade" }),
+    agent: text("agent_json", { mode: "json" })
+        .notNull()
+        .default("{}"),
     expiresAt: integer("expires_at", {
         mode: "timestamp"
     }).notNull()
@@ -49,7 +52,9 @@ export const listsTable = sqliteTable("lists", {
     title: text("title")
         .notNull(),
     coverPath: text("cover_path"),
-    configs: text("configs_json").notNull().default("{}"),
+    configs: text("configs_json", { mode: "json" })
+        .notNull()
+        .default("{}"),
     trash: integer("trash", { mode: "boolean" })
         .notNull()
         .default(false),

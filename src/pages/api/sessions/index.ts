@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!validPassword) return res.status(400).json({ message: 'Invalid Username Or Password' })
 
       const token = $generateSessionToken();
-      const session = await $createSession(token, user.id);
+      const session = await $createSession(token, user.id, req.headers['user-agent']);
 
       $setSessionTokenCookie(res, token, session.expiresAt);
       res.status(200).json(user);

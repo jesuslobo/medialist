@@ -27,8 +27,21 @@ export interface UserData {
     username: string
     // roles: 'admin' | 'member'
     // email: string
-    // created_at
-    // last_login
+    created_at: Date
+    updated_at: Date
+}
+
+export interface UserSessionData {
+    id: string
+    agent: SessionAgent
+    expiresAt: Date
+    createdAt: Date
+}
+
+export interface SessionAgent {
+    browser?: string
+    os?: string
+    device?: string
 }
 
 type Cause = { username?: string; password?: string; }

@@ -20,8 +20,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'GET') {
             const { user } = await $validateAuthCookies(req, res);
             if (!user) return res.status(401).json({ message: 'Unauthorized' });
+            const userRes = { ...user, passwordHash: undefined }
 
-            return res.status(200).json(user);
+            return res.status(200).json(userRes);
         }
 
         if (req.method === 'POST') {
@@ -70,7 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             await mkdir(userDir, { recursive: true }) // create media directory
 
             const token = $generateSessionToken();
-            const session = await $createSession(token, user[0].id);
+            const session = await $createSession(token, user[0].id, req.headers['user-agent']);
 
             $setSessionTokenCookie(res, token, session.expiresAt)
             res.status(200).json(user[0])

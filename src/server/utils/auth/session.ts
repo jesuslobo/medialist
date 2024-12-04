@@ -1,8 +1,10 @@
 import { db } from "@/server/db";
 import { Session, sessionsTable, User, usersTable } from "@/server/db/schema";
+import { SessionAgent } from "@/utils/types/global";
 import { sha256 } from "@oslojs/crypto/sha2";
 import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
 import { eq } from "drizzle-orm";
+import { userAgentFromString } from "next/server";
 
 const SESSION_LIFETIME = 1000 * 60 * 60 * 24 * 30; // 30 days
 const SESSION_REFRESH_THRESHOLD = SESSION_LIFETIME / 2;
@@ -14,13 +16,16 @@ export function $generateSessionToken() {
 	return token
 }
 
-export async function $createSession(token: string, userId: string) {
+export async function $createSession(token: string, userId: string, agentString?: string): Promise<Session> {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)))
+	const { os, browser, device } = userAgentFromString(agentString || "")
 
 	const session: Session = {
 		id: sessionId,
+		agent: { os: os?.name, browser: browser?.name, device: device?.type } as SessionAgent,
 		userId,
-		expiresAt: new Date(Date.now() + SESSION_LIFETIME)
+		expiresAt: new Date(Date.now() + SESSION_LIFETIME),
+		createdAt: new Date(Date.now())
 	}
 	await db.insert(sessionsTable).values(session)
 
