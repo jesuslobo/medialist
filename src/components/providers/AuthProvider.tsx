@@ -1,26 +1,39 @@
-import { usersQueryOptions } from "@/utils/lib/tanquery/usersQuery";
+import { mutateUserCache, usersQueryOptions } from "@/utils/lib/tanquery/usersQuery";
 import { UserData } from "@/utils/types/global";
 import { Spinner } from "@nextui-org/react";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 import AuthLayout from "../features/auth/AuthLayout";
+import httpClient from "@/utils/lib/httpClient";
+import { queryClient } from "./RootProviders";
+import { useRouter } from "next/router";
 
 const AuthContext = createContext({
     user: {} as UserData,
 } as {
-    user: UserData
+    user: UserData,
+    logout: () => Promise<void>
 })
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: userData, isSuccess, isLoading } = useQuery(usersQueryOptions())
+    const router = useRouter()
 
     const isAuthed = isSuccess && Boolean(userData) && Object.keys(userData).length > 0
+
+    async function logout() {
+        await httpClient().delete('sessions')
+        queryClient.clear()
+        mutateUserCache({})
+        router.push('/')
+    }
 
     if (isLoading) return LoadingAuth()
 
     return isAuthed ? (
         <AuthContext.Provider value={{
             user: userData,
+            logout,
         }}>
             {children}
         </AuthContext.Provider>

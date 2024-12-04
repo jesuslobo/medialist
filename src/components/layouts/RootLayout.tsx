@@ -1,19 +1,15 @@
-import httpClient from '@/utils/lib/httpClient';
 import { Spinner } from '@nextui-org/react';
 import { useTheme } from 'next-themes';
 import { Poppins } from 'next/font/google';
 import Head from "next/head";
-import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { BiCollection, BiLogOutCircle, BiTrashAlt } from 'react-icons/bi';
 import { BsSun } from 'react-icons/bs';
 import { RiMoonClearLine, RiUserLine } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
 import { useUser } from '../providers/AuthProvider';
-import { queryClient } from '../providers/RootProviders';
 import BaseNavBar from '../ui/bars/nav/BaseNavBar';
 import BaseNavButton, { BaseNavButtonProps } from '../ui/bars/nav/BaseNavButtons';
-import { mutateUserCache } from '@/utils/lib/tanquery/usersQuery';
 
 const poppins = Poppins({ weight: '400', subsets: ['latin'] })
 
@@ -76,16 +72,13 @@ const ThemeButton = ({ varient }: { varient: BaseNavButtonProps['varient'] }) =>
 }
 
 const LogOutButton = ({ varient }: { varient: BaseNavButtonProps['varient'] }) => {
-    const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
+    const { logout } = useUser()
 
-    async function logout() {
+    async function onClick() {
         setIsLoading(true)
-        await httpClient().delete('sessions')
-        queryClient.clear()
-        mutateUserCache({})
+        await logout()
         setIsLoading(false)
-        router.push('/')
     }
 
     return (
@@ -93,7 +86,7 @@ const LogOutButton = ({ varient }: { varient: BaseNavButtonProps['varient'] }) =
             varient={varient}
             icon={isLoading ? <Spinner color="current" /> : <BiLogOutCircle />}
             label="Logout"
-            onClick={logout}
+            onClick={onClick}
             disabled={isLoading}
             disableActive
         />

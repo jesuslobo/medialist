@@ -1,20 +1,37 @@
 import { db } from '@/server/db';
-import { usersTable } from '@/server/db/schema';
+import { sessionsTable, usersTable } from '@/server/db/schema';
 import { $verifyPassword } from '@/server/utils/auth/auth';
 import { $setSessionTokenCookie, $validateAuthCookies } from '@/server/utils/auth/cookies';
 import { $createSession, $generateSessionToken, $invalidateSession } from '@/server/utils/auth/session';
 import parseJSONReq from '@/utils/functions/parseJSONReq';
 import { validatePassword, validateUsername } from '@/utils/lib/validate';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 /** api/sessions
- * Get: Returns All Sessions (Not Implemented)
+ * Get: Returns All Sessions Data of the User
  * Post: Create a Session - Login
  * Delete: Destroy a Session - Logout
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    if (req.method === 'GET') {
+      const { user } = await $validateAuthCookies(req, res);
+      if (!user) return res.status(401).json({ message: 'Unauthorized' });
+
+      const sessions = await db
+        .select({
+          id: sql`substr(${sessionsTable.id}, 1,10)`, // false ID
+          agent: sessionsTable.agent,
+          expiresAt: sessionsTable.expiresAt,
+          createdAt: sessionsTable.createdAt
+        })
+        .from(sessionsTable)
+        .where(eq(sessionsTable.userId, user.id));
+
+      return res.status(200).json(sessions);
+    }
+
     if (req.method === 'POST') {
       const body = parseJSONReq(await req.body);
 
