@@ -3,23 +3,23 @@ import { queryClient } from "@/components/providers/RootProviders"
 import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton"
 import httpClient from "@/utils/lib/httpClient"
 import { UserSessionData } from "@/utils/types/global"
-import { Card, CardBody, Skeleton, Spinner } from "@nextui-org/react"
+import { Card, CardBody, Skeleton } from "@nextui-org/react"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { IconType } from "react-icons"
-import { BiCheckDouble, BiRevision, BiTrash } from "react-icons/bi"
+import { BiCheckDouble, BiLaptop, BiRevision, BiTrash } from "react-icons/bi"
 import { FaAndroid, FaApple, FaChrome, FaEdge, FaFirefox, FaInternetExplorer, FaLinux, FaOpera, FaSafari, FaWindows } from "react-icons/fa"
 
-export default function UserPageSessionsList() {
+export default function UserPageSessionsList({ className }: { className?: string }) {
     const { data: sessions, isLoading, isSuccess } = useQuery<UserSessionData[]>({
         queryKey: ['sessions'],
         queryFn: () => httpClient().get('sessions')
     })
 
     return (
-        <div>
-            <h1 className="p-1 pb-4 text-xl">
-                Logged-in Devices:
-            </h1>
+        <section className={className}>
+            <div className="p-1 pb-4 text-xl flex items-center space-x-2">
+                <BiLaptop className="text-2xl" /> <span> Logged-in Devices:</span>
+            </div>
             <ul className="grid gap-y-3">
                 {isLoading && Array.from({ length: 4 }).map((_, i) =>
                     <Skeleton key={'skeleton_sessions' + i} className="w-full h-16 rounded-2xl" />
@@ -28,7 +28,7 @@ export default function UserPageSessionsList() {
                     <SessionCard key={session.id + i} session={session} />
                 ))}
             </ul>
-        </div>
+        </section>
     )
 }
 

@@ -1,6 +1,6 @@
 import { db } from '@/server/db';
 import { usersTable } from '@/server/db/schema';
-import { $hashPassword } from '@/server/utils/auth/auth';
+import { $hashPassword, $verifyPassword } from '@/server/utils/auth/auth';
 import { $setSessionTokenCookie, $validateAuthCookies } from '@/server/utils/auth/cookies';
 import { $createSession, $generateSessionToken } from '@/server/utils/auth/session';
 import { generateID } from '@/utils/lib/generateID';
@@ -14,6 +14,7 @@ import { join } from 'path';
 /** api/users
  * Get: Returns the Authenticated User's Data
  * Post: User Register
+ * Patch: Edit User's Data
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -75,6 +76,63 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             $setSessionTokenCookie(res, token, session.expiresAt)
             res.status(200).json(user[0])
+        }
+
+        if (req.method === 'PATCH') {
+            const { user } = await $validateAuthCookies(req, res);
+            if (!user) return res.status(401).json({ message: 'Unauthorized' });
+            const body = await req.body;
+            const { newUsername: reqNewUser, newPassword, oldPassword } = JSON.parse(body || {})
+
+            let dbHashNewPassword;
+            let dbNewUsernameReq;
+
+            if (newPassword) {
+                const validOldPassword = await $verifyPassword(oldPassword, user.passwordHash);
+                if (!validOldPassword) return res.status(400).json({
+                    cause: { oldPassword: "Invalid Password" },
+                    message: 'Invalid Request'
+                } as Error)
+
+                if (!validatePassword(newPassword))
+                    return res.status(400).json({
+                        cause: { newPassword: "Invalid Password" },
+                        message: 'Invalid Request'
+                    } as Error)
+
+                dbHashNewPassword = await $hashPassword(newPassword)
+            }
+
+            if (reqNewUser) {
+                const newUsername = reqNewUser.toLowerCase()
+
+                if (!validateUsername(newUsername))
+                    return res.status(400).json({
+                        cause: { username: "Invalid Username" },
+                        message: 'Invalid Request'
+                    } as Error)
+
+                const userExists = await db.select().from(usersTable).where(eq(usersTable.username, newUsername))
+                if (userExists.length !== 0) return res.status(400).json({
+                    cause: { username: 'User Already Exists' },
+                    message: 'Invalid Request'
+                } as ServerResponseError)
+
+                dbNewUsernameReq = newUsername
+            }
+            const updatedAt = new Date(Date.now())
+
+            const updatedUser = await db
+                .update(usersTable)
+                .set({
+                    username: dbNewUsernameReq,
+                    passwordHash: dbHashNewPassword,
+                    updatedAt
+                })
+                .where(eq(usersTable.id, user.id))
+                .returning()
+
+            return res.status(200).json({ ...updatedUser[0], passwordHash: undefined })
         }
 
         res.status(405).json({ message: 'Method Not Allowed' });

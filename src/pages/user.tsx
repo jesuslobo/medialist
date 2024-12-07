@@ -1,8 +1,9 @@
-import UserPageSessionsList from "@/components/page/user/UserSessionsList"
+import UserPageSecurityTab from "@/components/page/user/SecurityTab"
 import { useUser } from "@/components/providers/AuthProvider"
 import TitleBar from "@/components/ui/bars/TitleBar"
-import { Button } from "@nextui-org/react"
-import { BiPencil } from "react-icons/bi"
+import { Button, Tab, Tabs } from "@nextui-org/react"
+import { BiInfoCircle, BiShieldAlt2 } from "react-icons/bi"
+import { BsSuitcaseLg } from "react-icons/bs"
 import { RiUserLine } from "react-icons/ri"
 
 export default function UserPage() {
@@ -13,7 +14,7 @@ export default function UserPage() {
     return (
         <>
             <TitleBar
-                className="bg-pure-theme p-5 mb-5"
+                className="bg-pure-theme p-5 mb-2"
                 title={user.username}
                 startContent={<RiUserLine className="text-3xl mr-3" />}
             >
@@ -23,14 +24,48 @@ export default function UserPage() {
                             Admin
                         </Button>
                     )}
-                    <Button title="Edit Account" isIconOnly>
-                        <BiPencil className="text-xl" />
-                    </Button>
                 </div>
             </TitleBar>
 
-            <main className="animate-fade-in grid grid-cols-2">
-                <UserPageSessionsList />
+            <main className="animate-fade-in">
+                <Tabs
+                    aria-label="User Page Tabs"
+                    // variant="light"
+                    color="primary"
+                    classNames={{
+                        base: "data-selected:bg-default",
+                        tabList: "p-0 rounded-none bg-transparent",
+                        tab: "bg-accented duration-200 data-hover:text-xl  ",
+                    }}
+                    disableCursorAnimation
+                >
+                    <Tab title={
+                        <div className="flex items-center space-x-1">
+                            <BiShieldAlt2 className="text-lg" />
+                            <span>Security</span>
+                        </div>
+                    }>
+                        <UserPageSecurityTab />
+                    </Tab>
+                    <Tab title={
+                        <div className="flex items-center space-x-1">
+                            <BiInfoCircle className="text-lg" />
+                            <span>Activity</span>
+                        </div>
+                    }>
+
+                    </Tab>
+                    {isAdmin && ( //dynamic import
+                        <Tab title={
+                            <div className="flex items-center space-x-2">
+                                <BsSuitcaseLg className="text-lg" />
+                                <span>Admin</span>
+                            </div>
+                        }>
+                        </Tab>
+                    )}
+                </Tabs>
+                {/* pages: activites/ edit */}
             </main>
         </>
     )
