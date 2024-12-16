@@ -30,6 +30,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     eq(listsTagsTable.id, tagID as TagData['id']),
                 ));
 
+            if (tag.length === 0)
+                return res.status(404).json({ message: 'Not Found' })
+
             return res.status(200).json(tag[0]);
         }
 
@@ -64,6 +67,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     eq(listsTagsTable.id, tagID as TagData['id']),
                 ))
                 .returning()
+
+            if (data.length === 0)
+                return res.status(404).json({ message: 'Not Found' })
 
             return res.status(200).json(data[0])
         }

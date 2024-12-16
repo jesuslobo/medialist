@@ -17,13 +17,14 @@ function ItemPage() {
     const itemId = router.query.itemId as ItemData['id']
     const listId = router.query.id as ListData['id']
 
-    const { data: item, isPending, isSuccess } = useQuery(itemQueryOptions(itemId))
+    const { data: item, isPending, isSuccess, ...itemQuery } = useQuery(itemQueryOptions(itemId))
     const allTags = useQuery(tagsQueryOptions(listId))
 
     if (isPending || allTags.isPending) return (
-        <div className="flex justify-center items-center">
+        <div className="flex justify-center items-center h-screen">
             <Spinner />
         </div >)
+    if (itemQuery.error?.message == 'Not Found') return <Error404 />
     if (!isSuccess || !allTags.isSuccess) return <ErrorPage message="Failed To Fetch The Item" />
 
     const itemTags = allTags.data.filter(tag => item.tags.includes(tag.id))
@@ -46,5 +47,7 @@ export default function ItemPageHOC() {
 
     return validatedID(listId) && validatedID(itemId)
         ? <ItemPage />
-        : <ErrorPage message="Bad Item ID, Page Doesn't Exist" MainMessage="404!" hideTryAgain />
+        : <Error404 />
 }
+
+const Error404 = () => <ErrorPage message="Bad Item ID, Item Doesn't Exist" MainMessage="404!" hideTryAgain />

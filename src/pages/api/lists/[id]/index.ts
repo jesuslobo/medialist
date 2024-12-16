@@ -34,6 +34,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           eq(listsTable.id, id as string)
         ));
 
+      if (list.length === 0)
+        return res.status(404).json({ message: 'Not Found' });
+
       return res.status(200).json(list[0]);
 
     }
@@ -46,6 +49,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           eq(listsTable.id, id as string)
         ))
         .returning();
+
+      if (list.length === 0)
+        return res.status(404).json({ message: 'Not Found' });
 
       return res.status(200).json(list[0]);
     }

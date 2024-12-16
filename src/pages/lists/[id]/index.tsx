@@ -20,10 +20,11 @@ function ListPage() {
     const router = useRouter()
     const listId = router.query.id as ListData['id']
 
-    const { data: list, isSuccess, isPending } = useQuery(singleListQueryOptions(listId))
+    const { data: list, isSuccess, isPending, ...listQuery } = useQuery(singleListQueryOptions(listId))
     const items = useQuery(itemsQueryOptions(listId))
     const tags = useQuery(tagsQueryOptions(listId))
 
+    if (listQuery.error?.message == 'Not Found') return <Error404 />
     if (isPending || items.isPending || tags.isPending) return <ListsLoading />
     if (!isSuccess || !items.isSuccess || !tags.isSuccess) return <ErrorPage message="Failed To Fetch The List" />
 
@@ -38,9 +39,8 @@ function ListPage() {
             <ListPageProvider list={list} items={items.data} tags={tags.data}>
                 <TitleBar
                     title={`${list.title} (${items.data.length})`}
-                    className="mb-0 p-5"
+                    className="mb-0 p-5 bg-pure-theme"
                     startContent={<BiCollection className="text-3xl mr-3 flex-none p-0" />}
-                    pointedBg
                 >
                     <ListPageSearchBar />
                 </TitleBar>
@@ -60,5 +60,7 @@ export default function ListPageHOC() {
     const listId = router.query.id as ListData['id']
     return validatedID(listId)
         ? <ListPage />
-        : <ErrorPage message="Bad List ID, Page Doesn't Exist" MainMessage="404!" hideTryAgain />
+        : <Error404 />
 }
+
+const Error404 = () => <ErrorPage message="Bad List ID, List Doesn't Exist" MainMessage="404!" hideTryAgain />

@@ -32,6 +32,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     eq(itemsTable.userId, user.id),
                     eq(itemsTable.id, id as ItemData['id'])
                 ))
+
+            if (item.length === 0)
+                return res.status(404).json({ message: 'Not Found' })
+
             return res.status(200).json(item[0]);
         }
 
