@@ -76,8 +76,8 @@ function EditItemPage() {
             formData.append('layout', JSON.stringify(layoutTabs))
 
         //Header
-        if (dirtyFields.header)
-            formData.append('header', JSON.stringify(data.header))
+        formData.append('header', JSON.stringify(data.header))
+
         if (dirtyFields.title)
             formData.append('title', data.title)
         if (dirtyFields.description)

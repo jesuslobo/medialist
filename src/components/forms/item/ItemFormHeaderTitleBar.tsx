@@ -3,7 +3,7 @@ import { ItemHeader } from "@/utils/types/item";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Selection, SharedSelection } from "@nextui-org/react";
 import { useContext, useState } from "react";
 import { BsLayoutSidebarInset } from "react-icons/bs";
-import { TbLayoutSidebarFilled, TbTemplate } from "react-icons/tb";
+import { TbLayoutSidebarFilled } from "react-icons/tb";
 import { ItemFormContext } from "./ItemFormProvider";
 
 export default function ItemFormHeaderTitleBar({
@@ -25,7 +25,6 @@ export default function ItemFormHeaderTitleBar({
     }
 
     const iconMappings = new Map<string, React.ReactNode>([
-        ["poster_on_top", <TbTemplate key="poster_on_top_LayoutIcon" size={25} />],
         ["poster_inside", <BsLayoutSidebarInset key="poster_inside_LayoutIcon" size={20} />],
         ["poster_beside", <TbLayoutSidebarFilled key="poster_beside_LayoutIcon" size={25} />],
     ])
@@ -66,7 +65,7 @@ export default function ItemFormHeaderTitleBar({
                             ],
                         }}
                     >
-                        <DropdownSection className="columns-3 ">
+                        <DropdownSection className="columns-2">
                             <DropdownItem key="poster_beside" textValue="poster_beside" >
                                 <TbLayoutSidebarFilled size={25} className="w-full mb-2" />
                                 Poster Beside
@@ -74,10 +73,6 @@ export default function ItemFormHeaderTitleBar({
                             <DropdownItem key="poster_inside" textValue="poster_inside"  >
                                 <BsLayoutSidebarInset size={25} className="w-full mb-2" />
                                 Poster Inside
-                            </DropdownItem>
-                            <DropdownItem key="poster_on_top" textValue="poster_on_top">
-                                <TbTemplate size={25} className="w-full mb-2" />
-                                Poster on Top
                             </DropdownItem>
                         </DropdownSection>
                     </DropdownMenu>

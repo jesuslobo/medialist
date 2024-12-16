@@ -14,7 +14,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 /** api/items/[id]
  * Get:  gets an item by id
  * Patch:  updates an item by id
- * Delete: deletes an item by id // Not Implemented Yet
+ * Delete: moves an item to the trash
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
@@ -114,6 +114,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             )
 
             return req.pipe(bb)
+        }
+
+        if (req.method === 'DELETE') {
+            const item = await db
+                .select()
+                .from(itemsTable)
+                .where(and(
+                    eq(itemsTable.userId, user.id),
+                    eq(itemsTable.id, id as ItemData['id'])
+                ));
+
+            if (item.length === 0)
+                return res.status(404).json({ message: 'Not Found' });
+
+            const updatedItem = await db
+                .update(itemsTable)
+                .set({
+                    trash: true,
+                    updatedAt: new Date(Date.now())
+                })
+                .where(and(
+                    eq(itemsTable.userId, user.id),
+                    eq(itemsTable.id, id as ItemData['id'])
+                ))
+                .returning();
+
+            return res.status(200).json(updatedItem[0]);
         }
 
 

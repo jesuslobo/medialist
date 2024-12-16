@@ -1,5 +1,5 @@
 import ErrorPage from "@/components/layouts/ErrorPage"
-import ItemPageHeader from "@/components/page/lists/[id]/[itemId]/ItemPageHeader"
+import ItemPageHeader from "@/components/page/lists/[id]/[itemId]/Header"
 import ItemPageLayout from "@/components/page/lists/[id]/[itemId]/ItemPageLayout"
 import { ItemPageProvider } from "@/components/page/lists/[id]/[itemId]/ItemPageProvider"
 import { validatedID } from "@/utils/lib/generateID"

@@ -23,7 +23,7 @@ export interface ItemData {
 
 // # Item Header:
 export interface ItemHeader {
-    type: "poster_on_top" | "poster_inside" | "poster_beside"
+    type: "poster_inside" | "poster_beside"
     badges: ItemBadge[]
 }
 
@@ -36,7 +36,7 @@ export type ItemLayoutTab = [ItemLayoutHeader, ...ItemLayout]
 // ## Layout Fields:
 export type ItemLayoutHeader = {
     type: "one_row" | "left_sidebar" | "right_sidebar" | "two_rows" | "three_rows"
-    label: String
+    label: string
 }
 
 /** ### [row] [column]  */
