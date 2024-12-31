@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 .where(and(
                     eq(itemsTable.userId, user.id),
                     eq(itemsTable.id, id as ItemData['id'])
-                ))
+                )).limit(1);
 
             if (item.length === 0)
                 return res.status(404).json({ message: 'Not Found' })
@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const itemReq = await db.select().from(itemsTable).where(and(
                 eq(itemsTable.userId, user.id),
                 eq(itemsTable.id, id as ItemData['id']),
-            ));
+            )).limit(1);
 
             if (itemReq.length === 0)
                 return res.status(404).json({ message: 'Not Found' });
@@ -127,7 +127,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 .where(and(
                     eq(itemsTable.userId, user.id),
                     eq(itemsTable.id, id as ItemData['id'])
-                ));
+                )).limit(1);
 
             if (item.length === 0)
                 return res.status(404).json({ message: 'Not Found' });
@@ -142,6 +142,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     eq(itemsTable.userId, user.id),
                     eq(itemsTable.id, id as ItemData['id'])
                 ))
+                .limit(1)
                 .returning();
 
             return res.status(200).json(updatedItem[0]);

@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .where(and(
           eq(listsTable.userId, user.id),
           eq(listsTable.id, id as string)
-        ));
+        )).limit(1);
 
       if (list.length === 0)
         return res.status(404).json({ message: 'Not Found' });
@@ -47,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .where(and(
           eq(listsTable.userId, user.id),
           eq(listsTable.id, id as string)
-        ))
+        )).limit(1)
         .returning();
 
       if (list.length === 0)
@@ -60,7 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const listReq = await db.select().from(listsTable).where(and(
         eq(listsTable.userId, user.id),
         eq(listsTable.id, id)
-      ))
+      )).limit(1);
 
       if (listReq.length === 0)
         return res.status(404).json({ message: 'Not Found' });
@@ -85,12 +85,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         form.data.updatedAt = new Date(Date.now())
 
-        const updatedList = await db.update(listsTable).set(form.data).where(
-          and(
-            eq(listsTable.userId, user.id),
-            eq(listsTable.id, list.id)
-          )
-        ).returning();
+        const updatedList = await db
+          .update(listsTable)
+          .set(form.data)
+          .where(
+            and(
+              eq(listsTable.userId, user.id),
+              eq(listsTable.id, list.id)
+            )
+          ).limit(1)
+          .returning();
 
         res.status(200).json(updatedList[0]);
         console.log('[Edited] api/lists/[id]:', updatedList[0].id + ' ' + updatedList[0].title);

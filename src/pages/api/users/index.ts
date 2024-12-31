@@ -130,6 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     updatedAt
                 })
                 .where(eq(usersTable.id, user.id))
+                .limit(1)
                 .returning()
 
             return res.status(200).json({ ...updatedUser[0], passwordHash: undefined })

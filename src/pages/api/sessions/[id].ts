@@ -23,10 +23,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 return res.status(200).json({ message: 'logout' });
             }
 
-            const sessions = await db.delete(sessionsTable).where(and(
-                eq(sessionsTable.userId, user.id),
-                like(sessionsTable.id, id + '%')
-            )).returning()
+            const sessions = await db
+                .delete(sessionsTable)
+                .where(and(
+                    eq(sessionsTable.userId, user.id),
+                    like(sessionsTable.id, id + '%')
+                )).limit(1)
+                .returning()
 
             if (!sessions.length) return res.status(404).json({ message: 'Session Not Found' });
 

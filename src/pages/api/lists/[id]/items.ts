@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     .where(and(
                         eq(listsTable.userId, user.id),
                         eq(listsTable.id, listId),
-                    )),
+                    )).limit(1),
                 await db
                     .select({ id: listsTagsTable.id, listId: listsTagsTable.listId })
                     .from(listsTagsTable)

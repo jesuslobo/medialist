@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 .where(and(
                     eq(listsTagsTable.userId, user.id),
                     eq(listsTagsTable.id, tagID as TagData['id']),
-                ));
+                )).limit(1);
 
             if (tag.length === 0)
                 return res.status(404).json({ message: 'Not Found' })
@@ -54,6 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     eq(listsTagsTable.userId, user.id),
                     eq(listsTagsTable.id, tagID as TagData['id']),
                 ))
+                .limit(1)
                 .returning()
 
             return res.status(200).json(data[0]);
@@ -66,6 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     eq(listsTagsTable.userId, user.id),
                     eq(listsTagsTable.id, tagID as TagData['id']),
                 ))
+                .limit(1)
                 .returning()
 
             if (data.length === 0)

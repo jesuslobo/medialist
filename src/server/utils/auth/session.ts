@@ -40,7 +40,8 @@ export async function $validateSessionToken(token: string): Promise<ServerSessio
 		.select({ user: usersTable, session: sessionsTable })
 		.from(sessionsTable)
 		.innerJoin(usersTable, eq(sessionsTable.userId, usersTable.id))
-		.where(eq(sessionsTable.id, sessionId));
+		.where(eq(sessionsTable.id, sessionId))
+		.limit(1);
 
 	if (result.length < 1) return { session: null, user: null }
 
@@ -60,14 +61,18 @@ export async function $validateSessionToken(token: string): Promise<ServerSessio
 			.set({
 				expiresAt: session.expiresAt
 			})
-			.where(eq(sessionsTable.id, session.id));
+			.where(eq(sessionsTable.id, session.id))
+			.limit(1);
 	}
 
 	return { session, user }
 }
 
 export async function $invalidateSession(sessionId: string) {
-	await db.delete(sessionsTable).where(eq(sessionsTable.id, sessionId));
+	await db
+		.delete(sessionsTable)
+		.where(eq(sessionsTable.id, sessionId))
+		.limit(1);
 }
 
 export type ServerSessionValidationResult =
