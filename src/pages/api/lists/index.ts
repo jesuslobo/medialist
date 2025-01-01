@@ -1,5 +1,4 @@
-import { db } from '@/server/db';
-import { listsTable } from '@/server/db/schema';
+import { $createLists, $getLists } from '@/server/db/queries/lists';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $getDir from '@/server/utils/file/getDir';
 import { $listFormOptions } from '@/server/utils/lib/form/formData.options';
@@ -7,11 +6,10 @@ import $processFormData, { ProcessedFormData } from '@/server/utils/lib/processF
 import { generateID } from '@/utils/lib/generateID';
 import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
-import { and, eq } from 'drizzle-orm';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 /** api/lists/
- * Get: Get all lists of a user
+ * Get: Get all lists of a user (query: trash)
  * Post: Create a new list
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -20,15 +18,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
     if (req.method === 'GET') {
-      const lists = await db
-        .select()
-        .from(listsTable)
-        .where(and(
-          eq(listsTable.userId, user.id),
-          eq(listsTable.trash, false)
-        ))
-        .orderBy(listsTable.title);
-
+      const trash = req.query.trash === 'true';
+      const lists = await $getLists(user.id, trash);
       return res.status(200).json(lists);
     }
 
@@ -51,14 +42,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!data.title) return res.status(400).json({ message: 'Invalid Request' });
 
         const createdAt = new Date(Date.now());
-        const list = await db.insert(listsTable).values({
+        const list = await $createLists({
           id: id,
           title: data.title,
           coverPath: data.coverPath,
           userId: user.id,
           createdAt,
           updatedAt: createdAt,
-        }).returning();
+        })
 
         res.status(201).json(list[0]);
       })

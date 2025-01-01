@@ -1,5 +1,5 @@
-import { db } from '@/server/db';
-import { itemsTable, listsTagsTable } from '@/server/db/schema';
+import { $getItem, $updateItems } from '@/server/db/queries/items';
+import { $createTags, $getTag } from '@/server/db/queries/tags';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFile from '@/server/utils/file/deleteFile';
 import $processItemForm from '@/server/utils/lib/form/processItemForm';
@@ -8,7 +8,6 @@ import { validatedID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { ItemData, ItemLayoutTab, ItemSaveResponse, LogoField } from '@/utils/types/item';
 import busboy from 'busboy';
-import { and, eq } from 'drizzle-orm';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 /** api/items/[id]
@@ -24,39 +23,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
-        if (req.method === 'GET') {
-            const item = await db
-                .select()
-                .from(itemsTable)
-                .where(and(
-                    eq(itemsTable.userId, user.id),
-                    eq(itemsTable.id, id as ItemData['id'])
-                )).limit(1);
+        const items = await $getItem(user.id, id as ItemData['id']);
 
-            if (item.length === 0)
-                return res.status(404).json({ message: 'Not Found' })
+        if (items.length === 0)
+            return res.status(404).json({ message: 'Not Found' })
 
-            return res.status(200).json(item[0]);
-        }
+        const item = items[0]
+
+        if (req.method === 'GET')
+            return res.status(200).json(item);
 
         if (req.method === 'PATCH') {
-            const itemReq = await db.select().from(itemsTable).where(and(
-                eq(itemsTable.userId, user.id),
-                eq(itemsTable.id, id as ItemData['id']),
-            )).limit(1);
-
-            if (itemReq.length === 0)
-                return res.status(404).json({ message: 'Not Found' });
-
-            const item = itemReq[0] // original item
-
-            const tags = await db
-                .select({ id: listsTagsTable.id, listId: listsTagsTable.listId })
-                .from(listsTagsTable)
-                .where(and(
-                    eq(listsTagsTable.userId, user.id),
-                    eq(listsTagsTable.listId, itemReq[0].listId),
-                ))
+            const tags = await $getTag(user.id, item.listId)
 
             const form = await $processItemForm(user.id, item.listId, item.id)
             const { processFiles, processFields, handleTags, mapLayoutsToLogos, dir, data } = form;
@@ -78,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (form.data?.rawTags?.length > 0) {
                     newTagsData = handleTags(tags);
                     if (newTagsData.length > 0)
-                        await db.insert(listsTagsTable).values(newTagsData as TagData[])
+                        await $createTags(newTagsData as TagData[]);
                 }
 
                 if (data.coverPath !== undefined && item.coverPath && item.coverPath !== data.coverPath)
@@ -95,15 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 )
 
                 form.data.updatedAt = new Date(Date.now())
-
-                const updatedItem = await db
-                    .update(itemsTable)
-                    .set(form.data)
-                    .where(and(
-                        eq(itemsTable.userId, user.id),
-                        eq(itemsTable.id, item.id),
-                    ))
-                    .returning();
+                const updatedItem = await $updateItems(user.id, item.id, form.data)
 
                 res.status(201).json({
                     item: updatedItem[0],
@@ -120,34 +90,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return req.pipe(bb)
         }
 
+        // move to trash
         if (req.method === 'DELETE') {
-            const item = await db
-                .select()
-                .from(itemsTable)
-                .where(and(
-                    eq(itemsTable.userId, user.id),
-                    eq(itemsTable.id, id as ItemData['id'])
-                )).limit(1);
+            const data = {
+                trash: true,
+                updatedAt: new Date(Date.now())
+            }
 
-            if (item.length === 0)
-                return res.status(404).json({ message: 'Not Found' });
-
-            const updatedItem = await db
-                .update(itemsTable)
-                .set({
-                    trash: true,
-                    updatedAt: new Date(Date.now())
-                })
-                .where(and(
-                    eq(itemsTable.userId, user.id),
-                    eq(itemsTable.id, id as ItemData['id'])
-                ))
-                .limit(1)
-                .returning();
-
+            const updatedItem = await $updateItems(user.id, item.id, data)
             return res.status(200).json(updatedItem[0]);
         }
-
 
         res.status(405).json({ message: 'Method Not Allowed' });
     } catch (error) {

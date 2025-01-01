@@ -1,4 +1,5 @@
 import { db } from '@/server/db';
+import { $createTags, $getTags } from '@/server/db/queries/tags';
 import { listsTagsTable } from '@/server/db/schema';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import parseJSONReq from '@/utils/functions/parseJSONReq';
@@ -22,19 +23,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
+        //need more validation for listId
         if (req.method === 'GET') {
-            const tags = await db
-                .select()
-                .from(listsTagsTable)
-                .where(and(
-                    eq(listsTagsTable.userId, user.id),
-                    eq(listsTagsTable.listId, listID as ListData['id']),
-                ));
+            const tags = await $getTags(user.id, listID as ListData['id'])
 
             return res.status(200).json(tags);
         }
 
-        //need more validation
         if (req.method === 'POST') {
             const { label, description, groupName, badgeable } = body;
             if (!label) return res.status(400).json({ message: 'Bad Request' });
@@ -52,9 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 updatedAt: new Date(Date.now())
             }
 
-            const tag = await db.insert(listsTagsTable)
-                .values(tagData)
-                .returning()
+            const tag = await $createTags(tagData);
 
             return res.status(200).json(tag[0]);
         }

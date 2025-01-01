@@ -1,5 +1,8 @@
 import { db } from '@/server/db';
-import { itemsTable, listsTable, listsTagsTable } from '@/server/db/schema';
+import { $getItems } from '@/server/db/queries/items';
+import { $getList } from '@/server/db/queries/lists';
+import { $createTags, $getTags } from '@/server/db/queries/tags';
+import { itemsTable } from '@/server/db/schema';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $processItemForm from '@/server/utils/lib/form/processItemForm';
 import { generateID, validatedID } from '@/utils/lib/generateID';
@@ -7,7 +10,6 @@ import { TagData } from '@/utils/types/global';
 import { ItemSaveResponse } from '@/utils/types/item';
 import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
-import { and, eq } from 'drizzle-orm';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 /** api/lists/[id]/items
@@ -23,15 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
         if (req.method === 'GET') {
-            const items = await db
-                .select()
-                .from(itemsTable)
-                .where(and(
-                    eq(itemsTable.userId, user.id),
-                    eq(itemsTable.listId, listId),
-                    eq(itemsTable.trash, false)
-                ));
-
+            const items = await $getItems(user.id, listId)
             return res.status(200).json(items);
         }
 
@@ -39,20 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const itemId = generateID()
 
             const [lists, tags] = await Promise.all([
-                await db // should check if list exists , so change qurty
-                    .select({ id: listsTable.id })
-                    .from(listsTable)
-                    .where(and(
-                        eq(listsTable.userId, user.id),
-                        eq(listsTable.id, listId),
-                    )).limit(1),
-                await db
-                    .select({ id: listsTagsTable.id, listId: listsTagsTable.listId })
-                    .from(listsTagsTable)
-                    .where(and(
-                        eq(listsTagsTable.userId, user.id),
-                        eq(listsTagsTable.listId, listId),
-                    ))
+                await $getList(user.id, listId),
+                await $getTags(user.id, listId)
             ])
 
             if (lists.length === 0 || tags.length !== 0 && tags[0].listId !== listId)
@@ -86,7 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (form.data?.tags && form.data.tags.length > 0) {
                     newTagsData = handleTags(tags);
                     if (newTagsData.length > 0)
-                        await db.insert(listsTagsTable).values(newTagsData as TagData[])
+                        await $createTags(newTagsData as TagData[]);
                 }
 
                 form.data.createdAt = new Date(Date.now())

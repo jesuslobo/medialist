@@ -1,10 +1,12 @@
 import { db } from '@/server/db';
+import { $deleteItems, $updateItems } from '@/server/db/queries/items';
+import { $deleteLists } from '@/server/db/queries/lists';
 import { itemsTable, listsTable } from '@/server/db/schema';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFolder from '@/server/utils/file/deleteFolder';
 import $getDir from '@/server/utils/file/getDir';
 import { validatedID } from '@/utils/lib/generateID';
-import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { unionAll } from 'drizzle-orm/sqlite-core';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
@@ -59,14 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             let TrustedlistsIDs = new Set<string>([])
 
             if (lists?.length) {
-                const deletedLists = await db.delete(listsTable).where(and(
-                    eq(listsTable.userId, user.id),
-                    eq(listsTable.trash, true),
-                    inArray(listsTable.id, lists),
-                )).returning({
-                    id: listsTable.id,
-                    userId: listsTable.userId,
-                })
+                const deletedLists = await $deleteLists(user.id, lists)
 
                 TrustedlistsIDs = new Set<string>(deletedLists.map(list => list.id))
 
@@ -78,15 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             if (items?.length) {
-                const deletedItems = await db.delete(itemsTable).where(and(
-                    eq(itemsTable.userId, user.id),
-                    eq(itemsTable.trash, true),
-                    inArray(itemsTable.id, items),
-                )).returning({
-                    id: itemsTable.id,
-                    listId: itemsTable.listId,
-                    userId: itemsTable.userId,
-                })
+                const deletedItems = await $deleteItems(user.id, items)
 
                 deletedItems.forEach(async item => {
                     // if the list is already deleted
@@ -112,21 +99,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             let itemsData;
             let listsData;
 
-            if (lists?.length) {
-                listsData = await db.update(listsTable).set({ trash: false }).where(and(
-                    eq(listsTable.userId, user.id),
-                    eq(listsTable.trash, true),
-                    inArray(listsTable.id, lists),
-                )).returning()
-            }
+            const updatedAt = new Date(Date.now())
+            if (lists?.length)
+                listsData = await $updateItems(user.id, lists, { trash: false, updatedAt })
 
-            if (items?.length) {
-                itemsData = await db.update(itemsTable).set({ trash: false }).where(and(
-                    eq(itemsTable.userId, user.id),
-                    eq(itemsTable.trash, true),
-                    inArray(itemsTable.id, items),
-                )).returning()
-            }
+            if (items?.length)
+                itemsData = await $updateItems(user.id, items, { trash: false, updatedAt })
 
             return res.status(200).json({ items: itemsData || [], lists: listsData || [] });
         }

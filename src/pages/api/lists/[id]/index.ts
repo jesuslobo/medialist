@@ -1,5 +1,4 @@
-import { db } from '@/server/db';
-import { listsTable } from '@/server/db/schema';
+import { $getList, $updateLists } from '@/server/db/queries/lists';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFile from '@/server/utils/file/deleteFile';
 import $getDir from '@/server/utils/file/getDir';
@@ -9,13 +8,12 @@ import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOption
 import { validatedID } from '@/utils/lib/generateID';
 import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
-import { and, eq } from 'drizzle-orm';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 /** api/lists/[id]
  * Get: Get a list by id
+ * Delete: move a list to trash
  * PATCH: Update a list by id
- * Delete: Delete a list by id
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -24,49 +22,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const { user } = await $validateAuthCookies(req, res);
     if (!user) return res.status(401).json({ message: 'Unauthorized' });
+    const lists = await $getList(user.id, id);
 
-    if (req.method === 'GET') {
-      const list = await db
-        .select()
-        .from(listsTable)
-        .where(and(
-          eq(listsTable.userId, user.id),
-          eq(listsTable.id, id as string)
-        )).limit(1);
+    if (lists.length === 0)
+      return res.status(404).json({ message: 'Not Found' });
 
-      if (list.length === 0)
-        return res.status(404).json({ message: 'Not Found' });
+    const list = lists[0];
 
-      return res.status(200).json(list[0]);
+    if (req.method === 'GET')
+      return res.status(200).json(list);
 
-    }
-
+    // move to trash
     if (req.method === 'DELETE') {
-      const list = await db
-        .delete(listsTable)
-        .where(and(
-          eq(listsTable.userId, user.id),
-          eq(listsTable.id, id as string)
-        )).limit(1)
-        .returning();
+      const newData = {
+        trash: true,
+        updatedAt: new Date(Date.now())
+      }
+      const updatedList = await $updateLists(user.id, list.id, newData)
 
-      if (list.length === 0)
-        return res.status(404).json({ message: 'Not Found' });
-
-      return res.status(200).json(list[0]);
+      return res.status(200).json(updatedList[0]);
     }
 
     if (req.method === 'PATCH') {
-      const listReq = await db.select().from(listsTable).where(and(
-        eq(listsTable.userId, user.id),
-        eq(listsTable.id, id)
-      )).limit(1);
-
-      if (listReq.length === 0)
-        return res.status(404).json({ message: 'Not Found' });
-
-      const list = listReq[0] as ListData // original list
-
       const dir = await $getDir(user.id, list.id, true);
       const form = await $processFormData<ListData & ProcessedFormData>($listFormOptions(dir.list));
       const { processFiles, processFields, data } = form;
@@ -84,17 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           $deleteFile(coverThumbnailsOptions.listCover, dir.list, list.coverPath);
 
         form.data.updatedAt = new Date(Date.now())
-
-        const updatedList = await db
-          .update(listsTable)
-          .set(form.data)
-          .where(
-            and(
-              eq(listsTable.userId, user.id),
-              eq(listsTable.id, list.id)
-            )
-          ).limit(1)
-          .returning();
+        const updatedList = await $updateLists(user.id, list.id, form.data)
 
         res.status(200).json(updatedList[0]);
         console.log('[Edited] api/lists/[id]:', updatedList[0].id + ' ' + updatedList[0].title);
