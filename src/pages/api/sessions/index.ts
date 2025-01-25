@@ -53,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const users = await db
         .select()
         .from(usersTable)
-        .where(eq(usersTable.username, username.toLowerCase()));
+        .where(eq(usersTable.username, username?.toLowerCase()));
 
       if (!users[0]) return res.status(400).json({ message: 'Invalid Username Or Password' })
       const { passwordHash, ...user } = users[0];
@@ -65,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const session = await $createSession(token, user.id, req.headers['user-agent']);
 
       $setSessionTokenCookie(res, token, session.expiresAt);
-      res.status(200).json(user);
+      return res.status(200).json(user);
     }
 
     if (req.method === 'DELETE') {
@@ -73,7 +73,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!session) return res.status(401).json({ message: 'Unauthorized' });
 
       await $invalidateSession(session.id);
-      res.status(200).json({ message: 'Logged Out' });
+     return res.status(200).json({ message: 'Logged Out' });
     }
 
     res.status(405).json({ message: 'Method Not Allowed' });
