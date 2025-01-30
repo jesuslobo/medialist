@@ -20,7 +20,54 @@ vi.mock('@/server/db');
 describe('api/lists/[id]/items', async () => {
     const file = await TEST_MOCK_FILE_BUFFER
 
-    // to be added: 404, 400
+    describe('should return 404', () => {
+        test('if a fake/unexisting list ID is provided', async () => {
+            const { userMock } = await $mockList({ title: 'List1' });
+            const { userData, ...user } = userMock;
+            const { cookies } = await user.createCookie();
+
+            const { body, statusCode } = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: generateID() } });
+            expect(body).toEqual({ message: 'Not Found' });
+            expect(statusCode).toBe(404);
+
+            await user.delete();
+        })
+
+        test('if an ID of other user\'s list is provided', async () => {
+            const { listData, userMock } = await $mockList({ title: 'List1' });
+            const { listData: otherUserList } = await $mockList({ title: 'List1' });
+            const { userData, ...user } = userMock;
+            const { cookies } = await user.createCookie();
+
+            const { body, statusCode } = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: otherUserList.id } });
+            expect(body).toEqual({ message: 'Not Found' });
+            expect(statusCode).toBe(404);
+
+            await user.delete();
+        })
+    })
+
+    test('should return 400 Bad Request if an invalid ID is provided', async () => {
+        const { userMock } = await $mockList({ title: 'List1' });
+        const { userData, ...user } = userMock;
+        const { cookies } = await user.createCookie();
+
+        const r1 = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: 'invalidID' } });
+        expect(r1.body).toEqual({ message: 'Bad Request' });
+        expect(r1.statusCode).toBe(400);
+
+        const r2 = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: '' } });
+        expect(r2.body).toEqual({ message: 'Bad Request' });
+        expect(r2.statusCode).toBe(400);
+
+        //to-add: 
+        // const fakeString = 'a'.repeat(10 ** 10);
+        // const r3 = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: fakeString } });
+        // expect(r3.body).toEqual({ message: 'Bad Request' });
+        // expect(r3.statusCode).toBe(400);
+
+        await user.delete();
+    })
 
     describe('GET - get all items of a list', async () => {
         test('should return all items of a list', async () => {

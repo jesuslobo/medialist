@@ -24,23 +24,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
+        const listsDb = await $getList(user.id, listId);
+        if (listsDb.length === 0) return res.status(404).json({ message: 'Not Found' });
+
+        const list = listsDb[0];
+
         if (req.method === 'GET') {
-            const items = await $getItems(user.id, listId)
+            const items = await $getItems(user.id, list.id)
             return res.status(200).json(items);
         }
 
         if (req.method === 'POST') {
             const itemId = generateID()
-
-            const [lists, tags] = await Promise.all([
-                await $getList(user.id, listId),
-                await $getTags(user.id, listId)
-            ])
-
-            if (lists.length === 0 || tags.length !== 0 && tags[0].listId !== listId)
-                return res.status(400).json({ message: 'Bad Request' });
-
-            const list = lists[0];
+            const tags = await $getTags(user.id, list.id)
 
             const form = await $processItemForm(user.id, list.id, itemId)
             const { processFiles, processFields, handleTags, mapLayoutsToLogos } = form;
@@ -59,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             bb.on('finish', async () => {
                 if (!form.data.title)
-                    res.status(400).json({ message: 'Bad Request' });
+                    return res.status(400).json({ message: 'Bad Request' });
 
                 form.data.layout = mapLayoutsToLogos()
 
