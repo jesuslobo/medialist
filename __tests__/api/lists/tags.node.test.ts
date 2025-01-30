@@ -1,4 +1,5 @@
 import tagsRouter from '@/pages/api/lists/[id]/tags';
+import { generateID } from '@/utils/lib/generateID';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import $mockTag from '@tests/test-utils/mocks/data/mockTag';
 import $mockHttp from '@tests/test-utils/mocks/mockHttp';
@@ -10,34 +11,32 @@ vi.mock('@/server/db');
 
 describe('api/lists/[id]/tags', async () => {
 
-    // to add: currently returns an empty array
-    //   describe('should return 404', () => {
-    //         test('if a fake/unexisting list ID is provided', async () => {
-    //             const { userMock } = await $mockList({ title: 'List1' });
-    //             const { userData, ...user } = userMock;
-    //             const { cookies } = await user.createCookie();
+      describe('should return 404', () => {
+            test('if a fake/unexisting list ID is provided', async () => {
+                const { userMock } = await $mockList({ title: 'List1' });
+                const { userData, ...user } = userMock;
+                const { cookies } = await user.createCookie();
 
-    //             const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: generateID() } });
-    //             expect(body).toEqual({ message: 'Not Found' });
-    //             expect(statusCode).toBe(404);
+                const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: generateID() } });
+                expect(body).toEqual({ message: 'Not Found' });
+                expect(statusCode).toBe(404);
 
-    //             await user.delete();
-    //         })
+                await user.delete();
+            })
 
-    //         test('if an ID of other user\'s list is provided', async () => {
-    //             const { listData, userMock } = await $mockList({ title: 'List1' });
-    //             const { listData: otherUserList } = await $mockList({ title: 'List1' });
-    //             const { userData, ...user } = userMock;
-    //             const { cookies } = await user.createCookie();
+            test('if an ID of other user\'s list is provided', async () => {
+                const { listData, userMock } = await $mockList({ title: 'List1' });
+                const { listData: otherUserList } = await $mockList({ title: 'List1' });
+                const { userData, ...user } = userMock;
+                const { cookies } = await user.createCookie();
 
-    //             const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: otherUserList.id } });
-    //             expect(body).toEqual({ message: 'Not Found' });
-    //             expect(statusCode).toBe(404);
+                const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: otherUserList.id } });
+                expect(body).toEqual({ message: 'Not Found' });
+                expect(statusCode).toBe(404);
 
-    //             await user.delete();
-    //         })
-    //     })
-    //to add: it doesn't check if the list ID is valid
+                await user.delete();
+            })
+        })
 
     test('should return 400 Bad Request if an invalid ID is provided', async () => {
         const { userMock } = await $mockList({ title: 'List1' });

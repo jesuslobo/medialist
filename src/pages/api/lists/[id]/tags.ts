@@ -1,4 +1,5 @@
 import { db } from '@/server/db';
+import { $getList } from '@/server/db/queries/lists';
 import { $createTags, $getTags } from '@/server/db/queries/tags';
 import { listsTagsTable } from '@/server/db/schema';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
@@ -23,10 +24,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
-        //need more validation for listId
-        if (req.method === 'GET') {
-            const tags = await $getTags(user.id, listID as ListData['id'])
+        const listsDb = await $getList(user.id, listID as ListData['id']);
+        if (listsDb.length === 0) return res.status(404).json({ message: 'Not Found' });
 
+        const list = listsDb[0];
+
+        if (req.method === 'GET') {
+            const tags = await $getTags(user.id, list.id)
             return res.status(200).json(tags);
         }
 
@@ -39,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 id,
                 label,
                 userId: user.id,
-                listId: listID as ListData['id'],
+                listId: list.id,
                 description,
                 groupName,
                 badgeable: badgeable || "",
