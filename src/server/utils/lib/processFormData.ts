@@ -4,7 +4,7 @@ import { ThumbnailOptions } from "../../../utils/lib/fileHandling/thumbnailOptio
 import $handleFileUpload from "../file/handleFileUpload";
 
 /** function that will parseForm to fields */
-export default async function $processFormData<T extends ProcessedFormData>(options: ProcessFormDataOptions) {
+export default function $processFormData<T extends ProcessedFormData>(options: ProcessFormDataOptions) {
     let data = {} as T;
     let attachments = new Map<string, string>();
 
@@ -27,7 +27,10 @@ function handleFields(
     data: ProcessedFormData,
 ) {
     for (let fieldName in options) {
-        if (typeof options[fieldName] === "object" && value === "null")
+        if (typeof options[fieldName] === "object" &&
+            value === "null" &&
+            (name === fieldName || options[fieldName].aliases?.includes(name))
+        )
             return data[fieldName] = null;
 
         if (name === fieldName) {
@@ -56,7 +59,6 @@ async function processFiles(
     data: ProcessedFormData,
     attachments: Map<string, string>,
 ) {
-    // problem in this?? the attachment not working
     for (let fieldName in options) {
         if (typeof options[fieldName] !== "object") continue
         const { dir, thumbnailOptions, aliases, attachTo } = options[fieldName];

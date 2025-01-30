@@ -1,5 +1,5 @@
 import { $getItem, $updateItems } from '@/server/db/queries/items';
-import { $createTags, $getTag } from '@/server/db/queries/tags';
+import { $createTags, $getTags } from '@/server/db/queries/tags';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFile from '@/server/utils/file/deleteFile';
 import $processItemForm from '@/server/utils/lib/form/processItemForm';
@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(200).json(item);
 
         if (req.method === 'PATCH') {
-            const tags = await $getTag(user.id, item.listId)
+            const tags = await $getTags(user.id, item.listId)
 
             const form = await $processItemForm(user.id, item.listId, item.id)
             const { processFiles, processFields, handleTags, mapLayoutsToLogos, dir, data } = form;
@@ -53,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 let newTagsData: { id: string }[] = []
 
                 // new tags
-                if (form.data?.rawTags?.length > 0) {
+                if (form.data?.tags && form.data.tags.length > 0) {
                     newTagsData = handleTags(tags);
                     if (newTagsData.length > 0)
                         await $createTags(newTagsData as TagData[]);
@@ -75,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 form.data.updatedAt = new Date(Date.now())
                 const updatedItem = await $updateItems(user.id, item.id, form.data)
 
-                res.status(201).json({
+                res.status(200).json({
                     item: updatedItem[0],
                     newTags: newTagsData // for cache update on the client
                 } as ItemSaveResponse);

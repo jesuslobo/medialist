@@ -1,20 +1,18 @@
-import { generateID } from "../../../../utils/lib/generateID";
-import { TagData } from "../../../../utils/types/global";
-import { ItemData, ItemField, ItemLayoutTab, LogoField } from "../../../../utils/types/item";
-import { $itemFormOptions } from "./formData.options";
+import { generateID } from "@/utils/lib/generateID";
+import { TagData } from "@/utils/types/global";
+import { ItemData, ItemField, ItemLayoutTab, LogoField } from "@/utils/types/item";
 import $getDir from "../../file/getDir";
 import $processFormData, { ProcessedFormData } from "../processFormData";
+import { $itemFormOptions } from "./formData.options";
 
-type ItemServerForm = ItemData & ProcessedFormData & {
-    rawTags: string[]
-}
+type ItemServerForm = ItemData & ProcessedFormData
 
 /** Any Extra logic should be in BB's onFinish */
 export default async function $processItemForm(userId: string, listId: string, itemId: string) {
     const dir = await $getDir(userId, listId, itemId, true);
     const itemDir = dir.item as string;
 
-    const form = await $processFormData<ItemServerForm>($itemFormOptions(itemDir))
+    const form = $processFormData<ItemServerForm>($itemFormOptions(itemDir))
     const { data, attachments } = form
 
     return {
@@ -50,7 +48,7 @@ function mapFieldsToLogos(data: ItemServerForm, logoPaths: Map<String, string>) 
     ) as ItemLayoutTab[] || []
 }
 
-function handleTags(tagsData: { id: string }[], data: ItemServerForm, userId: string, listId: string) {
+function handleTags(tagsIDs: { id: string }[], data: ItemServerForm, userId: string, listId: string) {
     let newTags = [] as string[]
     let requestTags = data.tags ? [...data.tags] : []
     data.tags = []
@@ -60,7 +58,7 @@ function handleTags(tagsData: { id: string }[], data: ItemServerForm, userId: st
         // if A user can type a tag of 10 letters that can escape validation
         if (tag.length !== 10) {
             newTags.push(tag) // no need to check if it exists
-        } else if (tagsData.some(t => t.id === tag)) {
+        } else if (tagsIDs.some(t => t.id === tag)) {
             data.tags.push(tag)
         } else {
             newTags.push(tag)
