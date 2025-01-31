@@ -1,18 +1,18 @@
 import { db } from '@/server/db';
 import { $deleteItems, $updateItems } from '@/server/db/queries/items';
-import { $deleteLists } from '@/server/db/queries/lists';
+import { $deleteLists, $updateLists } from '@/server/db/queries/lists';
 import { itemsTable, listsTable } from '@/server/db/schema';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFolder from '@/server/utils/file/deleteFolder';
 import $getDir from '@/server/utils/file/getDir';
 import { validatedID } from '@/utils/lib/generateID';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { unionAll } from 'drizzle-orm/sqlite-core';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 interface RequestData { items: string[], lists: string[] }
 
-/** api/lists/
+/** api/trash/
  * Get: Get all deleted items & lists
  * Delete: delete selected items & lists as provided in RequestData
  * Patch: restore selected items & lists as provided in RequestData
@@ -23,40 +23,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
 
         if (req.method === 'GET') {
-            const items = db.select({
-                id: itemsTable.id,
-                listId: itemsTable.listId,
-                title: itemsTable.title,
-                coverPath: itemsTable.posterPath,
-                updatedAt: itemsTable.updatedAt,
-            }).from(itemsTable).where(and(
-                eq(itemsTable.userId, user.id),
-                eq(itemsTable.trash, true)
-            ))
-
-            const lists = db.select({
-                id: listsTable.id,
-                listId: sql`NULL`.as('listId'),
-                title: listsTable.title,
-                coverPath: listsTable.coverPath,
-                updatedAt: listsTable.updatedAt,
-            }).from(listsTable).where(and(
-                eq(listsTable.userId, user.id),
-                eq(listsTable.trash, true)
-            ))
-
-            const listsAndItems = await unionAll(lists, items).orderBy(desc(itemsTable.updatedAt))
-
+            const listsAndItems = await getTrash(user.id)
             return res.status(200).json(listsAndItems);
         }
 
         if (req.method === 'DELETE') {
             const { items, lists }: RequestData = JSON.parse(req.body);
-            if (!Array.isArray(items) && !Array.isArray(lists)) return res.status(400).json({ message: 'Bad Request' })
+            if (!Array.isArray(items) && !Array.isArray(lists))
+                return res.status(400).json({ message: 'Bad Request' })
 
             if (items?.some(id => !validatedID(id)) || lists?.some(id => !validatedID(id)))
                 return res.status(400).json({ message: 'Bad Request' })
 
+            const trashDb = await getTrash(user.id, items, lists)
+            if (!trashDb.length) return res.status(400).json({ message: 'Bad Request' })
+
+            if (items && items?.length !== trashDb.filter(item => item.listId).length ||
+                lists && lists?.length !== trashDb.filter(list => !list.listId).length
+            )
+                return res.status(400).json({ message: 'Bad Request' })
             // folder structure: /users/:userId/:listId/:itemId, thus we just need to delete the folders
             let TrustedlistsIDs = new Set<string>([])
 
@@ -90,18 +75,28 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         if (req.method === 'PATCH') {
             const { items, lists }: RequestData = JSON.parse(req.body);
+
             if (!Array.isArray(items) && !Array.isArray(lists))
                 return res.status(400).json({ message: 'Bad Request' })
 
             if (items?.some(id => !validatedID(id)) || lists?.some(id => !validatedID(id)))
                 return res.status(400).json({ message: 'Bad Request' })
 
+            const trashDb = await getTrash(user.id, items, lists)
+            if (!trashDb.length) return res.status(400).json({ message: 'Bad Request' })
+
+            if (items && items?.length !== trashDb.filter(item => item.listId).length ||
+                lists && lists?.length !== trashDb.filter(list => !list.listId).length
+            )
+                return res.status(400).json({ message: 'Bad Request' })
+
             let itemsData;
             let listsData;
 
             const updatedAt = new Date(Date.now())
+
             if (lists?.length)
-                listsData = await $updateItems(user.id, lists, { trash: false, updatedAt })
+                listsData = await $updateLists(user.id, lists, { trash: false, updatedAt })
 
             if (items?.length)
                 itemsData = await $updateItems(user.id, items, { trash: false, updatedAt })
@@ -116,3 +111,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 }
 
+const getTrash = async (userId: string, itemsIDs?: string[], listIDs?: string[]) => {
+
+    let andReqItems = [
+        eq(itemsTable.userId, userId),
+        eq(itemsTable.trash, true),
+    ]
+    if (itemsIDs) andReqItems.push(inArray(itemsTable.id, itemsIDs))
+
+    let andReqLists = [
+        eq(listsTable.userId, userId),
+        eq(listsTable.trash, true),
+    ]
+    if (listIDs) andReqLists.push(inArray(listsTable.id, listIDs))
+
+    const items = db.select({
+        id: itemsTable.id,
+        listId: itemsTable.listId,
+        title: itemsTable.title,
+        coverPath: itemsTable.posterPath,
+        updatedAt: itemsTable.updatedAt,
+    }).from(itemsTable).where(and(...andReqItems))
+
+    const lists = db.select({
+        id: listsTable.id,
+        listId: sql`NULL`.as('listId'),
+        title: listsTable.title,
+        coverPath: listsTable.coverPath,
+        updatedAt: listsTable.updatedAt,
+    }).from(listsTable).where(and(...andReqLists))
+
+    const listsAndItems = await unionAll(lists, items).orderBy(desc(itemsTable.updatedAt))
+
+    return listsAndItems;
+}
