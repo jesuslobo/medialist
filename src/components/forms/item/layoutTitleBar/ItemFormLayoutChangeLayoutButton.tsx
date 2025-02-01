@@ -44,7 +44,7 @@ export default function ItemFormLayoutChangeLayoutButton() {
         if (activeTabHeader)
             if (oldRowNumber > newRowNumber) {
                 setActiveTabFields(prev => {
-                    const diff = oldRowNumber - newRowNumber
+                    const diff = oldRowNumber - newRowNumber + 1
                     const newRows = prev.slice(-diff)
                     const mergedRows = newRows.flat()
                     return [...prev.slice(0, -diff), mergedRows]
