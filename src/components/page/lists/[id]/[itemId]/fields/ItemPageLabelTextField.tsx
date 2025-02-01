@@ -5,12 +5,14 @@ export default function ItemPageLabelTextField({
         body,
         label,
         countable,
-    }
+    },
+    className
 }: {
-    field: ItemLabelTextField
+    field: ItemLabelTextField,
+    className?: string
 }) {
     return (
-        <article>
+        <article className={className}>
             <b>{label}</b>: {body}
         </article>
     )

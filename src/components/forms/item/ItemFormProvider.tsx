@@ -2,10 +2,10 @@ import { SortableItemType } from "@/components/ui/layout/drag&drop/logic/Sortabl
 import { TagData } from "@/utils/types/global";
 import { ItemData, ItemField, ItemLayoutHeader } from "@/utils/types/item";
 import { ListData } from "@/utils/types/list";
-import { createContext, Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-interface Props extends Omit<ItemFormContext, "setActiveTabFields" | "setActiveTabHeader" | "activeTabFields" | "activeTabHeader"> {
+interface Props extends Omit<ItemFormContext, "setActiveTabFields" | "setActiveTabHeader" | "activeTabFields" | "activeTabHeader" | "isPreviewMode" | "setIsPreviewMode"> {
     children: React.ReactNode,
     layoutTabs: ItemFormLayoutTab[]
     setLayoutTabs: Dispatch<SetStateAction<ItemFormLayoutTab[]>>
@@ -21,6 +21,8 @@ interface ItemFormContext {
     setActiveTabFields: Dispatch<SetStateAction<ItemFormField[][]>>,
     activeTabHeader: ItemLayoutHeader,
     setActiveTabHeader: Dispatch<SetStateAction<ItemLayoutHeader>>,
+    isPreviewMode: boolean,
+    setIsPreviewMode: Dispatch<SetStateAction<boolean>>,
 }
 
 export type ItemFormField = SortableItemType & ItemField
@@ -44,6 +46,8 @@ export default function ItemFormProvider({
     activeTabIndex,
     children,
 }: Props) {
+    const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false)
+
     // a facade for the activeLayoutTab
     const [activeTabHeader, ...activeTabFields] = layoutTabs?.[activeTabIndex] || []
 
@@ -118,6 +122,8 @@ export default function ItemFormProvider({
             setActiveTabFields,
             activeTabHeader,
             setActiveTabHeader,
+            isPreviewMode,
+            setIsPreviewMode,
         }}>
             {children}
         </ItemFormContext.Provider>
