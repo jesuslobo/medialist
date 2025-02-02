@@ -1,18 +1,17 @@
 import { ItemField } from "@/utils/types/item"
-import ItemPageTagsField from "./fields/ItemPageTagsField"
-import ItemPageTextField from "./fields/ItemPageTextField"
 import ItemPageLabelTextField from "./fields/ItemPageLabelTextField"
 import ItemPageLinkField from "./fields/ItemPageLinkField"
+import ItemPageRatingField from "./fields/ItemPageRatingField"
+import ItemPageTagsField from "./fields/ItemPageTagsField"
+import ItemPageTextField from "./fields/ItemPageTextField"
 
 export default function ItemFieldMapper({
     field,
     ...position
-    // children,
 }: {
     field: ItemField
     rowIndex: number
     colIndex: number
-    // children?: React.ReactNode
 }) {
     switch (field.type) {
         case "tags":
@@ -23,6 +22,8 @@ export default function ItemFieldMapper({
             return <ItemPageLinkField field={field} />
         case "text":
             return <ItemPageTextField field={field} />
+        case "rating":
+            return <ItemPageRatingField field={field} />
         default:
             return <></>
     }

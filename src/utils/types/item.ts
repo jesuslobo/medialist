@@ -16,7 +16,6 @@ export interface ItemData {
     header: ItemHeader
     createdAt: Date
     updatedAt: Date
-    // progress_state?: itemProgressState
     // badges?: itemBadgesType[]
     // related?: ItemData['id'][]
 }
@@ -42,7 +41,7 @@ export type ItemLayoutHeader = {
 /** ### [row] [column]  */
 export type ItemLayout = ItemField[][]
 
-export type ItemField = ItemLabelTextField | ItemLinkField | ItemTextField | ItemCardField | ItemTagsField
+export type ItemField = ItemLabelTextField | ItemLinkField | ItemTextField | ItemCardField | ItemTagsField | ItemRatingField
 export type ItemFieldType = Extract<ItemField, { type: string }>['type'];
 
 export interface ItemTagsField { type: "tags" }
@@ -52,6 +51,7 @@ export interface LogoField { label: string, logoPath?: string }
 export interface ItemTextField { type: "text", variant: "long" | "short", text: string, }
 export interface ItemLabelTextField { type: "labelText", label: string, body: string, countable?: boolean }
 export interface ItemLinkField extends LogoField { type: "link", url: string }
+export interface ItemRatingField { type: "rating", rating: number, from: number }
 
 export interface ItemCardField {
     type: "card",
@@ -73,12 +73,6 @@ export interface ItemCardField {
 // export interface ItemBadgesType {
 //     logo_path: string
 //     label: string
-// }
-
-// export interface itemProgressState {
-//     /**NextUI colors */
-//     color: "default" | "primary" | "secondary" | "success" | "warning" | "danger" | undefined
-//     name: string
 // }
 
 /** Item Patch & POST response */

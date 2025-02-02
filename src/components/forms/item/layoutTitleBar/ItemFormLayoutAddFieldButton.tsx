@@ -1,7 +1,7 @@
 import { ItemFieldType } from "@/utils/types/item";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/react";
 import { useContext } from "react";
-import { BiLink, BiPlus } from "react-icons/bi";
+import { BiLink, BiPlus, BiSolidStar } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { RxText } from "react-icons/rx";
 import { ItemFormContext, ItemFormField } from "../ItemFormProvider";
@@ -54,6 +54,12 @@ export default function ItemFormLayoutAddFieldButton({ rowIndex }: { rowIndex: n
                         startContent={<BiLink />}
                     >
                         Link Button
+                    </DropdownItem>
+                    <DropdownItem
+                        onPress={() => addField("rating")}
+                        startContent={<BiSolidStar />}
+                    >
+                        Rating
                     </DropdownItem>
                 </DropdownSection>
             </DropdownMenu>

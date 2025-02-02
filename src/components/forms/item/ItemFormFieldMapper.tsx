@@ -1,6 +1,7 @@
 import { ItemFieldType } from "@/utils/types/item"
 import ItemFormLabelTextField from "./fields/ItemFormLabelTextField"
 import ItemFormLinkField from "./fields/ItemFormLinkField"
+import ItemFormRatingField from "./fields/ItemFormRatingField"
 import ItemFormTextField from "./fields/ItemFormTextField"
 import ItemFormTagsField from "./fields/tags/ItemFormTagsField"
 
@@ -8,12 +9,10 @@ import ItemFormTagsField from "./fields/tags/ItemFormTagsField"
 export default function ItemFormFieldsMapper({
     type,
     ...position
-    // children,
 }: {
     type: ItemFieldType
     rowIndex: number
     colIndex: number
-    // children?: React.ReactNode
 }) {
 
     switch (type) {
@@ -25,6 +24,8 @@ export default function ItemFormFieldsMapper({
             return <ItemFormLinkField {...position} />
         case "text":
             return <ItemFormTextField  {...position} />
+        case "rating":
+            return <ItemFormRatingField {...position} />
         default:
             return <></>
     }
