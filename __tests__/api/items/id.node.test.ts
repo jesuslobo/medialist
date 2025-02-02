@@ -84,7 +84,6 @@ describe('api/items/[id]', async () => {
     })
 
     describe('PATCH - update an item by ID', () => {
-        // Patch API chnage the layout every time it is called, so we beed to provide the layout in every PATCH request
         test('should update title if provided, without modifying any other field or deleting any media', async () => {
             // implicitly tests that changing any field doesn't effect the others
             const list = await $mockList({ title: 'old title' });
@@ -110,7 +109,6 @@ describe('api/items/[id]', async () => {
 
             const form = new FormData();
             form.append('title', 'new title');
-            form.append('layout', JSON.stringify(item.itemData.layout));
 
             const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
             expect(body.item).toEqual({
@@ -148,7 +146,6 @@ describe('api/items/[id]', async () => {
                 const { cookies } = await user.createCookie();
 
                 const form = new FormData();
-                form.append('layout', JSON.stringify(item.itemData.layout));
                 form.append('cover', file, TEST_MOCK_FILE_NAME);
                 form.append('poster', file, TEST_MOCK_FILE_NAME);
 
@@ -194,7 +191,6 @@ describe('api/items/[id]', async () => {
                 const { cookies } = await user.createCookie();
 
                 const form = new FormData();
-                form.append('layout', JSON.stringify(item.itemData.layout));
                 form.append('cover', file, TEST_MOCK_FILE_NAME);
                 form.append('poster', file, TEST_MOCK_FILE_NAME);
 
@@ -246,7 +242,6 @@ describe('api/items/[id]', async () => {
                 const { cookies } = await user.createCookie();
 
                 const form = new FormData();
-                form.append('layout', JSON.stringify(item.itemData.layout));
                 form.append('cover', 'null');
                 form.append('poster', 'null');
 

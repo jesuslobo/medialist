@@ -48,8 +48,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             bb.on('file', processFiles)
 
             bb.on('finish', async () => {
-                form.data.layout = mapLayoutsToLogos()
-
                 let newTagsData: { id: string }[] = []
 
                 // new tags
@@ -65,12 +63,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (data.posterPath !== undefined && item.posterPath && item.posterPath !== data.posterPath)
                     $deleteFile(coverThumbnailsOptions.itemPoster, dir.item, item.posterPath);
 
-                const oldLogoPaths = extractLogoPaths(item.layout as ItemLayoutTab[])
-                const newLogoPaths = new Set(extractLogoPaths(form.data.layout))
-                const deletedLogos = oldLogoPaths.filter(logoPath => !newLogoPaths.has(logoPath))
-                deletedLogos.forEach(logoPath => logoPath &&
-                    $deleteFile(coverThumbnailsOptions.logo, dir.item, logoPath)
-                )
+                if (form.data.layout !== undefined) {
+                    form.data.layout = mapLayoutsToLogos()
+
+                    const oldLogoPaths = extractLogoPaths(item.layout as ItemLayoutTab[])
+                    const newLogoPaths = new Set(extractLogoPaths(form.data.layout))
+                    const deletedLogos = oldLogoPaths.filter(logoPath => !newLogoPaths.has(logoPath))
+                    deletedLogos.forEach(logoPath => logoPath &&
+                        $deleteFile(coverThumbnailsOptions.logo, dir.item, logoPath)
+                    )
+                }
 
                 form.data.updatedAt = new Date(Date.now())
                 const updatedItem = await $updateItems(user.id, item.id, form.data)
