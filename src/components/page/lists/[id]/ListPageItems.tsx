@@ -1,8 +1,8 @@
 import ItemCard from "@/components/ui/cards/ItemCard";
+import ItemCardsList from "@/components/ui/cards/ItemCardsList";
 import { ItemData } from "@/utils/types/item";
 import { useContext } from "react";
 import { ListPageContext } from "./ListPageProvider";
-
 
 export default function ListPageItems() {
     const { items, viewMode, tagsQuery, filterSettings, tags } = useContext(ListPageContext)
@@ -18,6 +18,8 @@ export default function ListPageItems() {
         return tagsRule && searchRule
     }
 
+    const badgeableTags = tags.filter(tag => tag.badgeable)
+
     switch (viewMode) {
         case 'list':
             return (
@@ -26,12 +28,19 @@ export default function ListPageItems() {
             )
         case 'cardsList':
             return (
-                <>
-                </>
+                <div className=" grid grid-cols-2 lg:grid-cols-1 gap-4">
+                    {items.map(item => isItemUnderFilter(item) &&
+                        <ItemCardsList
+                            key={item.title + item.id}
+                            item={item}
+                            tagsData={badgeableTags}
+                        />
+                    )}
+                </div >
             )
         default: //cards
             return (
-                <div className=" grid grid-cols-md-card gap-x-4 gap-y-4">
+                <div className=" grid grid-cols-md-card gap-4">
                     {items.map(item => isItemUnderFilter(item) &&
                         <ItemCard
                             key={item.title + item.id}
