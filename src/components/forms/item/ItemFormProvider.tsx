@@ -102,14 +102,22 @@ export default function ItemFormProvider({
 
         setLayoutTabs(layout || defaultTemplate as any)
 
+        // when editing an item
         if (item) {
-            const { coverPath, posterPath, layout, ...itemData } = item
+            const { coverPath, posterPath, layout, tags: itemTags, ...itemData } = item
             const itemSrc = `/users/${item.userId}/${item.listId}/${item.id}`
 
             const cover = coverPath ? `${itemSrc}/${coverPath}` : null
             const poster = posterPath ? `${itemSrc}/${posterPath}` : null
-            itemForm.reset({ ...itemData, cover, poster })
+
+            // tags are stored as ids array in the db,
+            // when deleting a tag the id will still be stored in the item,
+            // so we will garbage collect them on edit
+            const garbageCollectedTags = itemTags.filter(tagId => tags.some(t => t.id === tagId))
+
+            itemForm.reset({ ...itemData, cover, poster, tags: garbageCollectedTags })
         }
+
     }, [item])
 
     return (

@@ -92,8 +92,6 @@ function EditItemPage() {
 
         //Layout
         formData.append('layout', JSON.stringify(layout))
-        // apply garbage collection of not existing old tags
-        formData.append('tags', JSON.stringify(data.tags))
 
         mutation.mutate(formData)
     }
