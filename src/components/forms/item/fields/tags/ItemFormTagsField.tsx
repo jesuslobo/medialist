@@ -1,4 +1,4 @@
-import { Chip } from "@nextui-org/react"
+import { Chip } from "@heroui/react"
 import { useContext, useState } from "react"
 import { useFieldArray } from "react-hook-form"
 import { ItemFormContext } from "../../ItemFormProvider"

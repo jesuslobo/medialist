@@ -1,6 +1,6 @@
 import { sortTagsByGroup } from "@/utils/functions/sortTagsByGroup"
 import { TagData } from "@/utils/types/global"
-import { Chip } from "@nextui-org/react"
+import { Chip } from "@heroui/react"
 import { useRouter } from "next/router"
 import { createSerializer, parseAsArrayOf, parseAsString } from "nuqs"
 import { useContext } from "react"

@@ -1,6 +1,6 @@
 import { ItemLayoutHeader } from "@/utils/types/item";
-import type { Selection, SharedSelection } from "@nextui-org/react";
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/react";
+import type { Selection, SharedSelection } from "@heroui/react";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import { BsLayoutSidebar, BsLayoutSidebarReverse, BsLayoutSplit, BsLayoutThreeColumns, BsSquare } from "react-icons/bs";
 import { ItemFormContext } from "../ItemFormProvider";

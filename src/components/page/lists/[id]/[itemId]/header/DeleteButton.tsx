@@ -1,7 +1,7 @@
 import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton";
 import httpClient from "@/utils/lib/httpClient";
 import { mutateItemCache } from "@/utils/lib/tanquery/itemsQuery";
-import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
+import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useContext } from "react";

@@ -1,5 +1,5 @@
 import { ItemFieldType } from "@/utils/types/item";
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@nextui-org/react";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@heroui/react";
 import { useContext } from "react";
 import { BiLink, BiPlus, BiSolidStar } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";

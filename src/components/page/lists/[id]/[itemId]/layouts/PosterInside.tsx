@@ -1,4 +1,4 @@
-import { Divider } from "@nextui-org/react"
+import { Divider } from "@heroui/react"
 import { useContext } from "react"
 import { twJoin } from "tailwind-merge"
 import { itemPageContext } from "../ItemPageProvider"

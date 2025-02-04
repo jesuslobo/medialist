@@ -1,4 +1,4 @@
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import React, { lazy, useEffect, useState } from "react";
@@ -29,13 +29,13 @@ export default function RootProviders({
     return (
         <>
             <QueryClientProvider client={queryClient}>
-                <NextUIProvider>
+                <HeroUIProvider>
                     <NextThemesProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
                         <AuthProvider>
                             {children}
                         </AuthProvider>
                     </NextThemesProvider>
-                </NextUIProvider>
+                </HeroUIProvider>
 
                 {showDevtools && (
                     <React.Suspense fallback={null}>

@@ -1,4 +1,4 @@
-import { Spinner } from '@nextui-org/react';
+import { Spinner } from "@heroui/react";
 import { useTheme } from 'next-themes';
 import { Poppins } from 'next/font/google';
 import Head from "next/head";

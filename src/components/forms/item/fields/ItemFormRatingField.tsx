@@ -1,5 +1,5 @@
 import { ItemRatingField } from "@/utils/types/item"
-import { Button, Chip, Input } from "@nextui-org/react"
+import { Button, Chip, Input } from "@heroui/react"
 import { useContext, useState } from "react"
 import { BiPencil, BiSave, BiSolidStar, BiSolidStarHalf, BiStar, BiX, BiXCircle } from "react-icons/bi"
 import { useItemFormLayoutField } from "../ItemFormLayoutSection"

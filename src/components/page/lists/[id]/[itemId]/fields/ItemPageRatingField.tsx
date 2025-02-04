@@ -1,5 +1,5 @@
 import { ItemRatingField } from "@/utils/types/item"
-import { Chip } from "@nextui-org/react"
+import { Chip } from "@heroui/react"
 import { BiSolidStar, BiSolidStarHalf, BiStar } from "react-icons/bi"
 import { twJoin } from "tailwind-merge"
 

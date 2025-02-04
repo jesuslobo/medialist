@@ -1,7 +1,7 @@
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
 import { badgeColors, TagData } from "@/utils/types/global";
 import { ItemData } from "@/utils/types/item";
-import { Card, Chip, Image } from "@nextui-org/react";
+import { Card, Chip, Image } from "@heroui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 

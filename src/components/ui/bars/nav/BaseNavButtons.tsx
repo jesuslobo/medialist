@@ -1,4 +1,4 @@
-import { tv } from "@nextui-org/react"
+import { tv } from "@heroui/react"
 import Link from "next/link"
 import { useRouter } from "next/router"
 import { ButtonHTMLAttributes, DetailedHTMLProps, LinkHTMLAttributes, useState } from "react"

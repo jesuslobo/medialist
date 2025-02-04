@@ -11,7 +11,7 @@ import { itemsQueryOptions, setupItemsCache } from "@/utils/lib/tanquery/itemsQu
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
 import { tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
 import { ListData } from "@/utils/types/list"
-import { Button } from "@nextui-org/react"
+import { Button } from "@heroui/react"
 import { useQuery } from "@tanstack/react-query"
 import Head from "next/head"
 import { useRouter } from "next/router"

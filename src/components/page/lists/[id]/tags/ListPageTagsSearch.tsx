@@ -1,5 +1,5 @@
 import { TagData } from "@/utils/types/global";
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 import { Dispatch, KeyboardEvent, SetStateAction, useEffect } from "react";
 import { BiSearch } from "react-icons/bi";
 

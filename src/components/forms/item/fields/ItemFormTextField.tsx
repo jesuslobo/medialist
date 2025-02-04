@@ -1,5 +1,5 @@
 import { ItemTextField } from "@/utils/types/item"
-import { Button, Input, Textarea } from "@nextui-org/react"
+import { Button, Input, Textarea } from "@heroui/react"
 import { useContext, useState } from "react"
 import { BiX } from "react-icons/bi"
 import { useItemFormLayoutField } from "../ItemFormLayoutSection"

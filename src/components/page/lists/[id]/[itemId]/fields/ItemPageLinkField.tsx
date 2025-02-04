@@ -1,5 +1,5 @@
 import { ItemLinkField } from "@/utils/types/item"
-import { Button, Image } from "@nextui-org/react"
+import { Button, Image } from "@heroui/react"
 import { useContext, useState } from "react"
 import { itemPageContext } from "../ItemPageProvider"
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions"

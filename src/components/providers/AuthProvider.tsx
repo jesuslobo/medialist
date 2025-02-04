@@ -1,6 +1,6 @@
 import { mutateUserCache, usersQueryOptions } from "@/utils/lib/tanquery/usersQuery";
 import { UserData } from "@/utils/types/global";
-import { Spinner } from "@nextui-org/react";
+import { Spinner } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 import AuthLayout from "../features/auth/AuthLayout";

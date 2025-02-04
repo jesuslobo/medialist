@@ -1,6 +1,6 @@
 import ImageInput from "@/components/ui/form/ImageUploader"
 import { ItemLinkField } from "@/utils/types/item"
-import { Button, Input, InputProps } from "@nextui-org/react"
+import { Button, Input, InputProps } from "@heroui/react"
 import { useContext, useEffect, useState } from "react"
 import { BiX } from "react-icons/bi"
 import { LuImagePlus } from "react-icons/lu"

@@ -1,4 +1,4 @@
-import { Tab, Tabs, TabsProps } from "@nextui-org/react"
+import { Tab, Tabs, TabsProps } from "@heroui/react"
 import { Key, useContext } from "react"
 import { itemPageContext } from "../ItemPageProvider"
 

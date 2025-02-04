@@ -1,6 +1,6 @@
 import { useUser } from "@/components/providers/AuthProvider";
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
-import { Button, Card, Checkbox, Chip, cn, Image } from "@nextui-org/react";
+import { Button, Card, Checkbox, Chip, cn, Image } from "@heroui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { BiTrashAlt } from "react-icons/bi";

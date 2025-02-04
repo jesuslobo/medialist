@@ -1,4 +1,4 @@
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 import { useContext } from "react";
 import { BiSearch } from "react-icons/bi";
 import { ListPageContext } from "./ListPageProvider";

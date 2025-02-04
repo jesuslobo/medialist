@@ -4,7 +4,7 @@ import httpClient from "@/utils/lib/httpClient";
 import { mutateItemCache } from "@/utils/lib/tanquery/itemsQuery";
 import { badgeColors } from "@/utils/types/global";
 import { ItemData } from "@/utils/types/item";
-import { Button, ButtonProps, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
+import { Button, ButtonProps, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useContext } from "react";

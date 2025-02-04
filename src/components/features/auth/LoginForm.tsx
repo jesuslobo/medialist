@@ -1,7 +1,7 @@
 import httpClient from "@/utils/lib/httpClient";
 import { mutateUserCache } from "@/utils/lib/tanquery/usersQuery";
 import { ServerResponseError, UserData } from "@/utils/types/global";
-import { Input } from "@nextui-org/react";
+import { Input } from "@heroui/react";
 import { useMutation } from "@tanstack/react-query";
 import Head from "next/head";
 import { Controller, useForm } from "react-hook-form";

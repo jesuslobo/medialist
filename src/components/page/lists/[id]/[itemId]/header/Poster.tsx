@@ -1,5 +1,5 @@
 import ImageViewerModal from "@/components/ui/modals/ImageViewerModal";
-import { Image } from "@nextui-org/react";
+import { Image } from "@heroui/react";
 import { useContext, useState } from "react";
 import { twJoin } from "tailwind-merge";
 import { itemPageContext } from "../ItemPageProvider";

@@ -1,6 +1,6 @@
 import TitleBar from "@/components/ui/bars/TitleBar";
 import { ItemHeader } from "@/utils/types/item";
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Selection, SharedSelection } from "@nextui-org/react";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Selection, SharedSelection } from "@heroui/react";
 import { useContext, useState } from "react";
 import { BsLayoutSidebarInset } from "react-icons/bs";
 import { TbLayoutSidebarFilled } from "react-icons/tb";

@@ -3,7 +3,7 @@ import SortableMultiContainersWrapper from "@/components/ui/layout/drag&drop/log
 import SortableContainer from "@/components/ui/layout/drag&drop/SortableContainer"
 import SortableItem from "@/components/ui/layout/drag&drop/SortableItem"
 import { DragOverlay } from "@dnd-kit/core"
-import { Divider } from "@nextui-org/react"
+import { Divider } from "@heroui/react"
 import { Dispatch, SetStateAction, useContext } from "react"
 import ItemFormFieldsMapper from "./ItemFormFieldMapper"
 import ItemFormLayoutAddFieldButton from "./layoutTitleBar/ItemFormLayoutAddFieldButton"

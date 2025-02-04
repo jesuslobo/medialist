@@ -1,4 +1,4 @@
-import { Button, Divider } from "@nextui-org/react";
+import { Button, Divider } from "@heroui/react";
 import { useState } from "react";
 import { BiLogInCircle } from "react-icons/bi";
 import { VscAccount } from "react-icons/vsc";

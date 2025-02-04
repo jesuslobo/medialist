@@ -9,7 +9,7 @@ import { mutateItemCache } from "@/utils/lib/tanquery/itemsQuery";
 import { mutateListCache } from "@/utils/lib/tanquery/listsQuery";
 import { ItemData } from "@/utils/types/item";
 import { ListData } from "@/utils/types/list";
-import { Button, CheckboxGroup, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@nextui-org/react";
+import { Button, CheckboxGroup, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useState } from "react";
@@ -31,7 +31,11 @@ export default function TrashPage() {
 
     const deleteMutation = useMutation({
         mutationFn: (data: ServerData) => httpClient().delete('trash', data),
-        onSuccess: refresh,
+        onSuccess: () => {
+            trashData.refetch()
+            setSelected([])
+            deleteMutation.reset()
+        },
     })
 
     const restoreMutation = useMutation({
@@ -39,7 +43,9 @@ export default function TrashPage() {
         onSuccess: (data: { items: ItemData[], lists: ListData[] }) => {
             data.items.forEach(item => mutateItemCache(item, "add"))
             data.lists.forEach(list => mutateListCache(list, "add"))
-            refresh()
+            trashData.refetch()
+            setSelected([])
+            restoreMutation.reset()
         },
     })
 
@@ -56,11 +62,6 @@ export default function TrashPage() {
         setSelected([...trashData.data!.map(item => item.id)])
     }
 
-    function refresh() {
-        trashData.refetch()
-        setSelected([])
-    }
-
     if (trashData.isLoading) return <ListsLoading />
     if (!trashData.isSuccess) return <ErrorPage message="Failed To Fetch The Data" />
 
@@ -72,7 +73,7 @@ export default function TrashPage() {
             <TitleBar
                 title="Trash"
                 startContent={<BiTrashAlt className="text-3xl mr-3 flex-none p-0" />}
-                className="bg-pure-theme p-5"
+                className="p-5"
             >
                 <div className=" flex items-center justify-center gap-x-2">
                     <StatusSubmitButton
@@ -175,7 +176,14 @@ function DeleteModal({ onPress }: { onPress: () => void }) {
                         <p>Deleting this is <b>permanent</b> and <b>cannot be undone.</b></p>
                     </ModalBody>
                     <ModalFooter>
-                        <Button color="danger" variant="bordered" onPress={onPress}>
+                        <Button
+                            color="danger"
+                            variant="bordered"
+                            onPress={() => {
+                                onPress()
+                                onClose()
+                            }}
+                        >
                             Delete Permanently
                         </Button>
                         <Button color="primary" onPress={onClose}>

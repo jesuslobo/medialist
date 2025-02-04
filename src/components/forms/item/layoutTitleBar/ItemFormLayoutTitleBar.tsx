@@ -1,6 +1,6 @@
 import TitleBar from "@/components/ui/bars/TitleBar";
 import ToggleButton from "@/components/ui/buttons/ToggleButton";
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/react";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
 import { Dispatch, SetStateAction, useContext } from "react";
 import { BiDotsVerticalRounded, BiPlus } from "react-icons/bi";
 import { BsEye } from "react-icons/bs";

@@ -4,7 +4,7 @@ import TitleBar from "@/components/ui/bars/TitleBar";
 import ListCard from "@/components/ui/cards/ListCard";
 import { listsQueryOptions, setupListsCache } from "@/utils/lib/tanquery/listsQuery";
 import { ListData } from "@/utils/types/list";
-import { Button, Input } from "@nextui-org/react";
+import { Button, Input } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useRouter } from "next/router";

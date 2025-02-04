@@ -1,4 +1,4 @@
-import { Button, ButtonProps } from '@nextui-org/react'
+import { Button, ButtonProps } from "@heroui/react"
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { BiArrowBack, BiRevision } from 'react-icons/bi'

@@ -1,5 +1,5 @@
 import TrashPopoverButton from "@/components/ui/buttons/TrashPopoverButton";
-import { Button, ButtonProps, Input, Modal, ModalBody, ModalContent, ModalHeader, Tab, Tabs, useDisclosure } from "@nextui-org/react";
+import { Button, ButtonProps, Input, Modal, ModalBody, ModalContent, ModalHeader, Tab, Tabs, useDisclosure } from "@heroui/react";
 import { Dispatch, SetStateAction, useState } from "react";
 import { BiPencil, BiTrashAlt } from "react-icons/bi";
 import { ItemFormLayoutTab } from "../ItemFormProvider";

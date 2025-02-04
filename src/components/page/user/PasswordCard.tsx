@@ -2,7 +2,7 @@ import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton";
 import ToggleButton from "@/components/ui/buttons/ToggleButton";
 import httpClient from "@/utils/lib/httpClient";
 import { mutateUserCache } from "@/utils/lib/tanquery/usersQuery";
-import { Card, CardBody, Input } from "@nextui-org/react";
+import { Card, CardBody, Input } from "@heroui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { BiCheckDouble, BiPencil, BiRevision, BiSave } from "react-icons/bi";

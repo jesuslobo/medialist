@@ -1,6 +1,6 @@
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
 import { ListData } from "@/utils/types/list";
-import { Card, CardBody, CardFooter, Image } from "@nextui-org/react";
+import { Card, CardBody, CardFooter, Image } from "@heroui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 

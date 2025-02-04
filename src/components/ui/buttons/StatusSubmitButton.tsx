@@ -1,4 +1,4 @@
-import { Button, ButtonProps } from "@nextui-org/react"
+import { Button, ButtonProps } from "@heroui/react"
 import { UseMutationResult } from "@tanstack/react-query"
 import { BiCheckDouble, BiRevision } from "react-icons/bi"
 import { FaSave } from "react-icons/fa"

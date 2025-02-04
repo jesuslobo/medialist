@@ -1,5 +1,5 @@
 import { validImagesMIME } from "@/utils/lib/fileHandling/validImages";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import { DetailedHTMLProps, HTMLAttributes, useEffect, useRef, useState } from "react";
 import { BiX } from "react-icons/bi";
 import { twMerge } from "tailwind-merge";

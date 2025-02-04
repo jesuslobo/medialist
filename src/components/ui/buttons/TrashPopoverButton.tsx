@@ -1,4 +1,4 @@
-import { Button, Popover, PopoverContent, PopoverProps, PopoverTrigger } from "@nextui-org/react";
+import { Button, Popover, PopoverContent, PopoverProps, PopoverTrigger } from "@heroui/react";
 import { useState } from "react";
 import { BiTrashAlt, BiX } from "react-icons/bi";
 

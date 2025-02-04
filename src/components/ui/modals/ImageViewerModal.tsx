@@ -1,4 +1,4 @@
-import { Button, Card, CardFooter, CardHeader, Image } from "@nextui-org/react";
+import { Button, Card, CardFooter, CardHeader, Image } from "@heroui/react";
 import { Dispatch, SetStateAction } from "react";
 import { createPortal } from "react-dom";
 import { BiX } from "react-icons/bi";

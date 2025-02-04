@@ -1,6 +1,6 @@
 import ItemPageLabelTextField from "@/components/page/lists/[id]/[itemId]/fields/ItemPageLabelTextField"
 import { ItemLabelTextField } from "@/utils/types/item"
-import { Button, Input, InputProps } from "@nextui-org/react"
+import { Button, Input, InputProps } from "@heroui/react"
 import { useContext, useState } from "react"
 import { BiX } from "react-icons/bi"
 import { useItemFormLayoutField } from "../ItemFormLayoutSection"

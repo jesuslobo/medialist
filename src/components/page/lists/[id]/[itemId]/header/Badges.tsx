@@ -2,7 +2,7 @@ import { useContext } from "react"
 import { twJoin } from "tailwind-merge"
 import { itemPageContext } from "../ItemPageProvider"
 import { badgeColors } from "@/utils/types/global"
-import { Chip } from "@nextui-org/react"
+import { Chip } from "@heroui/react"
 
 export default function ItemPageBadges({ className }: { className?: string }) {
     const { tags } = useContext(itemPageContext)

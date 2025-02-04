@@ -1,5 +1,5 @@
 import ImageInput from "@/components/ui/form/ImageUploader";
-import { Button, Input, Textarea } from "@nextui-org/react";
+import { Button, Input, Textarea } from "@heroui/react";
 import { useContext } from "react";
 import { Controller, FieldPath } from "react-hook-form";
 import { BiRevision } from "react-icons/bi";
