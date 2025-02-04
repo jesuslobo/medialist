@@ -1,7 +1,7 @@
 import ErrorPage from "@/components/layouts/ErrorPage"
 import ListsLoading from "@/components/layouts/loading/ListsLoading"
 import ListPageItems from "@/components/page/lists/[id]/ListPageItems"
-import ListPageProvider from "@/components/page/lists/[id]/ListPageProvider"
+import ListPageProvider, { ListPageContext } from "@/components/page/lists/[id]/ListPageProvider"
 import ListPageSearchBar from "@/components/page/lists/[id]/ListPageSearchBar"
 import ListPageSubNavBar from "@/components/page/lists/[id]/ListPageSubNavBar"
 import ListPageTagsList from "@/components/page/lists/[id]/tags/ListPageTagsList"
@@ -11,10 +11,12 @@ import { itemsQueryOptions, setupItemsCache } from "@/utils/lib/tanquery/itemsQu
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
 import { tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
 import { ListData } from "@/utils/types/list"
+import { Button } from "@nextui-org/react"
 import { useQuery } from "@tanstack/react-query"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { BiCollection } from "react-icons/bi"
+import { useContext } from "react"
+import { BiCollection, BiPlus } from "react-icons/bi"
 
 function ListPage() {
     const router = useRouter()
@@ -48,6 +50,7 @@ function ListPage() {
                 <ListPageSubNavBar />
                 <div className="relative">
                     <ListPageTagsList />
+                    {items.data.length === 0 && <EmptyScreen />}
                     <ListPageItems />
                 </div>
             </ListPageProvider>
@@ -64,3 +67,28 @@ export default function ListPageHOC() {
 }
 
 const Error404 = () => <ErrorPage message="Bad List ID, List Doesn't Exist" MainMessage="404!" hideTryAgain />
+
+function EmptyScreen() {
+    const router = useRouter();
+    const { list } = useContext(ListPageContext)
+
+    return (
+        <div className="flex items-center justify-center w-full h-96">
+            <section className="flex justify-center items-center flex-col gap-y-5">
+                <span className="text-9xl ml-1">🎉</span>
+                <article className="grid">
+                    <h2 className="text-4xl text-foreground-600 text-center">Create Your First Item</h2>
+                    <p className="text-foreground-500 text-center">Add an item and watch your list grow!</p>
+                </article>
+                <Button
+                    className="bg-accented"
+                    onPress={() => router.push(`/lists/${list.id}/add`)}
+                    title="Create List"
+                    size="lg"
+                >
+                    <BiPlus size={24} />
+                </Button>
+            </section>
+        </div>
+    )
+}

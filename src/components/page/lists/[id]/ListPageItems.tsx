@@ -1,35 +1,21 @@
 import ItemCard from "@/components/ui/cards/ItemCard";
 import ItemCardsList from "@/components/ui/cards/ItemCardsList";
-import { ItemData } from "@/utils/types/item";
 import { useContext } from "react";
 import { ListPageContext } from "./ListPageProvider";
 
 export default function ListPageItems() {
-    const { items, viewMode, tagsQuery, filterSettings, tags } = useContext(ListPageContext)
-
-    const tagsQueryIds = tagsQuery?.map(label => tags.find(tag => tag.label === label)?.id) || []
-
-    const isItemUnderFilter = (item: ItemData) => {
-        // item.tags.some(tagId => tagsQueryIds.includes(tagId)) for OR
-        const tagsRule = tagsQuery === null || tagsQueryIds.every(tagId => tagId && item.tags.includes(tagId))
-        const searchRule = !filterSettings.search || item.title.toLowerCase().includes(filterSettings.search)
-        // const primeTagRule
-        // const isFav
-        return tagsRule && searchRule
-    }
-
-    const badgeableTags = tags.filter(tag => tag.badgeable)
+    const { viewMode, visibleItems, badgeableTags } = useContext(ListPageContext)
 
     switch (viewMode) {
-        case 'list':
-            return (
-                <>
-                </>
-            )
+        // case 'list':
+        //     return (
+        //         <>
+        //         </>
+        //     )
         case 'cardsList':
             return (
                 <div className=" grid grid-cols-2 lg:grid-cols-1 gap-4">
-                    {items.map(item => isItemUnderFilter(item) &&
+                    {visibleItems.map(item =>
                         <ItemCardsList
                             key={item.title + item.id}
                             item={item}
@@ -41,7 +27,7 @@ export default function ListPageItems() {
         default: //cards
             return (
                 <div className=" grid grid-cols-md-card gap-4">
-                    {items.map(item => isItemUnderFilter(item) &&
+                    {visibleItems.map(item =>
                         <ItemCard
                             key={item.title + item.id}
                             item={item}
