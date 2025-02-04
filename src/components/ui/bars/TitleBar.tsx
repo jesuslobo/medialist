@@ -6,19 +6,16 @@ export default function TitleBar({
     children,
     startContent,
     middleContent,
-    pointedBg,
 }: {
     title?: string,
     className?: string,
     children?: React.ReactNode,
     startContent?: React.ReactNode,
     middleContent?: React.ReactNode,
-    pointedBg?: boolean,
 }) {
     return (
         <header className={twJoin(
-            "flex items-center lg:justify-center flex-wrap gap-y-3 rounded-2xl text-foreground capitalize font-extrabold bg-left",
-            pointedBg && "bg-pure-theme bg-pointed bg-[size:25px_25px]",
+            "flex items-center lg:justify-center flex-wrap gap-y-3 rounded-2xl text-foreground capitalize font-extrabold bg-left bg-pure-theme",
             className
         )}>
             {startContent}

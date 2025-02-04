@@ -56,7 +56,6 @@ function EditListPage() {
             <TitleBar
                 title={`Edit: ${list.title}`}
                 startContent={<BiPlus className="text-3xl mr-3 flex-none " />}
-                pointedBg
             >
                 <StatusSubmitButton
                     className={!Object.keys(dirtyFields).length ? "cursor-not-allowed" : undefined}

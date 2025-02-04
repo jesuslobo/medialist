@@ -41,7 +41,6 @@ export default function AddListPage() {
             <TitleBar
                 title="Add List"
                 startContent={<BiPlus className="text-3xl mr-3 flex-none " />}
-                pointedBg
             >
                 <StatusSubmitButton
                     mutation={mutation}
