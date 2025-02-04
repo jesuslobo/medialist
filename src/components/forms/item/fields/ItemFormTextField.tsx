@@ -24,7 +24,8 @@ export default function ItemFormTextField({
         className: "shadow-sm rounded-xl",
         type: "text",
         value: currentField.text,
-        onValueChange: (text: string) => set({ text })
+        onValueChange: (text: string) => set({ text }),
+        isRequired: true
     }
 
     return (

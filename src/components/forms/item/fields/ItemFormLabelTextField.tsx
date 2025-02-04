@@ -23,7 +23,7 @@ export default function ItemFormLabelTextField({
     const inputProps: InputProps = {
         className: "shadow-sm rounded-xl",
         variant: "bordered",
-        type: "text",
+        type: "text"
     }
 
     return (
@@ -38,6 +38,7 @@ export default function ItemFormLabelTextField({
                         value={currentField.label}
                         onValueChange={(label) => set({ label })}
                         {...inputProps}
+                        isRequired
                     />
                     :
                     <Input

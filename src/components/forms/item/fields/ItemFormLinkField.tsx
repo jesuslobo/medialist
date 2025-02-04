@@ -38,6 +38,7 @@ export default function ItemFormLinkField({
         className: "shadow-sm rounded-xl",
         variant: "bordered",
         type: "text",
+        isRequired: true,
     }
 
     function readImage(file: File) {
@@ -68,6 +69,7 @@ export default function ItemFormLinkField({
                         placeholder="Link"
                         value={currentField.url}
                         onValueChange={(url) => set({ url })}
+                        validate={(url) => url.match(/^(http|https):\/\/[^ "]+$/i) ? null : 'Invalid URL'}
                         {...inputProps}
                     />
 
