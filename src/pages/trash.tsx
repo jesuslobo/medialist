@@ -2,18 +2,18 @@ import ErrorPage from "@/components/layouts/ErrorPage";
 import ListsLoading from "@/components/layouts/loading/ListsLoading";
 import TrashCardCheckBox from "@/components/page/trash/TrashCardCheckBox";
 import TitleBar from "@/components/ui/bars/TitleBar";
-import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton";
+import StatusSubmitButton, { StatusSubmitButtonProps } from "@/components/ui/buttons/StatusSubmitButton";
 import ToggleButton from "@/components/ui/buttons/ToggleButton";
 import httpClient from "@/utils/lib/httpClient";
 import { mutateItemCache } from "@/utils/lib/tanquery/itemsQuery";
 import { mutateListCache } from "@/utils/lib/tanquery/listsQuery";
 import { ItemData } from "@/utils/types/item";
 import { ListData } from "@/utils/types/list";
-import { Button, CheckboxGroup, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
+import { Button, CheckboxGroup, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Head from "next/head";
-import { useState } from "react";
-import { BiCheckCircle, BiCheckDouble, BiRevision, BiSolidCheckCircle, BiTrashAlt } from "react-icons/bi";
+import { useEffect, useState } from "react";
+import { BiCheckCircle, BiCheckDouble, BiRevision, BiSearch, BiSolidCheckCircle, BiTrashAlt } from "react-icons/bi";
 
 interface DeleteEntity {
     id: string;
@@ -53,17 +53,43 @@ export default function TrashPage() {
     const selectedIDs = extractIDs(selected)
     const isAllSlected = trashData.data ? selected.length === trashData.data.length : false
 
-    const [visibility, setVisibility] = useState<'items' | 'lists' | 'both'>('both') // what to show
+    const [visibleEntities, setVisibleEntities] = useState<DeleteEntity[]>([])
+    const [allow, _setAllow] = useState<'items' | 'lists' | null>(null) // null means both
+    const [searchValue, _setSearchValue] = useState<string>('')
+
+    const setSearchValue = (value: string) => _setSearchValue(value.toLowerCase().trim())
+    const setAllow = (value: 'items' | 'lists') => _setAllow(value === allow ? null : value)
+
+    const isUnderFilter = (entity: DeleteEntity) => {
+        console.log(entity, allow === 'items' && entity.listId)
+        if (allow === 'items' && !entity.listId) return false
+        if (allow === 'lists' && entity.listId) return false
+        if (searchValue && !entity.title.toLowerCase().includes(searchValue)) return false
+        return true
+    }
+
+    useEffect(() => {
+        if (!searchValue && !allow) return setVisibleEntities(trashData.data || [])
+        setVisibleEntities(trashData.data!.filter(isUnderFilter))
+    }, [trashData.data, allow, searchValue])
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
     function selectAll() {
         if (isAllSlected) return setSelected([])
-        setSelected([...trashData.data!.map(item => item.id)])
+        setSelected([...trashData.data!.map(item => item.listId ? `i-${item.id}` : item.id)])
     }
 
     if (trashData.isLoading) return <ListsLoading />
     if (!trashData.isSuccess) return <ErrorPage message="Failed To Fetch The Data" />
+
+    const actionButtonProps: Partial<StatusSubmitButtonProps> = {
+        size: "sm",
+        savedContent: <BiCheckDouble className="text-xl" />,
+        errorContent: <BiRevision className="text-xl" />,
+        isDisabled: selected.length === 0,
+        isIconOnly: true
+    }
 
     return (
         <>
@@ -75,68 +101,64 @@ export default function TrashPage() {
                 startContent={<BiTrashAlt className="text-3xl mr-3 flex-none p-0" />}
                 className="p-5"
             >
-                <div className=" flex items-center justify-center gap-x-2">
-                    <StatusSubmitButton
-                        title="Delete All"
-                        mutation={deleteMutation}
-                        onPress={onOpen}
-                        defaultContent={<BiTrashAlt className="text-xl" />}
-                        savedContent={<BiCheckDouble className="text-xl" />}
-                        errorContent={<BiRevision className="text-xl" />}
-                        isDisabled={selected.length === 0}
-                        isIconOnly
-                    />
-                    <StatusSubmitButton
-                        title="Restore"
-                        mutation={restoreMutation}
-                        onPress={() => restoreMutation.mutate(selectedIDs)}
-                        defaultContent={<BiRevision className="text-xl" />}
-                        savedContent={<BiCheckDouble className="text-xl" />}
-                        errorContent={<BiRevision className="text-xl" />}
-                        isDisabled={selected.length === 0}
-                        isIconOnly
-                    />
-
-                    <ToggleButton
-                        isToggled={isAllSlected}
-                        toggledChildren={<BiSolidCheckCircle className="text-xl" />}
-                        onPress={selectAll}
-                        title="Select All"
-                        isIconOnly
-                    >
-                        <BiCheckCircle className="text-xl" />
-                    </ToggleButton>
-                </div>
+                <Input
+                    className="text-foreground shadow-none"
+                    radius="lg"
+                    placeholder="Type to search..."
+                    startContent={<BiSearch className="opacity-80" size={20} />}
+                    onValueChange={setSearchValue}
+                    value={searchValue}
+                />
             </TitleBar>
 
             <div className="flex items-center gap-2 mt-2 mb-5 animate-fade-in">
                 <span className="text-foreground-500 capitalize">filter:</span>
                 <ToggleButton
                     size="sm"
-                    isToggled={visibility === 'items'}
-                    onPress={() => setVisibility(visibility === 'items' ? 'both' : 'items')}
+                    isToggled={allow === 'items'}
+                    onPress={() => setAllow('items')}
                 >
                     Items
                 </ToggleButton>
                 <ToggleButton
                     size="sm"
                     activeColor="secondary"
-                    isToggled={visibility === 'lists'}
-                    onPress={() => setVisibility(visibility === 'lists' ? 'both' : 'lists')}
+                    isToggled={allow === 'lists'}
+                    onPress={() => setAllow('lists')}
                 >
                     Lists
+                </ToggleButton>
+                <div className="flex-grow"></div>
+                <StatusSubmitButton
+                    {...actionButtonProps}
+                    title="Delete All"
+                    mutation={deleteMutation}
+                    onPress={onOpen}
+                    defaultContent={<BiTrashAlt className="text-xl" />}
+                />
+                <StatusSubmitButton
+                    {...actionButtonProps}
+                    title="Restore"
+                    mutation={restoreMutation}
+                    onPress={() => restoreMutation.mutate(selectedIDs)}
+                    defaultContent={<BiRevision className="text-xl" />}
+                />
+
+                <ToggleButton
+                    title="Select All"
+                    size="sm"
+                    isToggled={isAllSlected}
+                    onPress={selectAll}
+                    toggledChildren={<BiSolidCheckCircle className="text-xl" />}
+                    isIconOnly
+                >
+                    <BiCheckCircle className="text-xl" />
                 </ToggleButton>
             </div>
 
             <CheckboxGroup value={selected} onChange={setSelected}>
                 <main className="grid grid-cols-3 lg:grid-cols-2 sm:flex sm:flex-col gap-3 items-start">
-                    {trashData.data?.map((item, i) =>
-                        visibility === 'items' && !item.listId
-                            ? null
-                            : visibility === 'lists' && item.listId
-                                ? null
-                                : <TrashCardCheckBox key={item.id + i} data={item} />
-                    )}
+                    {visibleEntities.map((item, i) => <TrashCardCheckBox key={item.id + i} data={item} />)}
                 </main>
             </CheckboxGroup>
 

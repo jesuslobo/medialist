@@ -3,7 +3,7 @@ import { UseMutationResult } from "@tanstack/react-query"
 import { BiCheckDouble, BiRevision } from "react-icons/bi"
 import { FaSave } from "react-icons/fa"
 
-interface StatusSubmitButtonProps extends Omit<ButtonProps, 'onPress'> {
+export interface StatusSubmitButtonProps extends Omit<ButtonProps, 'onPress'> {
     mutation: UseMutationResult<any, any, any, any>,
     errorOnPress?: () => void,
     saveOnPress?: () => void,

@@ -23,7 +23,7 @@ export default function ToggleButton({
 }: ToggleButtonProps) {
     const [isToggledH, setIsToggledH] = useState(false);
 
-    isToggled ||= isToggledH;
+    isToggled = isToggled === undefined ? isToggledH : isToggled;
     setIsToggled ||= setIsToggledH;
 
     const colors = ["primary", "default", "secondary", "success", "warning", "danger"]
