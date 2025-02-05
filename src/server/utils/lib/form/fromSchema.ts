@@ -35,8 +35,17 @@ const $ITEM_FORM_SCHEMA = (dir: string) => ({
   }
 }) as ProcessFormDataBuilder
 
+const $ITEM_MEDIA_FORM_SCHEMA = (dir: string) => ({
+  title: 'String',
+  path: {
+    dir,
+    thumbnailOptions: THUMBNAILS_OPTIONS.ITEM_MEDIA,
+  }
+}) as ProcessFormDataBuilder
+
 export {
   $ITEM_FORM_SCHEMA,
-  $LIST_FORM_SCHEMA
+  $LIST_FORM_SCHEMA,
+  $ITEM_MEDIA_FORM_SCHEMA
 };
 

@@ -3,7 +3,7 @@ import { $createTags, $getTags } from '@/server/db/queries/tags';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFile from '@/server/utils/file/deleteFile';
 import $processItemForm from '@/server/utils/lib/form/processItemForm';
-import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { validatedID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { ItemData, ItemLayoutTab, ItemSaveResponse, LogoField } from '@/utils/types/item';
@@ -58,10 +58,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
 
                 if (data.coverPath !== undefined && item.coverPath && item.coverPath !== data.coverPath)
-                    $deleteFile(coverThumbnailsOptions.itemCover, dir.item, item.coverPath);
+                    $deleteFile(THUMBNAILS_OPTIONS.ITEM_COVER, dir.item, item.coverPath);
 
                 if (data.posterPath !== undefined && item.posterPath && item.posterPath !== data.posterPath)
-                    $deleteFile(coverThumbnailsOptions.itemPoster, dir.item, item.posterPath);
+                    $deleteFile(THUMBNAILS_OPTIONS.ITEM_POSTER, dir.item, item.posterPath);
 
                 if (form.data.layout !== undefined) {
                     form.data.layout = mapLayoutsToLogos()
@@ -70,7 +70,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     const newLogoPaths = new Set(extractLogoPaths(form.data.layout))
                     const deletedLogos = oldLogoPaths.filter(logoPath => !newLogoPaths.has(logoPath))
                     deletedLogos.forEach(logoPath => logoPath &&
-                        $deleteFile(coverThumbnailsOptions.logo, dir.item, logoPath)
+                        $deleteFile(THUMBNAILS_OPTIONS.LOGO, dir.item, logoPath)
                     )
                 }
 

@@ -19,6 +19,7 @@ export const THUMBNAILS_OPTIONS = {
     LIST_COVER: [{ w: 300 }],
     ITEM_POSTER: [{ w: 300 }, { w: 700 }, {}],
     ITEM_COVER: [{ w: 300 }, { w: 700 }, {}],
+    ITEM_MEDIA: [{ w: 300 }, { w: 700 }, {}],
     LOGO: [{ w: 50 }],
 }
 
@@ -27,6 +28,6 @@ export const THUMBNAILS_OPTIONS = {
  * users/ userId / listId /
  *                        / list's cover & logos
  *                        / thumbnails / ...
- *                        / itemId / item's poster & cover
+ *                        / itemId / item's poster, cover, logos and media
  *                        / itemId / thumbnails / ...
  */
