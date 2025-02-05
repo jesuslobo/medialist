@@ -12,6 +12,16 @@ export const $getItemMedia = async (userId: string, item_id: string) => {
         ))
 }
 
+export const $getItemMediaById = async (userId: string, id: string) => {
+    return await db
+        .select()
+        .from(itemsMedia)
+        .where(and(
+            eq(itemsMedia.userId, userId),
+            eq(itemsMedia.id, id)
+        ))
+}
+
 export const $createItemMedia = async (data: typeof itemsMedia.$inferInsert[] | typeof itemsMedia.$inferInsert) =>
     await db
         .insert(itemsMedia)
