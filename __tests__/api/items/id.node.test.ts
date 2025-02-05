@@ -2,7 +2,7 @@
 import itemsRouter from '@/pages/api/items/[id]';
 import { db } from '@/server/db';
 import { listsTagsTable } from '@/server/db/schema';
-import { THUMBNAILS_OPTIONS, thumbnailName, ThumbnailOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { generateID } from '@/utils/lib/generateID';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
@@ -520,6 +520,69 @@ describe('api/items/[id]', async () => {
             })
         })
 
+        test('should create media if provided', async () => {
+            const { userMock, ...item } = await $mockItem({
+                layout: [[
+                    { type: 'one_row', label: 'test' },
+                    [{ type: 'labelText', label: 'logoField1', body: 'text', logo: true }],
+                ]],
+                createdAt: new Date(2000, 1),
+                updatedAt: new Date(2000, 1),
+            });
+
+            const { userData, ...user } = userMock;
+            const { cookies } = await user.createCookie();
+
+            const form = new FormData();
+            const [imageID1, imageID2] = [generateID(10), generateID(10)]
+
+            form.append('media', JSON.stringify([
+                { title: 'image1', path: imageID1 },
+                { title: null, path: 'shouldIgnorethis' },
+                { path: imageID2 },
+            ]))
+            form.append(`mediaImages[${imageID1}]`, file, TEST_MOCK_FILE_NAME);
+            form.append(`mediaImages[${imageID2}]`, file, TEST_MOCK_FILE_NAME);
+
+            const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
+            await new Promise(setImmediate)
+
+            expect(body).toEqual({
+                item: {
+                    ...item.itemData,
+                    updatedAt: expect.not.stringMatching(item.itemData.updatedAt),
+                },
+                newTags: [],
+                newMedia: [
+                    {
+                        id: expect.any(String),
+                        userId: userMock.userData.id,
+                        itemId: item.itemData.id,
+                        path: expect.any(String),
+                        type: 'image',
+                        title: 'image1',
+                        createdAt: expect.any(String),
+                        updatedAt: expect.any(String)
+                    },
+                    {
+                        id: expect.any(String),
+                        userId: userMock.userData.id,
+                        itemId: item.itemData.id,
+                        path: expect.any(String),
+                        type: 'image',
+                        title: null,
+                        createdAt: expect.any(String),
+                        updatedAt: expect.any(String)
+                    },
+                ]
+            })
+
+            const media1Exists = fileExists(item.itemDir, body.newMedia[0].path, [])
+            expect(media1Exists).toBe(true)
+
+            const media2Exists = fileExists(item.itemDir, body.newMedia[1].path, [])
+            expect(media2Exists).toBe(true)
+        })
     })
 
     test('DELETE - delete an item by ID', async () => {

@@ -1,6 +1,6 @@
 
 import itemsRouter from '@/pages/api/lists/[id]/items';
-import { THUMBNAILS_OPTIONS, thumbnailName, ThumbnailOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { generateID } from '@/utils/lib/generateID';
 import { ItemData, ItemLayoutTab } from '@/utils/types/item';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
@@ -106,7 +106,7 @@ describe('api/lists/[id]/items', async () => {
         // to add: default header, default layout,
         // to add: should check if that no item files are created when an error does occur
 
-        test('should create item with title, poster, cover, layout (with logos), and tags (existing + new)', async () => {
+        test('should create item with title, poster, cover, layout (with logos), media images, and tags (existing + new)', async () => {
             const list = await $mockList();
             const { listData, userMock } = list
             const { cookies } = await userMock.createCookie();
@@ -133,6 +133,14 @@ describe('api/lists/[id]/items', async () => {
             ] as ItemLayoutTab[]))
             form.append(`logoPaths[${logoID}]`, file, TEST_MOCK_FILE_NAME);
 
+            const [imageID1, imageID2] = [generateID(10), generateID(10)]
+            form.append('media', JSON.stringify([
+                { title: 'image1', path: imageID1 },
+                { title: null, path: 'shouldIgnorethis' },
+                { path: imageID2 },
+            ]))
+            form.append(`mediaImages[${imageID1}]`, file, TEST_MOCK_FILE_NAME);
+            form.append(`mediaImages[${imageID2}]`, file, TEST_MOCK_FILE_NAME);
 
             const { body, statusCode } = await $mockHttp(itemsRouter).post(form, { cookies, query: { id: listData.id } });
             await new Promise(setImmediate)
@@ -174,7 +182,29 @@ describe('api/lists/[id]/items', async () => {
                     label: 'newTag that will be created',
                     createdAt: expect.any(String),
                     updatedAt: expect.any(String),
-                }]
+                }],
+                newMedia: [
+                    {
+                        id: expect.any(String),
+                        userId: userMock.userData.id,
+                        itemId: item.id,
+                        path: expect.any(String),
+                        type: 'image',
+                        title: 'image1',
+                        createdAt: expect.any(String),
+                        updatedAt: expect.any(String)
+                    },
+                    {
+                        id: expect.any(String),
+                        userId: userMock.userData.id,
+                        itemId: item.id,
+                        path: expect.any(String),
+                        type: 'image',
+                        title: null,
+                        createdAt: expect.any(String),
+                        updatedAt: expect.any(String)
+                    },
+                ]
             })
 
             const itemDir = join(list.listDir, item.id)
@@ -188,6 +218,12 @@ describe('api/lists/[id]/items', async () => {
 
             const coverExists = fileExists(itemDir, item.coverPath as string, THUMBNAILS_OPTIONS.ITEM_COVER)
             expect(coverExists).toBe(true)
+
+            const mediaImage1Exists = fileExists(itemDir, body.newMedia[0].path, THUMBNAILS_OPTIONS.ITEM_MEDIA)
+            expect(mediaImage1Exists).toBe(true)
+
+            const mediaImage2Exists = fileExists(itemDir, body.newMedia[1].path, THUMBNAILS_OPTIONS.ITEM_MEDIA)
+            expect(mediaImage2Exists).toBe(true)
 
             expect(statusCode).toBe(201);
 
@@ -223,7 +259,8 @@ describe('api/lists/[id]/items', async () => {
                     coverPath: null,
                     description: null,
                 },
-                newTags: []
+                newTags: [],
+                newMedia: []
             })
 
             expect(statusCode).toBe(201);
