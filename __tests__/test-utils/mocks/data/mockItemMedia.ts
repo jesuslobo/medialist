@@ -45,6 +45,8 @@ export default async function $mockItemMedia(
     return {
         ItemMock,
         userMock,
+        listMock: ItemMock.listMock,
+        itemDir: ItemMock.itemDir,
         mediaData: {
             ...mediaData,
             createdAt: mediaData.createdAt.toISOString(),
