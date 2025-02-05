@@ -1,6 +1,7 @@
 import { db } from '@/server/db';
 import { $getItems } from '@/server/db/queries/items';
 import { $getList } from '@/server/db/queries/lists';
+import { $createItemMedia } from '@/server/db/queries/media';
 import { $createTags, $getTags } from '@/server/db/queries/tags';
 import { itemsTable } from '@/server/db/schema';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
@@ -9,8 +10,12 @@ import { generateID, validatedID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { ItemSaveResponse } from '@/utils/types/item';
 import { ListData } from '@/utils/types/list';
+import { MediaData } from '@/utils/types/media';
 import busboy from 'busboy';
 import type { NextApiRequest, NextApiResponse } from 'next';
+
+const MAX_UPLOAD_LIMIT = 1024 * 1024 * 50; // 50MB
+const MAX_ALLOWED_FILES = 40;
 
 /** api/lists/[id]/items
  * Get: Get all items of a list
@@ -39,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const tags = await $getTags(user.id, list.id)
 
             const form = await $processItemForm(user.id, list.id, itemId)
-            const { processFiles, processFields, handleTags, mapLayoutsToLogos } = form;
+            const { processFiles, processFields, handleTags, mapLayoutsToLogos, handleMediaImages } = form;
 
             form.data['id'] = itemId;
             form.data['userId'] = user.id;
@@ -47,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             const bb = busboy({
                 headers: req.headers,
-                limits: { fields: 5, files: 30, fileSize: 1024 * 1024 * 50 } // 50MB
+                limits: { fields: 6, files: MAX_ALLOWED_FILES, fileSize: MAX_UPLOAD_LIMIT }
             })
 
             bb.on('field', processFields)
@@ -75,9 +80,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     .values(form.data)
                     .returning();
 
+                // should be created after the item, since it uses the item id as a foreign key
+                let newMediaData: MediaData[] = []
+                if (form.data.media) {
+                    const toAdd = handleMediaImages()
+                    form.data.media = toAdd
+                    newMediaData = await $createItemMedia(toAdd)
+                }
+
                 res.status(201).json({
                     item: item[0],
-                    newTags: newTagsData // for cache update on the client
+                    // for cache update on the client:
+                    newTags: newTagsData,
+                    newMedia: newMediaData,
                 } as ItemSaveResponse);
 
                 console.log('[Created] api/lists/[id]/items:', item[0].id + ' ' + item[0].title);

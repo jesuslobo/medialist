@@ -1,11 +1,14 @@
 import { generateID } from "@/utils/lib/generateID";
 import { TagData } from "@/utils/types/global";
 import { ItemData, ItemField, ItemLayoutTab, LogoField } from "@/utils/types/item";
+import { MediaData } from "@/utils/types/media";
 import $getDir from "../../file/getDir";
 import $processFormData, { ProcessedFormData } from "../processFormData";
 import { $ITEM_FORM_SCHEMA } from "./fromSchema";
 
-type ItemServerForm = ItemData & ProcessedFormData
+type ItemServerForm = ItemData & ProcessedFormData & {
+    media?: { path: string, title?: string | null }[]
+}
 
 /** Any Extra logic should be in BB's onFinish */
 export default async function $processItemForm(userId: string, listId: string, itemId: string) {
@@ -19,6 +22,7 @@ export default async function $processItemForm(userId: string, listId: string, i
         ...form,
         /** Directly assemble the addresses of new logos to their fields */
         mapLayoutsToLogos: () => mapFieldsToLogos(data, attachments),
+        handleMediaImages: () => handleMediaImages(data, attachments, userId, itemId),
         /** Returns an Array of New Tags */
         handleTags: (tagsData: { id: string }[]) => handleTags(tagsData, data, userId, listId),
         dir: {
@@ -46,6 +50,29 @@ function mapFieldsToLogos(data: ItemServerForm, logoPaths: Map<String, string>) 
                 })
         )
     ) as ItemLayoutTab[] || []
+}
+
+function handleMediaImages(data: ItemServerForm, mediaImages: Map<String, string>, userId: string, itemId: string) {
+    let images = [] as MediaData[]
+
+    data.media?.forEach(media => {
+        const key = `mediaImages[${media.path}]`
+        if (!mediaImages.has(key)) return
+
+        const path = mediaImages.get(key) as string
+        images.push({
+            id: generateID(),
+            userId,
+            itemId,
+            path,
+            type: 'image',
+            title: media.title || null,
+            createdAt: new Date(Date.now()),
+            updatedAt: new Date(Date.now()),
+        })
+    })
+
+    return images
 }
 
 function handleTags(tagsIDs: { id: string }[], data: ItemServerForm, userId: string, listId: string) {

@@ -17,6 +17,7 @@ const $ITEM_FORM_SCHEMA = (dir: string) => ({
   header: 'JSON',
   tags: 'JSON',
   layout: "JSON",
+  media: "JSON",
   trash: "Boolean",
   posterPath: {
     dir,
@@ -32,6 +33,11 @@ const $ITEM_FORM_SCHEMA = (dir: string) => ({
     dir,
     thumbnailOptions: THUMBNAILS_OPTIONS.LOGO,
     attachTo: 'layout'
+  },
+  mediaImages: {
+    dir,
+    thumbnailOptions: THUMBNAILS_OPTIONS.ITEM_MEDIA,
+    attachTo: 'media'
   }
 }) as ProcessFormDataBuilder
 

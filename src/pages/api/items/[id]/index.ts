@@ -1,4 +1,5 @@
 import { $getItem, $updateItems } from '@/server/db/queries/items';
+import { $createItemMedia } from '@/server/db/queries/media';
 import { $createTags, $getTags } from '@/server/db/queries/tags';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFile from '@/server/utils/file/deleteFile';
@@ -7,8 +8,12 @@ import { THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { validatedID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { ItemData, ItemLayoutTab, ItemSaveResponse, LogoField } from '@/utils/types/item';
+import { MediaData } from '@/utils/types/media';
 import busboy from 'busboy';
 import type { NextApiRequest, NextApiResponse } from 'next';
+
+const MAX_UPLOAD_LIMIT = 1024 * 1024 * 50; // 50MB
+const MAX_ALLOWED_FILES = 40;
 
 /** api/items/[id]
  * Get:  gets an item by id
@@ -37,11 +42,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const tags = await $getTags(user.id, item.listId)
 
             const form = await $processItemForm(user.id, item.listId, item.id)
-            const { processFiles, processFields, handleTags, mapLayoutsToLogos, dir, data } = form;
+            const { processFiles, processFields, handleTags, mapLayoutsToLogos, handleMediaImages, dir, data } = form;
 
             const bb = busboy({
                 headers: req.headers,
-                limits: { fields: 7, files: 30, fileSize: 1024 * 1024 * 50 } // 50MB
+                limits: { fields: 8, files: MAX_ALLOWED_FILES, fileSize: MAX_UPLOAD_LIMIT }
             })
 
             bb.on('field', processFields)
@@ -74,12 +79,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     )
                 }
 
+                let newMediaData: MediaData[] = []
+                if (form.data?.media && Array.isArray(form.data.media) && form.data.media.length > 0) {
+                    const toAdd = handleMediaImages()
+                    form.data.media = toAdd
+                    newMediaData = await $createItemMedia(toAdd)
+                }
+
                 form.data.updatedAt = new Date(Date.now())
                 const updatedItem = await $updateItems(user.id, item.id, form.data)
 
                 res.status(200).json({
                     item: updatedItem[0],
-                    newTags: newTagsData // for cache update on the client
+                    // for cache update on the client:
+                    newTags: newTagsData,
+                    newMedia: newMediaData,
                 } as ItemSaveResponse);
 
                 console.log('[Edited] api/items/[id]:', updatedItem[0].id + ' ' + updatedItem[0].title);

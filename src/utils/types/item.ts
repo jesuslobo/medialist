@@ -1,5 +1,6 @@
 import { TagData, UserData } from "./global"
 import { ListData } from "./list"
+import { MediaData } from "./media"
 
 export interface ItemData {
     id: string
@@ -79,5 +80,5 @@ export interface ItemCardField {
 export interface ItemSaveResponse {
     item: ItemData
     newTags: TagData[]
-    // newImages:
+    newMedia: MediaData[]
 }
