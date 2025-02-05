@@ -150,8 +150,7 @@ export const itemsMedia = sqliteTable("items_media", {
     userId: text("user_id")
         .notNull()
         .references(() => usersTable.id, { onDelete: "cascade" }),
-    title: text("title")
-        .notNull(),
+    title: text("title"),
     path: text("path")
         .notNull(),
     type: text("type")

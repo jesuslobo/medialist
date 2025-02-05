@@ -5,7 +5,7 @@ export interface MediaData {
     id: string
     userId: UserData['id']
     itemId: ItemData['id']
-    title: string
+    title?: string | null
     path: string
     type: "image"
     createdAt: Date
