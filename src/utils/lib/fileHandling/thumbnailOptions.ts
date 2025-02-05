@@ -15,20 +15,11 @@ export const thumbnailName = (fileName: string, thumbnailsOptions: ThumbnailOpti
     return disablePrefix ? thumbnail : `thumbnails/${thumbnail}`;
 };
 
-//** rename it to thumbnailsOptions */
-export const coverThumbnailsOptions: Record<string, ThumbnailOptions[]> & {
-    listCover: ThumbnailOptions[];
-    itemPoster: ThumbnailOptions[];
-    itemCover: ThumbnailOptions[];
-    itemImage: ThumbnailOptions[];
-    logo: ThumbnailOptions[];
-} = {
-    listCover: [{ w: 300 }],
-    itemPoster: [{ w: 300 }, { w: 700 }, {}],
-    // itemPoster: [{ h: 300 }, { h: 700 }, {}], 
-    itemCover: [{ w: 300 }, { w: 700 }, {}],
-    itemImage: [{ w: 300 }, { w: 700 }, {}],
-    logo: [{ w: 50 }],
+export const THUMBNAILS_OPTIONS = {
+    LIST_COVER: [{ w: 300 }],
+    ITEM_POSTER: [{ w: 300 }, { w: 700 }, {}],
+    ITEM_COVER: [{ w: 300 }, { w: 700 }, {}],
+    LOGO: [{ w: 50 }],
 }
 
 /**

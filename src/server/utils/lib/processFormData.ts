@@ -4,15 +4,15 @@ import { ThumbnailOptions } from "../../../utils/lib/fileHandling/thumbnailOptio
 import $handleFileUpload from "../file/handleFileUpload";
 
 /** function that will parseForm to fields */
-export default function $processFormData<T extends ProcessedFormData>(options: ProcessFormDataOptions) {
+export default function $processFormData<T extends ProcessedFormData>(builder: ProcessFormDataBuilder) {
     let data = {} as T;
     let attachments = new Map<string, string>();
 
     return {
         processFields: (name: string, value: string) =>
-            handleFields(name, value, options, data),
+            handleFields(name, value, builder, data),
         processFiles: async (name: string, stream: internal.Readable & { truncated?: boolean }, info: busboy.FileInfo, disableStreamResume: boolean = false) =>
-            await processFiles(name, stream, info, disableStreamResume, options, data, attachments),
+            await processFiles(name, stream, info, disableStreamResume, builder, data, attachments),
         /** left the implementation to the user,
          *  since JSON fields are complex, and searching everything inside can be bad when we know where to search */
         attachments,
@@ -23,7 +23,7 @@ export default function $processFormData<T extends ProcessedFormData>(options: P
 function handleFields(
     name: string,
     value: string,
-    options: ProcessFormDataOptions,
+    options: ProcessFormDataBuilder,
     data: ProcessedFormData,
 ) {
     for (let fieldName in options) {
@@ -55,7 +55,7 @@ async function processFiles(
     stream: internal.Readable & { truncated?: boolean },
     info: busboy.FileInfo,
     disableStreamResume: Boolean,
-    options: ProcessFormDataOptions,
+    options: ProcessFormDataBuilder,
     data: ProcessedFormData,
     attachments: Map<string, string>,
 ) {
@@ -93,7 +93,7 @@ type File = {
     aliases?: string[];
 }
 
-export interface ProcessFormDataOptions {
+export interface ProcessFormDataBuilder {
     /** Default is String */
     [key: FieldName]: File | "JSON" | "String" | "Boolean" | "Number"
 }

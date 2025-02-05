@@ -2,9 +2,9 @@ import { $getList, $updateLists } from '@/server/db/queries/lists';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFile from '@/server/utils/file/deleteFile';
 import $getDir from '@/server/utils/file/getDir';
-import { $listFormOptions } from '@/server/utils/lib/form/formData.options';
+import { $LIST_FORM_SCHEMA } from '@/server/utils/lib/form/fromSchema';
 import $processFormData, { ProcessedFormData } from '@/server/utils/lib/processFormData';
-import { coverThumbnailsOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { validatedID } from '@/utils/lib/generateID';
 import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'PATCH') {
       const dir = await $getDir(user.id, list.id, true);
-      const form = await $processFormData<ListData & ProcessedFormData>($listFormOptions(dir.list));
+      const form = $processFormData<ListData & ProcessedFormData>($LIST_FORM_SCHEMA(dir.list));
       const { processFiles, processFields, data } = form;
 
       const bb = busboy({
@@ -58,7 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       bb.on('finish', async () => {
         if (data.coverPath !== undefined && list.coverPath && list.coverPath !== data.coverPath)
-          $deleteFile(coverThumbnailsOptions.listCover, dir.list, list.coverPath);
+          $deleteFile(THUMBNAILS_OPTIONS.LIST_COVER, dir.list, list.coverPath);
 
         form.data.updatedAt = new Date(Date.now())
         const updatedList = await $updateLists(user.id, list.id, form.data)

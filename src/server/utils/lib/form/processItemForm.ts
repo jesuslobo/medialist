@@ -3,7 +3,7 @@ import { TagData } from "@/utils/types/global";
 import { ItemData, ItemField, ItemLayoutTab, LogoField } from "@/utils/types/item";
 import $getDir from "../../file/getDir";
 import $processFormData, { ProcessedFormData } from "../processFormData";
-import { $itemFormOptions } from "./formData.options";
+import { $ITEM_FORM_SCHEMA } from "./fromSchema";
 
 type ItemServerForm = ItemData & ProcessedFormData
 
@@ -12,7 +12,7 @@ export default async function $processItemForm(userId: string, listId: string, i
     const dir = await $getDir(userId, listId, itemId, true);
     const itemDir = dir.item as string;
 
-    const form = $processFormData<ItemServerForm>($itemFormOptions(itemDir))
+    const form = $processFormData<ItemServerForm>($ITEM_FORM_SCHEMA(itemDir))
     const { data, attachments } = form
 
     return {

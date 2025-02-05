@@ -5,7 +5,7 @@ import { $createLists, $deleteLists } from "@/server/db/queries/lists";
 import { generateID } from "@/utils/lib/generateID";
 import { join } from "path";
 import { fs } from "memfs";
-import { coverThumbnailsOptions, thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
+import { THUMBNAILS_OPTIONS, thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
 import { mkdirSync } from "fs";
 
 type List = Partial<ListData> & {
@@ -30,7 +30,7 @@ export default async function $mockList(listData?: List, userMock?: Awaited<Retu
         fs.writeFileSync(join(listDir, generatedName), Buffer.from(''));
         coverPath = generatedName
 
-        coverThumbnailsOptions.listCover.forEach((option) =>
+        THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>
             fs.writeFileSync(join(listDir, thumbnailName(generatedName, option)), Buffer.from(''))
         )
     }

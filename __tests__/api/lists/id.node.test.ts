@@ -1,5 +1,5 @@
 import listsRouter from '@/pages/api/lists/[id]/index';
-import { coverThumbnailsOptions, thumbnailName } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { THUMBNAILS_OPTIONS, thumbnailName } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { generateID } from '@/utils/lib/generateID';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import { TEST_MOCK_FILE_BUFFER, TEST_MOCK_FILE_NAME } from '@tests/test-utils/mocks/mockFile';
@@ -111,7 +111,7 @@ describe('api/lists/[id]', async () => {
 
             const oldCoverDir = join(listDir, listData.coverPath as string);
             expect(fs.existsSync(oldCoverDir)).toBe(true);
-            coverThumbnailsOptions.listCover.forEach((option) =>
+            THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>
                 expect(fs.existsSync(join(listDir, thumbnailName(listData.coverPath as string, option)))).toBe(true)
             )
 
@@ -129,7 +129,7 @@ describe('api/lists/[id]', async () => {
             expect(statusCode).toBe(200);
 
             expect(fs.existsSync(oldCoverDir)).toBe(true);
-            coverThumbnailsOptions.listCover.forEach((option) =>
+            THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>
                 expect(fs.existsSync(join(listDir, thumbnailName(listData.coverPath as string, option)))).toBe(true)
             )
 
@@ -156,7 +156,7 @@ describe('api/lists/[id]', async () => {
             });
             const coverDir = join(user.userDir, listData.id, body.coverPath);
             expect(fs.existsSync(coverDir)).toBe(true);
-            coverThumbnailsOptions.listCover.forEach((option) =>
+            THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>
                 expect(fs.existsSync(join(listDir, thumbnailName(body.coverPath, option)))).toBe(true)
             )
 
@@ -172,7 +172,7 @@ describe('api/lists/[id]', async () => {
 
             const oldCoverDir = join(user.userDir, listData.id, listData.coverPath as string);
             expect(fs.existsSync(oldCoverDir)).toBe(true);
-            coverThumbnailsOptions.listCover.forEach((option) =>
+            THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>
                 expect(fs.existsSync(join(listDir, thumbnailName(listData.coverPath as string, option)))).toBe(true)
             )
 
@@ -193,13 +193,13 @@ describe('api/lists/[id]', async () => {
 
             //new cover exists
             expect(fs.existsSync(coverDir)).toBe(true);
-            coverThumbnailsOptions.listCover.forEach((option) =>
+            THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>
                 expect(fs.existsSync(join(listDir, thumbnailName(body.coverPath, option)))).toBe(true)
             )
 
             //old cover and thumbnails are deleted
             expect(fs.existsSync(oldCoverDir)).toBe(false);
-            coverThumbnailsOptions.listCover.forEach((option) =>
+            THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>
                 expect(fs.existsSync(join(listDir, thumbnailName(listData.coverPath as string, option)))).toBe(false)
             )
 
@@ -215,7 +215,7 @@ describe('api/lists/[id]', async () => {
 
             const oldCoverDir = join(listDir, listData.coverPath as string);
             expect(fs.existsSync(oldCoverDir)).toBe(true);
-            coverThumbnailsOptions.listCover.forEach((option) =>
+            THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>
                 expect(fs.existsSync(join(listDir, thumbnailName(listData.coverPath as string, option)))).toBe(true)
             )
 
@@ -235,7 +235,7 @@ describe('api/lists/[id]', async () => {
 
             //old cover and thumbnails are deleted
             expect(fs.existsSync(oldCoverDir)).toBe(false);
-            coverThumbnailsOptions.listCover.forEach((option) =>
+            THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>
                 expect(fs.existsSync(join(listDir, thumbnailName(listData.coverPath as string, option)))).toBe(false)
             )
 
@@ -261,4 +261,4 @@ describe('api/lists/[id]', async () => {
     })
 })
 
-const waitForFiles = async () => await new Promise(res => setTimeout(res, coverThumbnailsOptions.listCover.length + 5));
+const waitForFiles = async () => await new Promise(res => setTimeout(res, THUMBNAILS_OPTIONS.LIST_COVER.length + 5));

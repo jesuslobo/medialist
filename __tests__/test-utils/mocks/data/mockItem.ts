@@ -1,5 +1,5 @@
 import { $createItems, $deleteItems } from "@/server/db/queries/items";
-import { coverThumbnailsOptions, thumbnailName, ThumbnailOptions } from "@/utils/lib/fileHandling/thumbnailOptions";
+import { THUMBNAILS_OPTIONS, thumbnailName, ThumbnailOptions } from "@/utils/lib/fileHandling/thumbnailOptions";
 import { generateID } from "@/utils/lib/generateID";
 import { ItemData, ItemField, ItemLayoutHeader } from "@/utils/types/item";
 import { mkdirSync, writeFileSync } from "fs";
@@ -36,10 +36,10 @@ export async function $mockItem(
     mkdirSync(join(itemDir, 'thumbnails'), { recursive: true });
 
     itemData.coverPath = itemData.cover
-        ? mockAFile(itemDir, coverThumbnailsOptions.itemCover)
+        ? mockAFile(itemDir, THUMBNAILS_OPTIONS.ITEM_COVER)
         : itemData.coverPath
     itemData.posterPath = itemData.poster
-        ? mockAFile(itemDir, coverThumbnailsOptions.itemPoster)
+        ? mockAFile(itemDir, THUMBNAILS_OPTIONS.ITEM_POSTER)
         : itemData.posterPath
 
     itemData?.layout?.forEach((tab) =>
@@ -47,7 +47,7 @@ export async function $mockItem(
             (column as ItemFieldMock[]).forEach((field) => {
                 if (!field.logo) return
                 field.logo = undefined
-                field.logoPath = mockAFile(itemDir, coverThumbnailsOptions.logo)
+                field.logoPath = mockAFile(itemDir, THUMBNAILS_OPTIONS.LOGO)
             })
         )
     )

@@ -1,5 +1,5 @@
 import listsRouter from '@/pages/api/lists';
-import { coverThumbnailsOptions, thumbnailName } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { THUMBNAILS_OPTIONS, thumbnailName } from '@/utils/lib/fileHandling/thumbnailOptions';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import $mockUser from '@tests/test-utils/mocks/data/mockUser';
 import { TEST_MOCK_FILE_BUFFER, TEST_MOCK_FILE_NAME } from '@tests/test-utils/mocks/mockFile';
@@ -166,7 +166,7 @@ describe('api/lists/', async () => {
             const coverExits = fs.existsSync(join(listDir, body.coverPath))
             expect(coverExits).toBe(true);
 
-            coverThumbnailsOptions.listCover.forEach((option) =>
+            THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>
                 expect(fs.existsSync(join(listDir, thumbnailName(body.coverPath, option)))).toBe(true)
             )
 

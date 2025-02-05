@@ -2,7 +2,7 @@
 import itemsRouter from '@/pages/api/items/[id]';
 import { db } from '@/server/db';
 import { listsTagsTable } from '@/server/db/schema';
-import { coverThumbnailsOptions, thumbnailName, ThumbnailOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { THUMBNAILS_OPTIONS, thumbnailName, ThumbnailOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { generateID } from '@/utils/lib/generateID';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
@@ -117,14 +117,14 @@ describe('api/items/[id]', async () => {
                 updatedAt: expect.not.stringMatching(item.itemData.updatedAt),
             });
 
-            const posterExists = fileExists(item.itemDir, item.itemData.posterPath as string, coverThumbnailsOptions.itemPoster)
+            const posterExists = fileExists(item.itemDir, item.itemData.posterPath as string, THUMBNAILS_OPTIONS.ITEM_POSTER)
             expect(posterExists).toBe(true)
 
-            const coverExists = fileExists(item.itemDir, item.itemData.coverPath as string, coverThumbnailsOptions.itemCover)
+            const coverExists = fileExists(item.itemDir, item.itemData.coverPath as string, THUMBNAILS_OPTIONS.ITEM_COVER)
             expect(coverExists).toBe(true)
 
             const logoPath = body.item.layout[0][1][0].logoPath
-            const logoExists = fileExists(item.itemDir, logoPath, coverThumbnailsOptions.itemLogo)
+            const logoExists = fileExists(item.itemDir, logoPath, THUMBNAILS_OPTIONS.LOGO)
             expect(logoExists).toBe(true)
             expect(statusCode).toBe(200);
 
@@ -160,14 +160,14 @@ describe('api/items/[id]', async () => {
                     posterPath: expect.any(String),
                 });
 
-                const newPosterExists = fileExists(item.itemDir, body.item.posterPath as string, coverThumbnailsOptions.itemPoster)
+                const newPosterExists = fileExists(item.itemDir, body.item.posterPath as string, THUMBNAILS_OPTIONS.ITEM_POSTER)
                 expect(newPosterExists).toBe(true)
 
-                const newCoverExists = fileExists(item.itemDir, body.item.coverPath as string, coverThumbnailsOptions.itemCover)
+                const newCoverExists = fileExists(item.itemDir, body.item.coverPath as string, THUMBNAILS_OPTIONS.ITEM_COVER)
                 expect(newCoverExists).toBe(true)
 
                 const logoPath = body.item.layout[0][1][0].logoPath
-                const logoExists = fileExists(item.itemDir, logoPath, coverThumbnailsOptions.itemLogo)
+                const logoExists = fileExists(item.itemDir, logoPath, THUMBNAILS_OPTIONS.LOGO)
                 expect(logoExists).toBe(true)
 
                 expect(statusCode).toBe(200);
@@ -205,20 +205,20 @@ describe('api/items/[id]', async () => {
                     posterPath: expect.any(String),
                 });
 
-                const newPosterExists = fileExists(item.itemDir, body.item.posterPath as string, coverThumbnailsOptions.itemPoster)
+                const newPosterExists = fileExists(item.itemDir, body.item.posterPath as string, THUMBNAILS_OPTIONS.ITEM_POSTER)
                 expect(newPosterExists).toBe(true)
 
-                const newCoverExists = fileExists(item.itemDir, body.item.coverPath as string, coverThumbnailsOptions.itemCover)
+                const newCoverExists = fileExists(item.itemDir, body.item.coverPath as string, THUMBNAILS_OPTIONS.ITEM_COVER)
                 expect(newCoverExists).toBe(true)
 
-                const oldPosterExists = fileExists(item.itemDir, item.itemData.posterPath as string, coverThumbnailsOptions.itemPoster)
+                const oldPosterExists = fileExists(item.itemDir, item.itemData.posterPath as string, THUMBNAILS_OPTIONS.ITEM_POSTER)
                 expect(oldPosterExists).toBe(false)
 
-                const oldCoverExists = fileExists(item.itemDir, item.itemData.coverPath as string, coverThumbnailsOptions.itemCover)
+                const oldCoverExists = fileExists(item.itemDir, item.itemData.coverPath as string, THUMBNAILS_OPTIONS.ITEM_COVER)
                 expect(oldCoverExists).toBe(false)
 
                 const logoPath = body.item.layout[0][1][0].logoPath
-                const logoExists = fileExists(item.itemDir, logoPath, coverThumbnailsOptions.itemLogo)
+                const logoExists = fileExists(item.itemDir, logoPath, THUMBNAILS_OPTIONS.LOGO)
                 expect(logoExists).toBe(true)
 
                 expect(statusCode).toBe(200);
@@ -256,14 +256,14 @@ describe('api/items/[id]', async () => {
                     posterPath: null,
                 });
 
-                const posterExists = fileExists(item.itemDir, item.itemData.posterPath as string, coverThumbnailsOptions.itemPoster)
+                const posterExists = fileExists(item.itemDir, item.itemData.posterPath as string, THUMBNAILS_OPTIONS.ITEM_POSTER)
                 expect(posterExists).toBe(false)
 
-                const coverExists = fileExists(item.itemDir, item.itemData.coverPath as string, coverThumbnailsOptions.itemCover)
+                const coverExists = fileExists(item.itemDir, item.itemData.coverPath as string, THUMBNAILS_OPTIONS.ITEM_COVER)
                 expect(coverExists).toBe(false)
 
                 const logoPath = body.item.layout[0][1][0].logoPath
-                const logoExists = fileExists(item.itemDir, logoPath, coverThumbnailsOptions.itemLogo)
+                const logoExists = fileExists(item.itemDir, logoPath, THUMBNAILS_OPTIONS.LOGO)
                 expect(logoExists).toBe(true)
 
                 expect(statusCode).toBe(200);
@@ -288,11 +288,11 @@ describe('api/items/[id]', async () => {
                 const { cookies } = await user.createCookie();
 
                 const logoPath1 = (item as any).itemData?.layout[0][1][0].logoPath
-                const logo1Exists = fileExists(item.itemDir, logoPath1, coverThumbnailsOptions.itemLogo)
+                const logo1Exists = fileExists(item.itemDir, logoPath1, THUMBNAILS_OPTIONS.LOGO)
                 expect(logo1Exists).toBe(true)
 
                 const logoPath2 = (item as any).itemData?.layout[0][2][0].logoPath
-                const logo2Exists = fileExists(item.itemDir, logoPath2, coverThumbnailsOptions.itemLogo)
+                const logo2Exists = fileExists(item.itemDir, logoPath2, THUMBNAILS_OPTIONS.LOGO)
                 expect(logo2Exists).toBe(true)
 
                 const form = new FormData();
@@ -319,10 +319,10 @@ describe('api/items/[id]', async () => {
                     ]
                 })
 
-                const logo1StillExists = fileExists(item.itemDir, logoPath1, coverThumbnailsOptions.logo)
+                const logo1StillExists = fileExists(item.itemDir, logoPath1, THUMBNAILS_OPTIONS.LOGO)
                 expect(logo1StillExists).toBe(false)
 
-                const logo2StillExists = fileExists(item.itemDir, logoPath2, coverThumbnailsOptions.logo)
+                const logo2StillExists = fileExists(item.itemDir, logoPath2, THUMBNAILS_OPTIONS.LOGO)
                 expect(logo2StillExists).toBe(true)
 
                 expect(statusCode).toBe(200);
@@ -344,7 +344,7 @@ describe('api/items/[id]', async () => {
                 const { cookies } = await user.createCookie();
 
                 const logoPath1 = (item as any).itemData?.layout[0][1][0].logoPath
-                const logo1Exists = fileExists(item.itemDir, logoPath1, coverThumbnailsOptions.itemLogo)
+                const logo1Exists = fileExists(item.itemDir, logoPath1, THUMBNAILS_OPTIONS.LOGO)
                 expect(logo1Exists).toBe(true)
 
                 const logoId = generateID()
@@ -376,10 +376,10 @@ describe('api/items/[id]', async () => {
                     ]
                 })
 
-                const logo1StillExists = fileExists(item.itemDir, logoPath1, coverThumbnailsOptions.logo)
+                const logo1StillExists = fileExists(item.itemDir, logoPath1, THUMBNAILS_OPTIONS.LOGO)
                 expect(logo1StillExists).toBe(true)
 
-                const logo2Exists = fileExists(item.itemDir, logoPath2, coverThumbnailsOptions.logo)
+                const logo2Exists = fileExists(item.itemDir, logoPath2, THUMBNAILS_OPTIONS.LOGO)
                 expect(logo2Exists).toBe(true)
 
                 expect(statusCode).toBe(200);

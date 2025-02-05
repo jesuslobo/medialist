@@ -1,6 +1,6 @@
 
 import itemsRouter from '@/pages/api/lists/[id]/items';
-import { coverThumbnailsOptions, thumbnailName, ThumbnailOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { THUMBNAILS_OPTIONS, thumbnailName, ThumbnailOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { generateID } from '@/utils/lib/generateID';
 import { ItemData, ItemLayoutTab } from '@/utils/types/item';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
@@ -180,13 +180,13 @@ describe('api/lists/[id]/items', async () => {
             const itemDir = join(list.listDir, item.id)
 
             const logoPath = body.item.layout[0][1][0].logoPath
-            const logoExists = fileExists(itemDir, logoPath, coverThumbnailsOptions.itemLogo)
+            const logoExists = fileExists(itemDir, logoPath, THUMBNAILS_OPTIONS.LOGO)
             expect(logoExists).toBe(true)
 
-            const posterExists = fileExists(itemDir, item.posterPath as string, coverThumbnailsOptions.itemPoster)
+            const posterExists = fileExists(itemDir, item.posterPath as string, THUMBNAILS_OPTIONS.ITEM_POSTER)
             expect(posterExists).toBe(true)
 
-            const coverExists = fileExists(itemDir, item.coverPath as string, coverThumbnailsOptions.itemCover)
+            const coverExists = fileExists(itemDir, item.coverPath as string, THUMBNAILS_OPTIONS.ITEM_COVER)
             expect(coverExists).toBe(true)
 
             expect(statusCode).toBe(201);
