@@ -1,5 +1,6 @@
 import { TagData } from "@/utils/types/global";
 import { ItemHeader, ItemLayoutTab } from "@/utils/types/item";
+import { MediaData } from "@/utils/types/media";
 import { InferSelectModel, sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
@@ -129,6 +130,34 @@ export const listsTagsTable = sqliteTable("lists_tags", {
     badgeable: text("badgeable")
         .default('')
         .$type<TagData['badgeable']>(),
+    createdAt: integer("created_at", {
+        mode: "timestamp"
+    }).notNull()
+        .default(sql`(unixepoch())`),
+    updatedAt: integer("updated_at", {
+        mode: "timestamp"
+    }).notNull()
+        .default(sql`(unixepoch())`),
+});
+
+export const itemsMedia = sqliteTable("items_media", {
+    id: text("id")
+        .notNull()
+        .primaryKey(),
+    itemId: text("item_id")
+        .notNull()
+        .references(() => itemsTable.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+        .notNull()
+        .references(() => usersTable.id, { onDelete: "cascade" }),
+    title: text("title")
+        .notNull(),
+    path: text("path")
+        .notNull(),
+    type: text("type")
+        .notNull()
+        .default("image")
+        .$type<MediaData['type']>(),
     createdAt: integer("created_at", {
         mode: "timestamp"
     }).notNull()
