@@ -35,7 +35,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'PATCH') {
             const body = parseJSONReq(await req.body) as Partial<MediaData>
             const data: Partial<MediaData> = {
-                title: body.title, // for now only title can be updated
+                title: body.title, // for now only title can be updated,
+                keywords: Array.isArray(body.keywords) ? body.keywords : [],
+                updatedAt: new Date(Date.now()),
             }
 
             const updatedMedia = await $updateItemMedia(user.id, media.id, data)

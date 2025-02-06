@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             const bb = busboy({
                 headers: req.headers,
-                limits: { fields: 2, files: 1, fileSize: MAX_FILE_SIZE }
+                limits: { fields: 3, files: 1, fileSize: MAX_FILE_SIZE }
             })
 
             bb.on('field', processFields)
@@ -60,6 +60,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     userId: user.id,
                     itemId: item.id,
                     title: data.title,
+                    keywords: Array.isArray(data.keywords) ? data.keywords : [],
                     type: 'image',
                     path: data.path,
                     updatedAt: new Date(Date.now()),

@@ -43,6 +43,7 @@ const $ITEM_FORM_SCHEMA = (dir: string) => ({
 
 const $ITEM_MEDIA_FORM_SCHEMA = (dir: string) => ({
   title: 'String',
+  keywords: 'JSON',
   path: {
     dir,
     thumbnailOptions: THUMBNAILS_OPTIONS.ITEM_MEDIA,

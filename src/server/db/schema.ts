@@ -151,6 +151,10 @@ export const itemsMedia = sqliteTable("items_media", {
         .notNull()
         .references(() => usersTable.id, { onDelete: "cascade" }),
     title: text("title"),
+    keywords: text("json_keywords", { mode: "json" })
+        .notNull()
+        .default("[]")
+        .$type<string[]>(),
     path: text("path")
         .notNull(),
     type: text("type")

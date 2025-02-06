@@ -7,7 +7,7 @@ import $processFormData, { ProcessedFormData } from "../processFormData";
 import { $ITEM_FORM_SCHEMA } from "./fromSchema";
 
 type ItemServerForm = ItemData & ProcessedFormData & {
-    media?: { path: string, title?: string | null }[]
+    media?: Pick<MediaData, 'path' | 'title' | 'keywords'>[]
 }
 
 /** Any Extra logic should be in BB's onFinish */
@@ -65,6 +65,7 @@ function handleMediaImages(data: ItemServerForm, mediaImages: Map<String, string
             userId,
             itemId,
             path,
+            keywords: Array.isArray(media.keywords) ? media.keywords : [],
             type: 'image',
             title: media.title || null,
             createdAt: new Date(Date.now()),

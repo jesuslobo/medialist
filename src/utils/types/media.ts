@@ -6,7 +6,8 @@ export interface MediaData {
     userId: UserData['id']
     itemId: ItemData['id']
     title?: string | null
-    path: string
+    path: string,
+    keywords: string[]
     type: "image"
     createdAt: Date
     updatedAt: Date
