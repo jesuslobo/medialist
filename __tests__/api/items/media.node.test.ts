@@ -1,4 +1,3 @@
-
 import itemsMediaRouter from '@/pages/api/items/[id]/media';
 import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { generateID } from '@/utils/lib/generateID';
@@ -98,7 +97,7 @@ describe('api/items/[id]/media', async () => {
     })
 
     describe('POST - add media to an item', () => {
-        test('should add a media to the item with title, and the image, and generate thumbnails', async () => {
+        test('should add a media to the item with title, keywords, image, and generate thumbnails', async () => {
             const { userMock, ...item } = await $mockItem();
             const { userData, ...user } = userMock;
             const { cookies } = await user.createCookie();
@@ -106,9 +105,9 @@ describe('api/items/[id]/media', async () => {
             const form = new FormData();
             form.append('title', 'mediaTitle');
             form.append('path', file, TEST_MOCK_FILE_NAME);
+            form.append('keywords', JSON.stringify(['keyword1', 'keyword2']));
 
             const { body, statusCode } = await $mockHttp(itemsMediaRouter).post(form, { cookies, query: { id: item.itemData.id } });
-
             await new Promise(setImmediate);
 
             expect(body).toEqual({
@@ -117,6 +116,7 @@ describe('api/items/[id]/media', async () => {
                 itemId: item.itemData.id,
                 title: 'mediaTitle',
                 type: 'image',
+                keywords: ['keyword1', 'keyword2'],
                 path: expect.any(String),
                 createdAt: expect.any(String),
                 updatedAt: expect.any(String)
@@ -128,7 +128,7 @@ describe('api/items/[id]/media', async () => {
             expect(statusCode).toBe(200);
         })
 
-        test('should add a media to the item without title', async () => {
+        test('should add a media to the item without title or keywords', async () => {
             const { userMock, ...item } = await $mockItem();
             const { userData, ...user } = userMock;
             const { cookies } = await user.createCookie();
@@ -145,6 +145,7 @@ describe('api/items/[id]/media', async () => {
                 userId: userData.id,
                 itemId: item.itemData.id,
                 title: null,
+                keywords: [],
                 type: 'image',
                 path: expect.any(String),
                 createdAt: expect.any(String),

@@ -79,15 +79,26 @@ describe('api/items/[id]/media', async () => {
     })
 
     test('PATCH - should update media data by id', async () => {
-        const { mediaData, userMock, ...media } = await $mockItemMedia({});
+        const { mediaData, userMock, ...media } = await $mockItemMedia({
+            createdAt: new Date(2000, 1),
+            updatedAt: new Date(2000, 1)
+        });
         const { userData, ...user } = userMock;
         const { cookies } = await user.createCookie();
 
-        const newTitle = 'New Title';
-        const { body, statusCode } = await $mockHttp(itemsMediaRouter).patch({ title: newTitle }, { cookies, query: { id: mediaData.id } });
+        const title = 'New Title';
+        const keywords = ['new', 'keywords'];
+
+        const { body, statusCode } = await $mockHttp(itemsMediaRouter).patch({ title, keywords }, { cookies, query: { id: mediaData.id } });
         await new Promise(setImmediate);
 
-        expect(body.title).toBe(newTitle);
+        expect(body).toEqual({
+            ...mediaData,
+            title,
+            keywords,
+            updatedAt: expect.not.stringMatching(mediaData.updatedAt)
+        });
+
         expect(statusCode).toBe(200);
 
         const fileStillExists = fileExists(media.itemDir, mediaData.path, THUMBNAILS_OPTIONS.ITEM_MEDIA);

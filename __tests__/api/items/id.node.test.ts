@@ -537,7 +537,7 @@ describe('api/items/[id]', async () => {
             const [imageID1, imageID2] = [generateID(10), generateID(10)]
 
             form.append('media', JSON.stringify([
-                { title: 'image1', path: imageID1 },
+                { title: 'image1', path: imageID1, keywords: ['keyword1', 'keyword2'] },
                 { title: null, path: 'shouldIgnorethis' },
                 { path: imageID2 },
             ]))
@@ -561,6 +561,7 @@ describe('api/items/[id]', async () => {
                         path: expect.any(String),
                         type: 'image',
                         title: 'image1',
+                        keywords: ['keyword1', 'keyword2'],
                         createdAt: expect.any(String),
                         updatedAt: expect.any(String)
                     },
@@ -571,6 +572,7 @@ describe('api/items/[id]', async () => {
                         path: expect.any(String),
                         type: 'image',
                         title: null,
+                        keywords: [],
                         createdAt: expect.any(String),
                         updatedAt: expect.any(String)
                     },

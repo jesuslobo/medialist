@@ -1,4 +1,3 @@
-
 import itemsRouter from '@/pages/api/lists/[id]/items';
 import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { generateID } from '@/utils/lib/generateID';
@@ -135,7 +134,7 @@ describe('api/lists/[id]/items', async () => {
 
             const [imageID1, imageID2] = [generateID(10), generateID(10)]
             form.append('media', JSON.stringify([
-                { title: 'image1', path: imageID1 },
+                { title: 'image1', path: imageID1, keywords: ['keyword1', 'keyword2'] },
                 { title: null, path: 'shouldIgnorethis' },
                 { path: imageID2 },
             ]))
@@ -191,6 +190,7 @@ describe('api/lists/[id]/items', async () => {
                         path: expect.any(String),
                         type: 'image',
                         title: 'image1',
+                        keywords: ['keyword1', 'keyword2'],
                         createdAt: expect.any(String),
                         updatedAt: expect.any(String)
                     },
@@ -201,6 +201,7 @@ describe('api/lists/[id]/items', async () => {
                         path: expect.any(String),
                         type: 'image',
                         title: null,
+                        keywords: [],
                         createdAt: expect.any(String),
                         updatedAt: expect.any(String)
                     },
