@@ -87,6 +87,19 @@ function AddItemPage() {
         formData.append('layout', JSON.stringify(layout))
         formData.append('tags', JSON.stringify(data.tags))
 
+        if (data.media) {
+            const media = data.media.map(media => {
+                const key = generateID(10)
+                formData.append(`mediaImages[${key}]`, media.path as File)
+                return {
+                    title: media.title,
+                    keywords: media.keywords,
+                    path: key
+                }
+            })
+            formData.append('media', JSON.stringify(media))
+        }
+
         mutation.mutate(formData)
     }
 

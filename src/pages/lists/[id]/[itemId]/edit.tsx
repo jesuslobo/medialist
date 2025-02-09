@@ -9,6 +9,7 @@ import { generateID, validatedID } from "@/utils/lib/generateID"
 import httpClient from "@/utils/lib/httpClient"
 import { itemQueryOptions, mutateItemCache } from "@/utils/lib/tanquery/itemsQuery"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
+import { allMediaQueryOptions } from "@/utils/lib/tanquery/mediaQuery"
 import { mutateTagCache, tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
 import { ItemData, ItemSaveResponse } from "@/utils/types/item"
 import { ListData } from "@/utils/types/list"
@@ -29,6 +30,7 @@ function EditItemPage() {
     const { data: item, isPending, isSuccess } = useQuery(itemQueryOptions(itemId))
     const list = useQuery(singleListQueryOptions(listId))
     const tags = useQuery(tagsQueryOptions(listId))
+    const media = useQuery(allMediaQueryOptions(itemId))
 
     const itemForm = useForm<ItemFormData>({})
     const { handleSubmit, formState: { dirtyFields } } = itemForm
@@ -69,6 +71,8 @@ function EditItemPage() {
             )
         )
 
+        formData.append('layout', JSON.stringify(layout))
+
         if (dirtyFields.tags)
             formData.append('tags', JSON.stringify(data.tags))
 
@@ -90,8 +94,18 @@ function EditItemPage() {
             formData.append('poster', data.poster as File | string)
         }
 
-        //Layout
-        formData.append('layout', JSON.stringify(layout))
+        if (data.media) {
+            const media = data.media.map(media => {
+                const key = generateID(10)
+                formData.append(`mediaImages[${key}]`, media.path as File)
+                return {
+                    title: media.title,
+                    keywords: media.keywords,
+                    path: key
+                }
+            })
+            formData.append('media', JSON.stringify(media))
+        }
 
         mutation.mutate(formData)
     }
@@ -99,11 +113,11 @@ function EditItemPage() {
     const [layoutTabs, setLayoutTabs] = useState<ItemFormLayoutTab[]>([])
     const [activeTabIndex, setActiveTabIndex] = useState(0)
 
-    if (isPending || tags.isPending || list.isPending) return (
+    if (isPending || tags.isPending || list.isPending || media.isPending) return (
         <div className="flex justify-center items-center">
             <Spinner />
         </div >)
-    if (!isSuccess || !tags.isSuccess || !list.isSuccess || item.listId !== listId)
+    if (!isSuccess || !tags.isSuccess || !list.isSuccess || item.listId !== listId || !media.isSuccess)
         return <ErrorPage message="Failed To Fetch The Item" />
 
     return (
@@ -111,6 +125,7 @@ function EditItemPage() {
             item={item}
             tags={tags.data}
             list={list.data}
+            media={media.data}
             itemForm={itemForm}
             layoutTabs={layoutTabs}
             setLayoutTabs={setLayoutTabs}

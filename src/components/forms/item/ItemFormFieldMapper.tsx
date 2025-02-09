@@ -3,6 +3,7 @@ import ItemFormLabelTextField from "./fields/ItemFormLabelTextField"
 import ItemFormLinkField from "./fields/ItemFormLinkField"
 import ItemFormRatingField from "./fields/ItemFormRatingField"
 import ItemFormTextField from "./fields/ItemFormTextField"
+import ItemFormGallery from "./fields/media/ItemFormGalery"
 import ItemFormTagsField from "./fields/tags/ItemFormTagsField"
 
 // Maps a Field to its Component equivalent
@@ -14,7 +15,6 @@ export default function ItemFormFieldsMapper({
     rowIndex: number
     colIndex: number
 }) {
-
     switch (type) {
         case "tags":
             return <ItemFormTagsField />
@@ -26,8 +26,9 @@ export default function ItemFormFieldsMapper({
             return <ItemFormTextField  {...position} />
         case "rating":
             return <ItemFormRatingField {...position} />
+        case "gallery":
+            return <ItemFormGallery {...position} />
         default:
             return <></>
     }
-
 }

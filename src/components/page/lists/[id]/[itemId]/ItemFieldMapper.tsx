@@ -4,14 +4,12 @@ import ItemPageLinkField from "./fields/ItemPageLinkField"
 import ItemPageRatingField from "./fields/ItemPageRatingField"
 import ItemPageTagsField from "./fields/ItemPageTagsField"
 import ItemPageTextField from "./fields/ItemPageTextField"
+import ItemPageGallery from "./fields/media/ItemPageGallery"
 
 export default function ItemFieldMapper({
     field,
-    ...position
 }: {
     field: ItemField
-    rowIndex: number
-    colIndex: number
 }) {
     switch (field.type) {
         case "tags":
@@ -24,8 +22,9 @@ export default function ItemFieldMapper({
             return <ItemPageTextField field={field} />
         case "rating":
             return <ItemPageRatingField field={field} />
+        case "gallery":
+            return <ItemPageGallery field={field} />
         default:
             return <></>
     }
-
 }

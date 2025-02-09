@@ -42,12 +42,14 @@ export type ItemLayoutHeader = {
 /** ### [row] [column]  */
 export type ItemLayout = ItemField[][]
 
-export type ItemField = ItemLabelTextField | ItemLinkField | ItemTextField | ItemCardField | ItemTagsField | ItemRatingField
+export type ItemField = ItemLabelTextField | ItemLinkField | ItemTextField | ItemCardField | ItemTagsField | ItemRatingField | GalleryField
 export type ItemFieldType = Extract<ItemField, { type: string }>['type'];
 
 export interface ItemTagsField { type: "tags" }
 
 export interface LogoField { label: string, logoPath?: string }
+export interface GalleryField { type: "gallery", filter?: GalleryFieldFilter }
+export interface GalleryFieldFilter { keywords?: string[] }
 
 export interface ItemTextField { type: "text", variant: "long" | "short", text: string, }
 export interface ItemLabelTextField { type: "labelText", label: string, body: string, countable?: boolean }
@@ -61,20 +63,6 @@ export interface ItemCardField {
     description: string,
     imagePath: string
 }
-
-// export interface ItemImageData {
-//     id: string
-//     image_path: string
-//     title?: string
-//     description?: string
-//     item_id: string
-// }
-
-
-// export interface ItemBadgesType {
-//     logo_path: string
-//     label: string
-// }
 
 /** Item Patch & POST response */
 export interface ItemSaveResponse {

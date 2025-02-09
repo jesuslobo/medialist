@@ -1,6 +1,7 @@
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
 import { TagData } from "@/utils/types/global";
 import { ItemData } from "@/utils/types/item";
+import { MediaData } from "@/utils/types/media";
 import { createContext, Dispatch, SetStateAction, useState } from "react";
 
 export const itemPageContext = createContext({} as itemPageContext)
@@ -9,10 +10,12 @@ export function ItemPageProvider({
     children,
     item,
     tags,
+    media,
 }: {
     children: React.ReactNode,
     item: ItemData,
     tags: TagData[],
+    media: MediaData[],
 }) {
     const headerType = item?.header?.type || "poster_beside"
     const [activeTabIndex, setActiveTabIndex] = useState(0)
@@ -41,6 +44,7 @@ export function ItemPageProvider({
         <itemPageContext.Provider value={{
             item,
             tags,
+            media,
             headerType,
             activeTabIndex,
             setActiveTabIndex,
@@ -54,6 +58,7 @@ export function ItemPageProvider({
 interface itemPageContext {
     item: ItemData,
     tags: TagData[],
+    media: MediaData[],
     headerType: ItemData['header']['type'],
     activeTabIndex: number,
     setActiveTabIndex: Dispatch<SetStateAction<number>>,
@@ -66,5 +71,5 @@ interface itemPageContext {
         originalCover?: string,
         backgroundImage?: string,
         bg300?: string,
-    }
+    },
 }

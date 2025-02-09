@@ -2,20 +2,23 @@ import { SortableItemType } from "@/components/ui/layout/drag&drop/logic/Sortabl
 import { TagData } from "@/utils/types/global";
 import { ItemData, ItemField, ItemLayoutHeader } from "@/utils/types/item";
 import { ListData } from "@/utils/types/list";
+import { MediaData } from "@/utils/types/media";
 import { createContext, Dispatch, SetStateAction, useEffect, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 
-interface Props extends Omit<ItemFormContext, "setActiveTabFields" | "setActiveTabHeader" | "activeTabFields" | "activeTabHeader" | "isPreviewMode" | "setIsPreviewMode"> {
+interface Props extends Omit<ItemFormContext, "setActiveTabFields" | "setActiveTabHeader" | "activeTabFields" | "activeTabHeader" | "isPreviewMode" | "setIsPreviewMode" | 'media'> {
     children: React.ReactNode,
     layoutTabs: ItemFormLayoutTab[]
     setLayoutTabs: Dispatch<SetStateAction<ItemFormLayoutTab[]>>
     activeTabIndex: number
+    media?: MediaData[]
 }
 
 interface ItemFormContext {
     tags: TagData[],
     list: ListData,
     item?: ItemData,
+    media: MediaData[]
     itemForm: UseFormReturn<ItemFormData>,
     activeTabFields: ItemFormField[][],
     setActiveTabFields: Dispatch<SetStateAction<ItemFormField[][]>>,
@@ -30,8 +33,9 @@ export type ItemFormLayoutTab = [ItemLayoutHeader, ...ItemFormField[][]]
 export type ItemFormLogoField = ItemFormField & { id: number, logoPath: File | null }
 
 export interface ItemFormData extends Omit<ItemData, "id" | "createdAt" | "updatedAt" | 'coverPath' | 'posterPath' | 'userId'> {
-    cover: File | null | string
-    poster: File | null | string
+    cover: File | null | string,
+    poster: File | null | string,
+    media?: (Pick<MediaData, 'title' | 'keywords'> & { path: File })[],
 }
 
 export const ItemFormContext = createContext({} as ItemFormContext);
@@ -40,6 +44,7 @@ export default function ItemFormProvider({
     tags,
     list,
     item,
+    media = [],
     itemForm,
     layoutTabs,
     setLayoutTabs,
@@ -115,7 +120,7 @@ export default function ItemFormProvider({
             // so we will garbage collect them on edit
             const garbageCollectedTags = itemTags.filter(tagId => tags.some(t => t.id === tagId))
 
-            itemForm.reset({ ...itemData, cover, poster, tags: garbageCollectedTags })
+            itemForm.reset({ ...itemData, cover, poster, tags: garbageCollectedTags, media: [] })
         }
 
     }, [item])
@@ -132,6 +137,7 @@ export default function ItemFormProvider({
             setActiveTabHeader,
             isPreviewMode,
             setIsPreviewMode,
+            media,
         }}>
             {children}
         </ItemFormContext.Provider>

@@ -58,9 +58,7 @@ export default function ImageInput({
         }
 
         setError(null)
-        const fileReader = new FileReader()
-        fileReader.onload = () => setImage(fileReader.result as string)
-        fileReader.readAsDataURL(file)
+        setImage(URL.createObjectURL(file))
 
         onChange(file)
         return file

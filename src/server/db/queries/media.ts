@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { db } from "..";
 import { itemsMedia } from "../schema";
 
@@ -9,7 +9,7 @@ export const $getItemMedia = async (userId: string, item_id: string) => {
         .where(and(
             eq(itemsMedia.userId, userId),
             eq(itemsMedia.itemId, item_id)
-        ))
+        )).orderBy(desc(itemsMedia.createdAt))
 }
 
 export const $getItemMediaById = async (userId: string, id: string) => {

@@ -13,8 +13,6 @@ export default function ItemPageLayoutColumn({ column }: { column: number }) {
                 <ItemFieldMapper
                     key={"field" + rowIndex}
                     field={field}
-                    rowIndex={rowIndex}
-                    colIndex={column}
                 />
             ))}
         </>
