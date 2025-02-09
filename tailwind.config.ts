@@ -1,4 +1,4 @@
-import { heroui, NextUIPluginConfig } from "@heroui/react";
+import { heroui, HeroUIPluginConfig } from "@heroui/react";
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -88,7 +88,7 @@ const config: Config = {
           }
         },
       }
-    } as NextUIPluginConfig & Record<string, string | object | boolean>) //even though nextUI uses tw-colors plugin, apparently it is not friendly with custom colors
+    } as HeroUIPluginConfig & Record<string, string | object | boolean>) //even though nextUI uses tw-colors plugin, apparently it is not friendly with custom colors
   ],
 };
 export default config;

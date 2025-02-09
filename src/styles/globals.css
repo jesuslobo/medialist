@@ -22,6 +22,11 @@ body {
   margin: 0px;
 }
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--heroui-foreground-200)) transparent;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
