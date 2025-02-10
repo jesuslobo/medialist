@@ -28,6 +28,7 @@ export function ItemPageProvider({
     const originalCover = item.coverPath && `${itemSrc}/${item.coverPath}`
     const backgroundImage = (coverSrc || posterSrc) ? `url(${coverSrc || posterSrc})` : undefined
     const bg300 = (coverSrc300 || posterSrc) ? `url(${coverSrc300 || posterSrc})` : undefined
+    const bg700 = (coverSrc || posterSrc) ? `url(${coverSrc || posterSrc})` : undefined
 
     const imagePaths = {
         itemSrc,
@@ -38,6 +39,7 @@ export function ItemPageProvider({
         originalCover,
         backgroundImage,
         bg300,
+        bg700,
     }
 
     return (
@@ -71,5 +73,6 @@ interface itemPageContext {
         originalCover?: string,
         backgroundImage?: string,
         bg300?: string,
+        bg700?: string,
     },
 }
