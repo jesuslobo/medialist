@@ -1,7 +1,7 @@
 import TitleBar from "@/components/ui/bars/TitleBar";
 import { ItemHeader } from "@/utils/types/item";
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, Selection, SharedSelection } from "@heroui/react";
-import { useContext, useState } from "react";
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger, SharedSelection } from "@heroui/react";
+import { useContext } from "react";
 import { BsLayoutSidebarInset } from "react-icons/bs";
 import { TbLayoutSidebarFilled } from "react-icons/tb";
 import { ItemFormContext } from "./ItemFormProvider";
@@ -12,18 +12,16 @@ export default function ItemFormHeaderTitleBar({
     children?: React.ReactNode
 }) {
     const { itemForm } = useContext(ItemFormContext)
-    const { getValues, setValue } = itemForm
+    const { setValue } = itemForm
 
-    const defaultSelected = getValues("header.type") as ItemHeader['type']
-    const [selectedKey, setSelectedKey] = useState<Selection>(new Set([defaultSelected]))
-    const selectedLayout = Array.from(selectedKey).toString() as ItemHeader['type']
-
-    function updateLayout(value: SharedSelection) {
+    const selected = itemForm.watch("header.type") as ItemHeader['type']
+    const selectedKey = new Set([selected])
+    function setSelectedKey(value: SharedSelection) {
         const newValue = value.currentKey as ItemHeader['type']
         setValue("header.type", newValue)
-        setSelectedKey(new Set([newValue]))
     }
 
+    const selectedLayout = Array.from(selectedKey).toString() as ItemHeader['type']
     const iconMappings = new Map<string, React.ReactNode>([
         ["poster_inside", <BsLayoutSidebarInset key="poster_inside_LayoutIcon" size={20} />],
         ["poster_beside", <TbLayoutSidebarFilled key="poster_beside_LayoutIcon" size={25} />],
@@ -46,7 +44,7 @@ export default function ItemFormHeaderTitleBar({
                         disallowEmptySelection
                         selectionMode="single"
                         selectedKeys={selectedKey}
-                        onSelectionChange={updateLayout}
+                        onSelectionChange={setSelectedKey}
                         itemClasses={{
                             base: [
                                 "flex",

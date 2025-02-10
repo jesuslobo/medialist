@@ -20,7 +20,8 @@ export default function ItemFormTagsField() {
     })
 
     const idToName = (id: string) => tags.find(tag => tag.id === id)?.label
-    const currentTags = getValues("tags")?.map(id => { return { id, label: idToName(id) || id } }).filter(Boolean) || []
+    const currentTagsNames = itemForm.watch("tags")
+    const currentTags = currentTagsNames.map(id => ({ id, label: idToName(id) || id })).filter(Boolean) || []
 
     let currentTagsIDs = [] as string[]
     let currentNewTags = [] as string[]
