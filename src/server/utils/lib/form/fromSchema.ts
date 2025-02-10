@@ -19,6 +19,7 @@ const $ITEM_FORM_SCHEMA = (dir: string) => ({
   layout: "JSON",
   media: "JSON",
   trash: "Boolean",
+  fav: "Boolean",
   posterPath: {
     dir,
     thumbnailOptions: THUMBNAILS_OPTIONS.ITEM_POSTER,

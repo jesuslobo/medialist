@@ -107,7 +107,9 @@ export const itemsTable = sqliteTable("items", {
         mode: "timestamp"
     }).notNull()
         .default(sql`(unixepoch())`),
-    // fav: integer("fav", { mode: "boolean" }).notNull().default(false),
+    fav: integer("fav", { mode: "boolean" })
+        .notNull()
+        .default(false),
     // templates: text("templates").notNull().default("[]"), // JSON string
     // configs: text("templates").notNull().default("[]"), // JSON string
     // apis: text("templates").notNull().default("[]"), // JSON string

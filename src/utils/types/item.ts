@@ -10,8 +10,8 @@ export interface ItemData {
     posterPath?: string
     coverPath?: string
     description?: string
-    // fav?: boolean
-    trash?: boolean
+    fav: boolean
+    trash: boolean
     tags: TagData['id'][]
     layout: ItemLayoutTab[]
     header: ItemHeader

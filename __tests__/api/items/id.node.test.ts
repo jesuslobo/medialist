@@ -585,6 +585,29 @@ describe('api/items/[id]', async () => {
             const media2Exists = fileExists(item.itemDir, body.newMedia[1].path, [])
             expect(media2Exists).toBe(true)
         })
+
+        describe('should update fav', async () => {
+            const { userMock, ...item } = await $mockItem();
+            const { userData, ...user } = userMock;
+            const { cookies } = await user.createCookie();
+
+            const form = new FormData();
+            form.append('fav', JSON.stringify(true));
+
+            const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
+
+            await new Promise(setImmediate)
+
+            expect(body.item).toEqual({
+                ...item.itemData,
+                fav: true,
+                updatedAt: expect.not.stringMatching(item.itemData.updatedAt),
+            });
+
+            expect(statusCode).toBe(200);
+
+            await item.delete();
+        })
     })
 
     test('DELETE - delete an item by ID', async () => {

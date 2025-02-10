@@ -115,6 +115,7 @@ describe('api/lists/[id]/items', async () => {
             const form = new FormData();
             form.append('title', 'new item');
             form.append('description', 'new item description');
+            form.append('fav', JSON.stringify(true));
 
             form.append('header', JSON.stringify({ type: 'poster_beside' }))
             form.append('poster', file, TEST_MOCK_FILE_NAME);
@@ -169,6 +170,7 @@ describe('api/lists/[id]/items', async () => {
                     ],
                     header: { type: 'poster_beside' },
                     trash: false,
+                    fav: true,
                     tags: [
                         existingTags.tagData.id,
                         expect.any(String),
@@ -253,6 +255,7 @@ describe('api/lists/[id]/items', async () => {
                     updatedAt: expect.any(String),
                     title: 'new item',
                     trash: false,
+                    fav: false,
                     tags: [],
                     layout: [],
                     header: {},

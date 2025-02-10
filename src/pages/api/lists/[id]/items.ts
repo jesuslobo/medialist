@@ -52,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             const bb = busboy({
                 headers: req.headers,
-                limits: { fields: 6, files: MAX_ALLOWED_FILES, fileSize: MAX_UPLOAD_LIMIT }
+                limits: { fields: 7, files: MAX_ALLOWED_FILES, fileSize: MAX_UPLOAD_LIMIT }
             })
 
             bb.on('field', processFields)
