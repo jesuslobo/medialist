@@ -1,14 +1,10 @@
-import { Button, Divider } from "@heroui/react"
-import { AnimatePresence, motion, Variants } from "framer-motion"
-import { useContext, useRef, useState } from "react"
-import { twJoin } from "tailwind-merge"
+import { Divider } from "@heroui/react"
+import { useContext, useRef } from "react"
 import { itemPageContext } from "../ItemPageProvider"
 import ItemPageBadges from "../header/Badges"
-import ItemPageDeleteButton from "../header/DeleteButton"
-import ItemPageEditButton from "../header/EditButton"
-import ItemPageLayoutTabs from "../header/LayoutTabs"
-import ItemPagePoster from "../header/Poster"
 import ItemPageDescription from "../header/Description"
+import ItemPagePoster from "../header/Poster"
+import ItemPageSubNav from "../header/SubNav"
 
 export default function ItemPagePosterInside() {
     const { item, imagePaths } = useContext(itemPageContext)
@@ -43,27 +39,10 @@ export default function ItemPagePosterInside() {
                     }
                     <section className="flex flex-col items-start gap-y-2 w-full" ref={tabsRef}>
                         <Divider className="mt-auto" />
-                        <SubNav className="w-full opacity-90" />
+                        <ItemPageSubNav className="w-full opacity-90" />
                     </section>
                 </section>
             </div>
         </header>
-    )
-}
-
-function SubNav({ className }: { className?: string }) {
-    const { item } = useContext(itemPageContext)
-    const tabsNumber = item?.layout?.length || 0
-    return (
-        <div className={twJoin("flex items-center gap-x-2", className)}>
-            {tabsNumber !== 0
-                ? <ItemPageLayoutTabs variant="light" className="flex-grow" />
-                : <div className="flex-grow"></div>
-            }
-            <div className="flex items-center gap-2">
-                <ItemPageDeleteButton />
-                <ItemPageEditButton />
-            </div>
-        </div>
     )
 }

@@ -1,12 +1,9 @@
 import { useContext, useRef } from "react";
-import { twJoin } from "tailwind-merge";
 import { itemPageContext } from "../ItemPageProvider";
 import ItemPageBadges from "../header/Badges";
-import ItemPageDeleteButton from "../header/DeleteButton";
 import ItemPageDescription from "../header/Description";
-import ItemPageEditButton from "../header/EditButton";
-import ItemPageLayoutTabs from "../header/LayoutTabs";
 import ItemPagePoster from "../header/Poster";
+import ItemPageSubNav from "../header/SubNav";
 
 export default function ItemPagePosterBeside() {
     const { item, imagePaths } = useContext(itemPageContext)
@@ -36,24 +33,7 @@ export default function ItemPagePosterBeside() {
                     </div>
                 </section>
             </header>
-            <SubNav className="w-full p-3 pb-0 opacity-90" />
+            <ItemPageSubNav className="w-full p-3 pb-0 opacity-90" />
         </>
-    )
-}
-
-function SubNav({ className }: { className?: string }) {
-    const { item } = useContext(itemPageContext)
-    const tabsNumber = item?.layout?.length || 0
-    return (
-        <div className={twJoin("flex items-center gap-x-2", className)}>
-            {tabsNumber !== 0
-                ? <ItemPageLayoutTabs variant="light" className="flex-grow" />
-                : <div className="flex-grow"></div>
-            }
-            <div className="flex items-center gap-2">
-                <ItemPageDeleteButton />
-                <ItemPageEditButton />
-            </div>
-        </div>
     )
 }

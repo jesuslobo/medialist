@@ -8,7 +8,7 @@ import { Button, ButtonProps, Divider, Dropdown, DropdownItem, DropdownMenu, Dro
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useContext } from "react";
-import { BiDotsVerticalRounded, BiPencil, BiPlus, BiPurchaseTag, BiRedo, BiRevision, BiTrash } from "react-icons/bi";
+import { BiDotsVerticalRounded, BiPencil, BiPlus, BiPurchaseTag, BiRedo, BiRevision, BiSolidStar, BiStar, BiTrash } from "react-icons/bi";
 import { CiGrid2H } from "react-icons/ci";
 import { FaDiamond } from "react-icons/fa6";
 import { IoGridOutline } from "react-icons/io5";
@@ -17,7 +17,7 @@ import { ListPageContext } from "./ListPageProvider";
 
 export default function ListPageSubNavBar() {
     const router = useRouter();
-    const { list, viewMode, setViewMode, showTags, setShowTags, badgeableTags, tagsQuery, toggleTagQuery } = useContext(ListPageContext)
+    const { list, viewMode, setViewMode, showTags, setShowTags, badgeableTags, tagsQuery, toggleTagQuery, filterSettings, setFilterSettings } = useContext(ListPageContext)
 
     const buttonProps: ButtonProps = {
         size: "sm",
@@ -46,6 +46,15 @@ export default function ListPageSubNavBar() {
             <Divider orientation="vertical" className="h-5" />
 
             <div className="flex-grow flex gap-x-2">
+                <ToggleButton
+                    {...buttonProps}
+                    activeColor="warning"
+                    isToggled={filterSettings.fav}
+                    setIsToggled={() => setFilterSettings({ ...filterSettings, fav: !filterSettings.fav })}
+                    toggledChildren={<BiSolidStar className="text-lg" />}
+                >
+                    <BiStar className="text-lg" />
+                </ToggleButton>
                 {badgeableTags.map(tag => {
                     const isToggled = tagsQuery?.includes(tag.label)
                     return (

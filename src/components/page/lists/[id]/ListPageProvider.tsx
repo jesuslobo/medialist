@@ -18,7 +18,9 @@ export default function ListPageProvider({
     items: ItemData[],
     tags: TagData[]
 }) {
-    const [filterSettings, setFilterSettings] = useState<FilterSettings>({})
+    const [filterSettings, setFilterSettings] = useState<FilterSettings>({
+        fav: false,
+    })
     const [tagsQuery, setTagsQuery] = useQueryState('tags', parseAsArrayOf(parseAsString))
 
     const [viewMode, setViewMode] = useLocalStorage<ViewMode>('viewMode-' + list.id, 'cards')
@@ -30,12 +32,13 @@ export default function ListPageProvider({
     const visibleItems = useMemo(() => items.filter(isItemUnderFilter), [items, tagsQueryIds, filterSettings])
 
     function isItemUnderFilter(item: ItemData) {
-        // item.tags.some(tagId => tagsQueryIds.includes(tagId)) for OR
-        const tagsRule = tagsQuery === null || tagsQueryIds.every(tagId => tagId && item.tags.includes(tagId))
-        const searchRule = !filterSettings.search || item.title.toLowerCase().includes(filterSettings.search)
-        // const primeTagRule
-        // const isFav
-        return tagsRule && searchRule
+        // if Flag is disabled || the rule if enabled
+        const indexItemTags = new Map(item.tags.map(tagId => [tagId, true]))
+        const tagsFlag = tagsQuery === null || tagsQueryIds.every(tagId => tagId && indexItemTags.has(tagId))
+        const searchFlag = !filterSettings.search || item.title.toLowerCase().includes(filterSettings.search)
+        const favFlag = !filterSettings.fav || item.fav
+        // item.tags.some(tagId => tagsQueryIds.has(tagId)) for OR
+        return tagsFlag && searchFlag && favFlag
     }
 
     const toggleTagQuery = (tag: TagData) => setTagsQuery(q =>
@@ -87,7 +90,8 @@ interface ListPageContext {
 }
 
 interface FilterSettings {
-    search?: string
+    search?: string,
+    fav?: boolean
 }
 
 type ViewMode = 'cards' | 'cardsList' | 'list';
