@@ -1,8 +1,10 @@
 import ItemPageLabelTextField from "@/components/page/lists/[id]/[itemId]/fields/ItemPageLabelTextField"
+import ToggleButton from "@/components/ui/buttons/ToggleButton"
 import { ItemLabelTextField } from "@/utils/types/item"
 import { Button, Input, InputProps } from "@heroui/react"
 import { useContext, useState } from "react"
 import { BiX } from "react-icons/bi"
+import { MdOutlineNumbers } from "react-icons/md"
 import { useItemFormLayoutField } from "../ItemFormLayoutSection"
 import { ItemFormContext } from "../ItemFormProvider"
 
@@ -17,6 +19,7 @@ export default function ItemFormLabelTextField({
     const { set, remove } = useItemFormLayoutField(rowIndex, colIndex, setActiveTabFields)
 
     const currentField = activeTabFields[rowIndex][colIndex] as ItemLabelTextField & { id: number }
+    const { countable } = currentField
 
     const [hover, setHover] = useState(false)
 
@@ -40,13 +43,21 @@ export default function ItemFormLabelTextField({
                         {...inputProps}
                         isRequired
                     />
-                    :
-                    <Input
+                    :<Input
                         placeholder="Body"
+                        type={countable ? "number" : "text"}
                         value={currentField.body}
                         onValueChange={(body) => set({ body })}
                         {...inputProps}
                     />
+                    <ToggleButton
+                        title="Countable? if yes it will show plus & minus buttons"
+                        isToggled={Boolean(countable)}
+                        setIsToggled={() => set({ countable: !countable })}
+                        isIconOnly
+                    >
+                        <MdOutlineNumbers size={30} />
+                    </ToggleButton>
                     <Button
                         onPress={remove}
                         variant="light"
@@ -58,6 +69,7 @@ export default function ItemFormLabelTextField({
                 : <ItemPageLabelTextField
                     className="animate-fade-in px-2"
                     field={currentField}
+                    isEditing
                 />
             }
 

@@ -8,14 +8,17 @@ import ItemPageGallery from "./fields/media/ItemPageGallery"
 
 export default function ItemFieldMapper({
     field,
+    ...position
 }: {
     field: ItemField
+    rowIndex: number
+    colIndex: number
 }) {
     switch (field.type) {
         case "tags":
             return <ItemPageTagsField />
         case "labelText":
-            return <ItemPageLabelTextField field={field} />
+            return <ItemPageLabelTextField field={field} {...position} />
         case "link":
             return <ItemPageLinkField field={field} />
         case "text":
