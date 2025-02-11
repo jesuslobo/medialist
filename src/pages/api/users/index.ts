@@ -29,7 +29,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'POST') {
             const body = await req.body;
             const { username: reqUser, password } = JSON.parse(body || {})
-            const username = reqUser.toLowerCase()
+            const username = reqUser?.toLowerCase()
 
             if (!username || !password) return res.status(400).json({ message: 'Invalid Request' })
 
@@ -75,7 +75,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const session = await $createSession(token, user[0].id, req.headers['user-agent']);
 
             $setSessionTokenCookie(res, token, session.expiresAt)
-            res.status(200).json(user[0])
+            return res.status(201).json(user[0])
         }
 
         if (req.method === 'PATCH') {
@@ -87,13 +87,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             let dbHashNewPassword;
             let dbNewUsernameReq;
 
-            if (newPassword) {
-                const validOldPassword = await $verifyPassword(oldPassword, user.passwordHash);
-                if (!validOldPassword) return res.status(400).json({
-                    cause: { oldPassword: "Invalid Password" },
-                    message: 'Invalid Request'
-                } as Error)
+            if (!oldPassword) return res.status(400).json({
+                cause: { oldPassword: "Required" },
+                message: 'Invalid Request'
+            } as Error)
 
+            const validOldPassword = await $verifyPassword(oldPassword, user.passwordHash);
+            if (!validOldPassword) return res.status(400).json({
+                cause: { oldPassword: "Invalid Old Password" },
+                message: 'Invalid Request'
+            } as Error)
+
+            if (newPassword) {
                 if (!validatePassword(newPassword))
                     return res.status(400).json({
                         cause: { newPassword: "Invalid Password" },

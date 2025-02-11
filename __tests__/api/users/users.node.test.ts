@@ -93,13 +93,21 @@ describe('api/users/', () => {
     })
 
     describe('PATCH - change userdata', () => {
-        test('should change username', async () => {
+        test('should change username with valid old password', async () => {
             const oldDate = new Date(2000, 1)
-            const { userData: { id, createdAt, updatedAt }, ...user } = await $mockUser(undefined, undefined, oldDate)
+            const { userData: { id, createdAt, updatedAt, password, username }, ...user } = await $mockUser(undefined, undefined, oldDate)
             const { cookies } = await user.createCookie()
             const newUsername = generateID(5)
 
-            const { body, statusCode } = await $mockHttp(usersRoute).patch({ newUsername }, { cookies });
+            const { body, statusCode } = await $mockHttp(usersRoute).patch({ newUsername, oldPassword: password }, { cookies });
+
+            const newUser = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1)
+
+            const VerifyThatOldPasswordIsTheSame = await $verifyPassword(password, newUser[0].passwordHash)
+            expect(VerifyThatOldPasswordIsTheSame).toBe(true)
+
+            const VerifyThatUsernameChanged = newUser[0].username !== username
+            expect(VerifyThatUsernameChanged).toBe(true)
 
             expect(body).toEqual({
                 id,
@@ -122,9 +130,12 @@ describe('api/users/', () => {
             const { body, statusCode } = await $mockHttp(usersRoute).patch({ newPassword, oldPassword: password }, { cookies });
 
             const newUser = await db.select().from(usersTable).where(eq(usersTable.id, id)).limit(1)
-            const verifyPassword = await $verifyPassword(newPassword, newUser[0].passwordHash)
 
-            expect(verifyPassword).toBe(true)
+            const verifyThatPasswordChanged = await $verifyPassword(newPassword, newUser[0].passwordHash)
+            expect(verifyThatPasswordChanged).toBe(true)
+
+            const VerifyThatUsernameIsTheSame = newUser[0].username === username
+            expect(VerifyThatUsernameIsTheSame).toBe(true)
 
             expect(body).toEqual({
                 id,
@@ -138,12 +149,20 @@ describe('api/users/', () => {
             await user.delete()
         })
 
-        test('shouldn\'t change password with an invalid old password', async () => {
+        test('shouldn\'t change password or username with an invalid old password', async () => {
             const user = await $mockUser()
             const { cookies } = await user.createCookie()
 
-            const reqBody = { newPassword: generateID(6), oldPassword: 'invalidpasswordexample' }
+            const reqBody = { newPassword: generateID(6), username: "newUsername", oldPassword: 'invalidpasswordexample' }
             const { body, statusCode } = await $mockHttp(usersRoute).patch(reqBody, { cookies });
+
+            const newUser = await db.select().from(usersTable).where(eq(usersTable.id, user.userData.id)).limit(1)
+
+            const VerifyThatOldPasswordIsTheSame = await $verifyPassword(user.userData.password, newUser[0].passwordHash)
+            expect(VerifyThatOldPasswordIsTheSame).toBe(true)
+
+            const VerifyThatUsernameIsTheSame = newUser[0].username === user.userData.username
+            expect(VerifyThatUsernameIsTheSame).toBe(true)
 
             expect(body).toEqual({
                 cause: { oldPassword: "Invalid Password" },
@@ -154,12 +173,20 @@ describe('api/users/', () => {
             await user.delete()
         })
 
-        test('shouldn\'t change password without an old password', async () => {
+        test('shouldn\'t change password or username without an old password', async () => {
             const user = await $mockUser()
             const { cookies } = await user.createCookie()
 
-            const reqBody = { newPassword: generateID(6) }
+            const reqBody = { newPassword: generateID(6), username: "newUsername" }
             const { body, statusCode } = await $mockHttp(usersRoute).patch(reqBody, { cookies });
+
+            const newUser = await db.select().from(usersTable).where(eq(usersTable.id, user.userData.id)).limit(1)
+
+            const VerifyThatOldPasswordIsTheSame = await $verifyPassword(user.userData.password, newUser[0].passwordHash)
+            expect(VerifyThatOldPasswordIsTheSame).toBe(true)
+
+            const VerifyThatUsernameIsTheSame = newUser[0].username === user.userData.username
+            expect(VerifyThatUsernameIsTheSame).toBe(true)
 
             expect(body).toEqual({
                 cause: { oldPassword: "Required" },
