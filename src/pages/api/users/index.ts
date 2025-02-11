@@ -11,6 +11,8 @@ import { mkdir } from 'fs/promises';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { join } from 'path';
 
+let adminUserExistsCache: Boolean; // cache
+
 /** api/users
  * Get: Returns the Authenticated User's Data
  * Post: User Register
@@ -57,16 +59,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const userID = generateID()
             const createdAt = new Date(Date.now())
 
+            const adminUserExists = await checkForAdminUserExists();
+            const role = adminUserExists ? 'user' : 'admin';
+
             const user = await db
                 .insert(usersTable)
                 .values({
                     id: userID,
                     username,
+                    role,
                     passwordHash,
                     createdAt,
                     updatedAt: createdAt
                 })
-                .returning({ id: usersTable.id, username: usersTable.username })
+                .returning({ id: usersTable.id, username: usersTable.username, role: usersTable.role })
 
             const userDir = join('public', 'users', userID)
             await mkdir(userDir, { recursive: true }) // create media directory
@@ -147,4 +153,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.error("[Error] api/users: ", error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
+}
+
+async function checkForAdminUserExists() {
+    if (adminUserExistsCache) return true;
+
+    const exists = await db.select().from(usersTable).where(eq(usersTable.role, 'admin')).limit(1);
+    const result = exists.length > 0;
+    adminUserExistsCache = result
+    return result;
 }

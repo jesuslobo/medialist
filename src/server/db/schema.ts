@@ -14,10 +14,10 @@ export const usersTable = sqliteTable("users", {
         .unique(),
     passwordHash: text("password_hash")
         .notNull(),
-    // role: text("role", { enum: ["user", "admin"] })
-    //     .notNull()
-    //     .default("user")
-    //     .$type<"user" | "admin">(),
+    role: text("role", { enum: ["user", "admin"] })
+        .notNull()
+        .default("user")
+        .$type<"user" | "admin">(),
     createdAt: integer("created_at", {
         mode: "timestamp"
     }).notNull()

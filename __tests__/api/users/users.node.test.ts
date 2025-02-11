@@ -26,6 +26,7 @@ describe('api/users/', () => {
             expect(body).toEqual({
                 id,
                 username,
+                role: expect.stringMatching(/user|admin/),
                 createdAt: createdAt.toISOString(),
                 updatedAt: updatedAt.toISOString(),
             })
@@ -51,6 +52,7 @@ describe('api/users/', () => {
 
             expect(body).toEqual({
                 id: expect.stringMatching(/^[123456789ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz]{10}$/),
+                role: expect.stringMatching(/user|admin/),
                 username: username.toLowerCase(),
             })
             expect(statusCode).toBe(201)
@@ -111,6 +113,7 @@ describe('api/users/', () => {
 
             expect(body).toEqual({
                 id,
+                role: expect.stringMatching(/user|admin/),
                 username: newUsername.toLowerCase(),
                 createdAt: createdAt.toISOString(),
                 updatedAt: expect.not.stringMatching(updatedAt.toISOString()),
@@ -139,6 +142,7 @@ describe('api/users/', () => {
 
             expect(body).toEqual({
                 id,
+                role: expect.stringMatching(/user|admin/),
                 username: username.toLowerCase(),
                 createdAt: createdAt.toISOString(),
                 updatedAt: expect.not.stringMatching(updatedAt.toISOString()),
@@ -165,7 +169,7 @@ describe('api/users/', () => {
             expect(VerifyThatUsernameIsTheSame).toBe(true)
 
             expect(body).toEqual({
-                cause: { oldPassword: "Invalid Password" },
+                cause: { oldPassword: "Invalid Old Password" },
                 message: 'Invalid Request'
             })
             expect(statusCode).toBe(400)

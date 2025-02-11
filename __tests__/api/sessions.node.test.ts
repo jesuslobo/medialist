@@ -51,6 +51,7 @@ describe('api/sessions/', () => {
             expect(body).toEqual({
                 id,
                 username,
+                role: expect.stringMatching(/user|admin/),
                 createdAt: createdAt.toISOString(),
                 updatedAt: updatedAt.toISOString(),
             })
