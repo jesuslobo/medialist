@@ -8,6 +8,7 @@
       "start": "next start",
       "lint": "next lint",
       "test": "vitest",
+      "test:migrate": "set DATABASE_PATH=tests.db && npx drizzle-kit migrate",
       "db:gen": "drizzle-kit generate",
       "db:migrate": "drizzle-kit migrate",
       "db:studio": "drizzle-kit studio"
