@@ -2,8 +2,9 @@ import { TagData } from "@/utils/types/global";
 import { ItemHeader, ItemLayoutTab } from "@/utils/types/item";
 import { MediaData } from "@/utils/types/media";
 import { InferSelectModel, sql } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+// primary keys and unique columns are all autoindexed by sqlite
 export const usersTable = sqliteTable("users", {
     id: text("id")
         .notNull()
@@ -13,6 +14,10 @@ export const usersTable = sqliteTable("users", {
         .unique(),
     passwordHash: text("password_hash")
         .notNull(),
+    // role: text("role", { enum: ["user", "admin"] })
+    //     .notNull()
+    //     .default("user")
+    //     .$type<"user" | "admin">(),
     createdAt: integer("created_at", {
         mode: "timestamp"
     }).notNull()
@@ -41,7 +46,9 @@ export const sessionsTable = sqliteTable("sessions", {
         mode: "timestamp"
     }).notNull()
         .default(sql`(unixepoch())`),
-});
+}, (table) => [
+    index("sessions_user_id_idx").on(table.userId),
+]);
 
 export const listsTable = sqliteTable("lists", {
     id: text("id")
@@ -70,7 +77,9 @@ export const listsTable = sqliteTable("lists", {
     // fav: integer("fav", { mode: "boolean" }).notNull().default(false),
     // templates: text("templates").notNull().default("[]"), // JSON string
     // apis: text("templates").notNull().default("[]"), // JSON string
-});
+}, (table) => [
+    index("lists_user_id_trash_idx").on(table.userId, table.trash),
+]);
 
 export const itemsTable = sqliteTable("items", {
     id: text("id")
@@ -113,7 +122,9 @@ export const itemsTable = sqliteTable("items", {
     // templates: text("templates").notNull().default("[]"), // JSON string
     // configs: text("templates").notNull().default("[]"), // JSON string
     // apis: text("templates").notNull().default("[]"), // JSON string
-});
+}, (table) => [
+    index("items_user_trash_list_idx").on(table.userId, table.trash, table.listId),
+]);
 
 export const listsTagsTable = sqliteTable("lists_tags", {
     id: text("id")
@@ -140,7 +151,9 @@ export const listsTagsTable = sqliteTable("lists_tags", {
         mode: "timestamp"
     }).notNull()
         .default(sql`(unixepoch())`),
-});
+}, (table) => [
+    index("lists_tags_user_list_idx").on(table.userId, table.listId),
+]);
 
 export const itemsMedia = sqliteTable("items_media", {
     id: text("id")
@@ -171,7 +184,9 @@ export const itemsMedia = sqliteTable("items_media", {
         mode: "timestamp"
     }).notNull()
         .default(sql`(unixepoch())`),
-});
+}, (table) => [
+    index("items_media_user_item_idx").on(table.userId, table.itemId),
+]);
 
 export type User = InferSelectModel<typeof usersTable>;
 export type Session = InferSelectModel<typeof sessionsTable>;
