@@ -11,26 +11,32 @@ import { RiUserLine } from "react-icons/ri";
 
 interface ReqForm {
     newUsername: string,
+    oldPassword?: string,
 }
 
 interface ResError {
     cause: {
         username?: string
+        oldPassword?: string
     },
 }
 
 export default function UserPageUsernameCard() {
     const { user } = useUser()
 
-    const [_input, setInput] = useState<string>(user.username)
-    const input = _input.trim().toLowerCase()
+    const [_username, setUsername] = useState<string>(user.username)
+    const username = _username.trim().toLowerCase()
+    const [oldPass, setOldPass] = useState<string>('')
 
     const [editMode, _setEditMode] = useState(false)
     const [error, setError] = useState<ResError | null>(null)
 
     function setEditMode(val: boolean | ((prev: boolean) => boolean)) {
-        if (mutation.isSuccess)
+        if (mutation.isSuccess){
             mutation.reset()
+            setOldPass('')
+            setUsername(user.username)
+        }
         _setEditMode(val)
     }
 
@@ -41,9 +47,8 @@ export default function UserPageUsernameCard() {
     })
 
     function onSubmit() {
-        if (!input) return
-        mutation.mutate({ newUsername: input })
-
+        if (!username) return
+        mutation.mutate({ newUsername: username, oldPassword: oldPass })
     }
 
     return (
@@ -52,19 +57,7 @@ export default function UserPageUsernameCard() {
                 <CardBody className="flex flex-row items-center gap-x-3 ">
                     <RiUserLine className="text-2xl" />
                     <span className="text-lg flex flex-row gap-x-2 items-center flex-grow">
-                        Username: <span className="text-foreground-500 animate-fade-in">{!editMode && user.username}</span>
-                        {editMode &&
-                            <Input
-                                className="text-foreground-500 animate-fade-in"
-                                placeholder="New Username"
-                                type="text"
-                                value={_input}
-                                onValueChange={setInput}
-                                isInvalid={Boolean(error?.cause?.username)}
-                                color={error?.cause?.username ? "danger" : undefined}
-                                errorMessage={error?.cause?.username}
-                            />
-                        }
+                        Username: <span className="text-foreground-500 animate-fade-in">{user.username}</span>
                     </span>
                     {editMode &&
                         <StatusSubmitButton
@@ -75,7 +68,7 @@ export default function UserPageUsernameCard() {
                             defaultContent={<BiSave className="text-xl" />}
                             savedContent={<BiCheckDouble className="text-xl" />}
                             errorContent={<BiRevision className="text-xl" />}
-                            isDisabled={input === user.username}
+                            isDisabled={username === user.username}
                             isIconOnly
                         />
                     }
@@ -88,6 +81,35 @@ export default function UserPageUsernameCard() {
                     </ToggleButton>
                 </CardBody>
             </Card>
+            {editMode &&
+                <Card className="w-full grid gap-y-2 my-2 p-2 bg-accented/30 animate-fade-in">
+                    <Input
+                        className="text-foreground-500"
+                        labelPlacement="inside"
+                        label="Old Password"
+                        variant="faded"
+                        type="password"
+                        value={oldPass}
+                        onValueChange={setOldPass}
+                        isInvalid={Boolean(error?.cause?.oldPassword)}
+                        color={error?.cause?.oldPassword ? "danger" : undefined}
+                        errorMessage={error?.cause?.oldPassword}
+                    />
+                    <Input
+                        className="text-foreground-500"
+                        labelPlacement="inside"
+                        label="New Username"
+                        variant="faded"
+                        type="text"
+                        value={_username}
+                        onValueChange={setUsername}
+                        isInvalid={Boolean(error?.cause?.username)}
+                        color={error?.cause?.username ? "danger" : undefined}
+                        errorMessage={error?.cause?.username}
+                    />
+                </Card>
+
+            }
         </li>
     )
 }

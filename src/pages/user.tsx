@@ -1,15 +1,12 @@
 import UserPageSecurityTab from "@/components/page/user/SecurityTab"
 import { useUser } from "@/components/providers/AuthProvider"
 import TitleBar from "@/components/ui/bars/TitleBar"
-import { Button, Tab, Tabs } from "@heroui/react"
-import { BiInfoCircle, BiShieldAlt2 } from "react-icons/bi"
-import { BsSuitcaseLg } from "react-icons/bs"
+import { Tab, Tabs } from "@heroui/react"
+import { BiShieldAlt2 } from "react-icons/bi"
 import { RiUserLine } from "react-icons/ri"
 
 export default function UserPage() {
     const { user } = useUser()
-
-    const isAdmin = true
 
     return (<>
         <TitleBar
@@ -18,11 +15,11 @@ export default function UserPage() {
             startContent={<RiUserLine className="text-3xl mr-3" />}
         >
             <div className="flex gap-x-2">
-                {isAdmin && (
+                {/* {isAdmin && (
                     <Button title="Admin" variant="bordered">
                         Admin
                     </Button>
-                )}
+                )} */}
             </div>
         </TitleBar>
         <main className="animate-fade-in">
@@ -45,7 +42,7 @@ export default function UserPage() {
                 }>
                     <UserPageSecurityTab />
                 </Tab>
-                <Tab title={
+                {/* <Tab title={
                     <div className="flex items-center space-x-1">
                         <BiInfoCircle className="text-lg" />
                         <span>Activity</span>
@@ -70,7 +67,7 @@ export default function UserPage() {
                         </div>
                     }>
                     </Tab>)
-                )}
+                )} */}
             </Tabs>
             {/* pages: activites/ edit */}
         </main>
