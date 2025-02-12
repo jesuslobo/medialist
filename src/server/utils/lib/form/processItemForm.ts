@@ -1,6 +1,6 @@
 import { generateID } from "@/utils/lib/generateID";
 import { TagData } from "@/utils/types/global";
-import { ItemData, ItemField, ItemLayoutTab, LogoField } from "@/utils/types/item";
+import { ItemData, ItemField, ItemImageField, ItemLayoutTab, LogoField } from "@/utils/types/item";
 import { MediaData } from "@/utils/types/media";
 import $getDir from "../../file/getDir";
 import $processFormData, { ProcessedFormData } from "../processFormData";
@@ -20,8 +20,8 @@ export default async function $processItemForm(userId: string, listId: string, i
 
     return {
         ...form,
-        /** Directly assemble the addresses of new logos to their fields */
-        mapLayoutsToLogos: () => mapFieldsToLogos(data, attachments),
+        /** Directly assemble the addresses of new logos to their fields, SHOULD be used after handleMediaImages() */
+        mapLayoutsToPaths: () => mapFieldsToPaths(data, attachments),
         handleMediaImages: () => handleMediaImages(data, attachments, userId, itemId),
         /** Returns an Array of New Tags */
         handleTags: (tagsData: { id: string }[]) => handleTags(tagsData, data, userId, listId),
@@ -32,7 +32,8 @@ export default async function $processItemForm(userId: string, listId: string, i
     }
 };
 
-function mapFieldsToLogos(data: ItemServerForm, logoPaths: Map<String, string>) {
+// map fileds to paths
+function mapFieldsToPaths(data: ItemServerForm, logoPaths: Map<String, string>) {
     return data.layout?.map(tab =>
         tab.map((row, rowIndex) =>
             rowIndex === 0
@@ -40,11 +41,19 @@ function mapFieldsToLogos(data: ItemServerForm, logoPaths: Map<String, string>) 
                 : (row as ItemField[]).map(field => {
                     if ((field as LogoField)?.logoPath) {
                         const fieldT = field as LogoField;
-                        const id = `logoPaths[${fieldT.logoPath}]`
+                        const pathKey = `logoPaths[${fieldT.logoPath}]`
                         let logoPath = fieldT?.logoPath;
-                        if (logoPaths.get(id)) logoPath = logoPaths.get(id)
+                        if (logoPaths.get(pathKey)) logoPath = logoPaths.get(pathKey)
                         return { ...field, logoPath, id: undefined }
-                    } else {
+                    } else if ((field as ItemImageField)?.imageId) {
+                        const fieldT = field as ItemImageField;
+                        const imageIdKey = `mediaImages[${fieldT.imageId}]`
+                        let imageId = fieldT?.imageId;
+                        if (logoPaths.get(imageIdKey))
+                            imageId = logoPaths.get(imageIdKey) as string
+                        return { ...field, imageId, id: undefined }
+                    }
+                    else {
                         return { ...field, id: undefined }
                     }
                 })
@@ -60,8 +69,12 @@ function handleMediaImages(data: ItemServerForm, mediaImages: Map<String, string
         if (!mediaImages.has(key)) return
 
         const path = mediaImages.get(key) as string
+        const id = generateID()
+        // we store id of the image, so we can use it in the layout with images-related fileds
+        mediaImages.set(key, id)
+
         images.push({
-            id: generateID(),
+            id,
             userId,
             itemId,
             path,

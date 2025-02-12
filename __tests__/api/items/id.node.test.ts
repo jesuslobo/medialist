@@ -4,6 +4,7 @@ import { db } from '@/server/db';
 import { listsTagsTable } from '@/server/db/schema';
 import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { generateID } from '@/utils/lib/generateID';
+import { ItemLayoutTab } from '@/utils/types/item';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import $mockTag from '@tests/test-utils/mocks/data/mockTag';
@@ -520,74 +521,143 @@ describe('api/items/[id]', async () => {
             })
         })
 
-        test('should create media if provided', async () => {
+        describe('create media', () => {
+            test('should create media if provided', async () => {
+                const { userMock, ...item } = await $mockItem({
+                    layout: [[
+                        { type: 'one_row', label: 'test' },
+                        [{ type: 'labelText', label: 'logoField1', body: 'text', logo: true }],
+                    ]],
+                    createdAt: new Date(2000, 1),
+                    updatedAt: new Date(2000, 1),
+                });
+
+                const { userData, ...user } = userMock;
+                const { cookies } = await user.createCookie();
+
+                const form = new FormData();
+                const [imageID1, imageID2] = [generateID(10), generateID(10)]
+
+                form.append('media', JSON.stringify([
+                    { title: 'image1', path: imageID1, keywords: ['keyword1', 'keyword2'] },
+                    { title: null, path: 'shouldIgnorethis' },
+                    { path: imageID2 },
+                ]))
+                form.append(`mediaImages[${imageID1}]`, file, TEST_MOCK_FILE_NAME);
+                form.append(`mediaImages[${imageID2}]`, file, TEST_MOCK_FILE_NAME);
+
+                const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
+                await new Promise(setImmediate)
+
+                expect(body).toEqual({
+                    item: {
+                        ...item.itemData,
+                        updatedAt: expect.not.stringMatching(item.itemData.updatedAt),
+                    },
+                    newTags: [],
+                    newMedia: [
+                        {
+                            id: expect.any(String),
+                            userId: userMock.userData.id,
+                            itemId: item.itemData.id,
+                            path: expect.any(String),
+                            type: 'image',
+                            title: 'image1',
+                            keywords: ['keyword1', 'keyword2'],
+                            createdAt: expect.any(String),
+                            updatedAt: expect.any(String)
+                        },
+                        {
+                            id: expect.any(String),
+                            userId: userMock.userData.id,
+                            itemId: item.itemData.id,
+                            path: expect.any(String),
+                            type: 'image',
+                            title: null,
+                            keywords: [],
+                            createdAt: expect.any(String),
+                            updatedAt: expect.any(String)
+                        },
+                    ]
+                })
+
+                const media1Exists = fileExists(item.itemDir, body.newMedia[0].path, [])
+                expect(media1Exists).toBe(true)
+
+                const media2Exists = fileExists(item.itemDir, body.newMedia[1].path, [])
+                expect(media2Exists).toBe(true)
+            })
+
+            test('should create media and map it to an image field in the layout', async () => {
+                const { userMock, ...item } = await $mockItem({
+                    layout: [[
+                        { type: 'one_row', label: 'test' },
+                        [{ type: 'labelText', label: 'logoField1', body: 'text', logo: true }],
+                    ]],
+                    createdAt: new Date(2000, 1),
+                    updatedAt: new Date(2000, 1),
+                });
+
+                const { userData, ...user } = userMock;
+                const { cookies } = await user.createCookie();
+
+                const form = new FormData();
+                const imageID1 = generateID(10)
+
+                form.append('media', JSON.stringify([
+                    { title: 'image1', path: imageID1, keywords: ['keyword1', 'keyword2'] },
+                    { title: null, path: 'shouldIgnorethis' },
+                ]))
+                form.append(`mediaImages[${imageID1}]`, file, TEST_MOCK_FILE_NAME);
+
+                form.append('layout', JSON.stringify([
+                    [{ type: 'one_row', label: 'tab1' }, [
+                        { type: 'image', imageId: imageID1 },
+                    ]],
+                ] as ItemLayoutTab[]))
+
+                const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
+                await new Promise(setImmediate)
+
+                expect(body).toEqual({
+                    item: {
+                        ...item.itemData,
+                        layout: [
+                            [{ type: 'one_row', label: 'tab1' }, [
+                                { type: 'image', imageId: body.newMedia[0].id },
+                            ]],
+                        ],
+                        updatedAt: expect.not.stringMatching(item.itemData.updatedAt),
+                    },
+                    newTags: [],
+                    newMedia: [
+                        {
+                            id: expect.any(String),
+                            userId: userMock.userData.id,
+                            itemId: item.itemData.id,
+                            path: expect.any(String),
+                            type: 'image',
+                            title: 'image1',
+                            keywords: ['keyword1', 'keyword2'],
+                            createdAt: expect.any(String),
+                            updatedAt: expect.any(String)
+                        }
+                    ]
+                })
+
+                const media1Exists = fileExists(item.itemDir, body.newMedia[0].path, [])
+                expect(media1Exists).toBe(true)
+
+                expect(statusCode).toBe(200);
+            })
+
+        })
+
+        test('should update fav', async () => {
             const { userMock, ...item } = await $mockItem({
-                layout: [[
-                    { type: 'one_row', label: 'test' },
-                    [{ type: 'labelText', label: 'logoField1', body: 'text', logo: true }],
-                ]],
                 createdAt: new Date(2000, 1),
                 updatedAt: new Date(2000, 1),
             });
-
-            const { userData, ...user } = userMock;
-            const { cookies } = await user.createCookie();
-
-            const form = new FormData();
-            const [imageID1, imageID2] = [generateID(10), generateID(10)]
-
-            form.append('media', JSON.stringify([
-                { title: 'image1', path: imageID1, keywords: ['keyword1', 'keyword2'] },
-                { title: null, path: 'shouldIgnorethis' },
-                { path: imageID2 },
-            ]))
-            form.append(`mediaImages[${imageID1}]`, file, TEST_MOCK_FILE_NAME);
-            form.append(`mediaImages[${imageID2}]`, file, TEST_MOCK_FILE_NAME);
-
-            const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
-            await new Promise(setImmediate)
-
-            expect(body).toEqual({
-                item: {
-                    ...item.itemData,
-                    updatedAt: expect.not.stringMatching(item.itemData.updatedAt),
-                },
-                newTags: [],
-                newMedia: [
-                    {
-                        id: expect.any(String),
-                        userId: userMock.userData.id,
-                        itemId: item.itemData.id,
-                        path: expect.any(String),
-                        type: 'image',
-                        title: 'image1',
-                        keywords: ['keyword1', 'keyword2'],
-                        createdAt: expect.any(String),
-                        updatedAt: expect.any(String)
-                    },
-                    {
-                        id: expect.any(String),
-                        userId: userMock.userData.id,
-                        itemId: item.itemData.id,
-                        path: expect.any(String),
-                        type: 'image',
-                        title: null,
-                        keywords: [],
-                        createdAt: expect.any(String),
-                        updatedAt: expect.any(String)
-                    },
-                ]
-            })
-
-            const media1Exists = fileExists(item.itemDir, body.newMedia[0].path, [])
-            expect(media1Exists).toBe(true)
-
-            const media2Exists = fileExists(item.itemDir, body.newMedia[1].path, [])
-            expect(media2Exists).toBe(true)
-        })
-
-        describe('should update fav', async () => {
-            const { userMock, ...item } = await $mockItem();
             const { userData, ...user } = userMock;
             const { cookies } = await user.createCookie();
 
@@ -608,6 +678,7 @@ describe('api/items/[id]', async () => {
 
             await item.delete();
         })
+
     })
 
     test('DELETE - delete an item by ID', async () => {

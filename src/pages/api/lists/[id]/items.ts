@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const tags = await $getTags(user.id, list.id)
 
             const form = await $processItemForm(user.id, list.id, itemId)
-            const { processFiles, processFields, handleTags, mapLayoutsToLogos, handleMediaImages } = form;
+            const { processFiles, processFields, handleTags, mapLayoutsToPaths, handleMediaImages } = form;
 
             form.data['id'] = itemId;
             form.data['userId'] = user.id;
@@ -62,8 +62,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (!form.data.title)
                     return res.status(400).json({ message: 'Bad Request' });
 
-                form.data.layout = mapLayoutsToLogos()
-
                 let newTagsData: { id: string }[] = []
                 // new tags
                 if (form.data?.tags && form.data.tags.length > 0) {
@@ -75,18 +73,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 form.data.createdAt = new Date(Date.now())
                 form.data.updatedAt = new Date(Date.now())
 
+                let newMediaData: MediaData[] = []
+                if (form.data.media) {
+                    // we init it here, since we mediaIDs for some fields
+                    newMediaData = handleMediaImages()
+                    form.data.media = newMediaData
+                }
+
+                form.data.layout = mapLayoutsToPaths()
+
                 const item = await db
                     .insert(itemsTable)
                     .values(form.data)
                     .returning();
 
                 // should be created after the item, since it uses the item id as a foreign key
-                let newMediaData: MediaData[] = []
-                if (form.data.media) {
-                    const toAdd = handleMediaImages()
-                    form.data.media = toAdd
-                    newMediaData = await $createItemMedia(toAdd)
-                }
+                if (form.data.media)
+                    newMediaData = await $createItemMedia(newMediaData)
 
                 res.status(201).json({
                     item: item[0],

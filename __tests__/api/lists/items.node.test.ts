@@ -127,10 +127,6 @@ describe('api/lists/[id]/items', async () => {
             ]))
 
             const logoID = generateID(10)
-            form.append('layout', JSON.stringify([
-                [{ type: 'one_row', label: 'tab1' }, [{ type: 'labelText', label: 'label', body: 'text', logoPath: logoID }]],
-                [{ type: 'one_row', label: 'tab2' }, [{ type: 'labelText', label: 'label', body: 'text' }]],
-            ] as ItemLayoutTab[]))
             form.append(`logoPaths[${logoID}]`, file, TEST_MOCK_FILE_NAME);
 
             const [imageID1, imageID2] = [generateID(10), generateID(10)]
@@ -141,6 +137,14 @@ describe('api/lists/[id]/items', async () => {
             ]))
             form.append(`mediaImages[${imageID1}]`, file, TEST_MOCK_FILE_NAME);
             form.append(`mediaImages[${imageID2}]`, file, TEST_MOCK_FILE_NAME);
+
+            form.append('layout', JSON.stringify([
+                [{ type: 'one_row', label: 'tab1' }, [{ type: 'labelText', label: 'label', body: 'text', logoPath: logoID }]],
+                [{ type: 'one_row', label: 'tab2' }, [
+                    { type: 'labelText', label: 'label', body: 'text' },
+                    { type: 'image', imageId: imageID1 },
+                ]],
+            ] as ItemLayoutTab[]))
 
             const { body, statusCode } = await $mockHttp(itemsRouter).post(form, { cookies, query: { id: listData.id } });
             await new Promise(setImmediate)
@@ -165,7 +169,10 @@ describe('api/lists/[id]/items', async () => {
                         ],
                         [
                             { type: 'one_row', label: 'tab2' },
-                            [{ type: 'labelText', label: 'label', body: 'text' }]
+                            [
+                                { type: 'labelText', label: 'label', body: 'text' },
+                                { type: 'image', imageId: body.newMedia[0].id }
+                            ],
                         ],
                     ],
                     header: { type: 'poster_beside' },
@@ -240,11 +247,9 @@ describe('api/lists/[id]/items', async () => {
 
             const form = new FormData();
             form.append('title', 'new item');
-
+debugger
             const { body, statusCode } = await $mockHttp(itemsRouter).post(form, { cookies, query: { id: listData.id } });
             await new Promise(setImmediate)
-
-            const item = body.item as ItemData
 
             expect(body).toEqual({
                 item: {

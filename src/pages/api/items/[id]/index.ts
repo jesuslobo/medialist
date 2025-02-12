@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const tags = await $getTags(user.id, item.listId)
 
             const form = await $processItemForm(user.id, item.listId, item.id)
-            const { processFiles, processFields, handleTags, mapLayoutsToLogos, handleMediaImages, dir, data } = form;
+            const { processFiles, processFields, handleTags, mapLayoutsToPaths, handleMediaImages, dir, data } = form;
 
             const bb = busboy({
                 headers: req.headers,
@@ -68,8 +68,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (data.posterPath !== undefined && item.posterPath && item.posterPath !== data.posterPath)
                     $deleteFile(THUMBNAILS_OPTIONS.ITEM_POSTER, dir.item, item.posterPath);
 
+                // in like in createItem, we can create items directly here, since item's id exists, and won't cause a foreign key error
+                let newMediaData: MediaData[] = []
+                if (form.data?.media && Array.isArray(form.data.media) && form.data.media.length > 0) {
+                    const toAdd = handleMediaImages()
+                    form.data.media = toAdd
+                    newMediaData = await $createItemMedia(toAdd)
+                }
+
                 if (form.data.layout !== undefined) {
-                    form.data.layout = mapLayoutsToLogos()
+                    form.data.layout = mapLayoutsToPaths()
 
                     const oldLogoPaths = extractLogoPaths(item.layout as ItemLayoutTab[])
                     const newLogoPaths = new Set(extractLogoPaths(form.data.layout))
@@ -77,13 +85,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     deletedLogos.forEach(logoPath => logoPath &&
                         $deleteFile(THUMBNAILS_OPTIONS.LOGO, dir.item, logoPath)
                     )
-                }
-
-                let newMediaData: MediaData[] = []
-                if (form.data?.media && Array.isArray(form.data.media) && form.data.media.length > 0) {
-                    const toAdd = handleMediaImages()
-                    form.data.media = toAdd
-                    newMediaData = await $createItemMedia(toAdd)
                 }
 
                 form.data.updatedAt = new Date(Date.now())
