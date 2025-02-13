@@ -7,7 +7,7 @@ import { twMerge } from "tailwind-merge";
 type DivAttributes = Omit<DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>, 'onDrop' | 'onDragOver' | 'onDragLeave' | 'onClick' | 'onChange' | 'children'>
 
 interface ImageInputProps extends DivAttributes {
-    value: File | null | string
+    value?: File | null | string
     onChange: (value: File | null) => void
     children?: ({ error }: { error: string | null }) => JSX.Element,
     innerContent?: string | JSX.Element
@@ -25,7 +25,7 @@ interface ImageInputProps extends DivAttributes {
 export default function ImageInput({
     children,
     className,
-    value,
+    value = null,
     onChange,
     innerContent = "Drag Image or Click to Upload",
     extraValidTypes,

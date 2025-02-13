@@ -5,6 +5,7 @@ import ItemPageRatingField from "./fields/ItemPageRatingField"
 import ItemPageTagsField from "./fields/ItemPageTagsField"
 import ItemPageTextField from "./fields/ItemPageTextField"
 import ItemPageGallery from "./fields/media/ItemPageGallery"
+import ItemPageImageField from "./fields/media/ItemPageImageField"
 
 export default function ItemFieldMapper({
     field,
@@ -27,6 +28,8 @@ export default function ItemFieldMapper({
             return <ItemPageRatingField field={field} />
         case "gallery":
             return <ItemPageGallery field={field} />
+        case "image":
+            return <ItemPageImageField field={field}/>
         default:
             return <></>
     }

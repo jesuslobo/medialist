@@ -1,4 +1,5 @@
 import { SortableItemType } from "@/components/ui/layout/drag&drop/logic/SortableMultiContainersWrapper";
+import counterGenerator from "@/utils/functions/counterGenerator";
 import { TagData } from "@/utils/types/global";
 import { ItemData, ItemField, ItemLayoutHeader } from "@/utils/types/item";
 import { ListData } from "@/utils/types/list";
@@ -28,6 +29,11 @@ interface ItemFormContext {
     setIsPreviewMode: Dispatch<SetStateAction<boolean>>,
 }
 
+export type ItemFormMedia = Pick<MediaData, 'keywords' | 'title'> & (
+    { path: string; id: string, ref?: undefined } | // an existing media
+    { path: File; id?: undefined, ref: string } // a new media
+    // ref is kinda a temporary id for the new media
+)
 export type ItemFormField = SortableItemType & ItemField
 export type ItemFormLayoutTab = [ItemLayoutHeader, ...ItemFormField[][]]
 export type ItemFormLogoField = ItemFormField & { id: number, logoPath: File | null }
@@ -35,7 +41,7 @@ export type ItemFormLogoField = ItemFormField & { id: number, logoPath: File | n
 export interface ItemFormData extends Omit<ItemData, "id" | "createdAt" | "updatedAt" | 'coverPath' | 'posterPath' | 'userId'> {
     cover: File | null | string,
     poster: File | null | string,
-    media?: (Pick<MediaData, 'title' | 'keywords'> & { path: File })[],
+    media?: ItemFormMedia[],
 }
 
 export const ItemFormContext = createContext({} as ItemFormContext);
@@ -143,3 +149,5 @@ export default function ItemFormProvider({
         </ItemFormContext.Provider>
     )
 }
+
+export const ItemFormCounterGen = counterGenerator() // universal instance, 'cause we need to keep the numbers unique across the app

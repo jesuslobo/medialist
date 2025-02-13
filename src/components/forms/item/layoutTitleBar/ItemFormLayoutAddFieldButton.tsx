@@ -1,7 +1,7 @@
 import { ItemFieldType } from "@/utils/types/item";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@heroui/react";
 import { useContext } from "react";
-import { BiImages, BiLink, BiPlus, BiSolidStar } from "react-icons/bi";
+import { BiImage, BiImages, BiLink, BiPlus, BiSolidStar } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
 import { RxText } from "react-icons/rx";
 import { ItemFormContext, ItemFormField } from "../ItemFormProvider";
@@ -56,6 +56,13 @@ export default function ItemFormLayoutAddFieldButton({ rowIndex }: { rowIndex: n
                         startContent={<BiImages />}
                     >
                         Gallery
+                    </DropdownItem>
+                    <DropdownItem
+                        key="add-image-field"
+                        onPress={() => addField("image")}
+                        startContent={<BiImage />}
+                    >
+                        Image
                     </DropdownItem>
                 </DropdownSection>
                 <DropdownSection title="Other">

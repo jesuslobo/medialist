@@ -18,14 +18,15 @@ export default function ItemPageGallery({ field }: { field?: GalleryField }) {
     const { item, media, imagePaths: { itemSrc } } = useContext(itemPageContext)
 
     const [showAddForm, setShowAddForm] = useState(false)
-    const filterKeywords = field?.filter?.keywords || []
 
     const filteredMedia = useMemo(() => {
+        const filterKeywords = field?.filter?.keywords || []
         const baseKeywordsFilters = new Set<string>(filterKeywords)
         return baseKeywordsFilters.size
             ? media.filter(item => item?.keywords?.some(key => baseKeywordsFilters.has(key)))
             : media
-    }, [media, filterKeywords])
+    }, [media, field])
+    const isFilterLocked = Array.isArray(field?.filter?.keywords) && field?.filter?.keywords.length > 0
 
     const [visiableMedia, setVisiableMedia] = useState(filteredMedia)
 
@@ -46,7 +47,7 @@ export default function ItemPageGallery({ field }: { field?: GalleryField }) {
 
         setVisiableMedia(filteredMedia.filter(item =>
             item.title?.toLowerCase().includes(value) ||
-            item.keywords?.some(key => key.toLowerCase() === value)
+            item.keywords?.some(key => typeof key === 'string' && key.toLowerCase() === value)
         ))
     }
 
@@ -57,6 +58,7 @@ export default function ItemPageGallery({ field }: { field?: GalleryField }) {
                     title="add new image"
                     isToggled={showAddForm}
                     setIsToggled={setShowAddForm}
+                    onDragOver={() => setShowAddForm(true)}
                     isIconOnly
                 >
                     <BiImageAdd className="ml-1 text-xl" />
@@ -67,7 +69,7 @@ export default function ItemPageGallery({ field }: { field?: GalleryField }) {
                     startContent={<BiSearch className="opacity-80" size={20} />}
                     className="text-foreground shadow-none"
                 />
-                {field?.filter?.keywords &&
+                {isFilterLocked &&
                     <Button
                         title="This Gallery has locked filters"
                         color="primary"
@@ -77,12 +79,12 @@ export default function ItemPageGallery({ field }: { field?: GalleryField }) {
                     </Button>}
             </div>
 
-            {field?.filter?.keywords &&
+            {isFilterLocked &&
                 <div className="flex flex-wrap gap-x-1 items-center justify-start ">
                     <Chip variant="bordered" size="sm" >
                         <BiFilterAlt className="text-lg" title="Applied Filters" />
                     </Chip>
-                    {filterKeywords.map((key, index) =>
+                    {field?.filter?.keywords?.map((key, index) =>
                         <Chip key={'gallery-keyword' + index} variant="bordered" size="sm" >
                             {key}
                         </Chip>
@@ -91,7 +93,7 @@ export default function ItemPageGallery({ field }: { field?: GalleryField }) {
             }
 
             <div className="w-full h-full columns-2xs gap-x-4 space-y-4">
-                {showAddForm && <AddImageForm itemId={item.id} setShowAddForm={setShowAddForm} />}
+                {showAddForm && <AddImageForm itemId={item.id} setShowAddForm={setShowAddForm} filter={field?.filter} />}
                 {visiableMedia.map((image, index) =>
                     <MediaImageCard
                         key={'gallery-image' + index}

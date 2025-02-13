@@ -6,7 +6,7 @@ import ItemFormLayoutTitleBar from "@/components/forms/item/layoutTitleBar/ItemF
 import ErrorPage from "@/components/layouts/ErrorPage"
 import ListsLoading from "@/components/layouts/loading/ListsLoading"
 import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton"
-import { generateID, validatedID } from "@/utils/lib/generateID"
+import { validatedID } from "@/utils/lib/generateID"
 import httpClient from "@/utils/lib/httpClient"
 import { mutateItemCache } from "@/utils/lib/tanquery/itemsQuery"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
@@ -54,21 +54,20 @@ function AddItemPage() {
 
     function onSubmit(data: ItemFormData) {
         const formData = new FormData()
-
         const logoFieldsTypes = ["badge", "link"]
 
+        let keys = 0
         let layout = layoutTabs.map((tab) =>
             tab.map((row, rowIndex) =>
                 rowIndex === 0
                     ? row //header
                     : (row as ItemFormField[]).map((field) => {
                         if (logoFieldsTypes.includes(field.type)) {
-                            const id = generateID(10)
+                            const key = String(keys++)
                             const fieldT = field as ItemFormLogoField
                             if (fieldT?.logoPath)
-                                formData.append(`logoPaths[${id}]`, fieldT.logoPath as File)
-
-                            return { ...field, logoPath: fieldT?.logoPath && id, id: undefined }
+                                formData.append(`logoPaths[${key}]`, fieldT.logoPath as File)
+                            return { ...field, logoPath: fieldT?.logoPath && key, id: undefined }
                         } else {
                             return { ...field, id: undefined, }
                         }
@@ -89,7 +88,7 @@ function AddItemPage() {
 
         if (data.media) {
             const media = data.media.map(media => {
-                const key = generateID(10)
+                const key = String(keys++)
                 formData.append(`mediaImages[${key}]`, media.path as File)
                 return {
                     title: media.title,

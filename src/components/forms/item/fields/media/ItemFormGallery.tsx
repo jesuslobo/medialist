@@ -1,5 +1,5 @@
 import { useItemFormLayoutField } from "@/components/forms/item/ItemFormLayoutSection"
-import { ItemFormContext } from "@/components/forms/item/ItemFormProvider"
+import { ItemFormContext, ItemFormCounterGen } from "@/components/forms/item/ItemFormProvider"
 import MediaImageCard from "@/components/page/lists/[id]/[itemId]/fields/media/MediaImageCard"
 import ToggleButton from "@/components/ui/buttons/ToggleButton"
 import ImageInput from "@/components/ui/form/ImageUploader"
@@ -13,8 +13,7 @@ import { useMutation } from "@tanstack/react-query"
 import { Dispatch, SetStateAction, useContext, useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { BiFilterAlt, BiImageAdd, BiLockOpenAlt, BiSave, BiSearch, BiSolidLockAlt, BiX } from "react-icons/bi"
-
-type Media = Pick<MediaData, 'keywords' | 'title'> & { path: File }
+import { ItemFormMedia } from "../../ItemFormProvider"
 
 // it is stateless like tags field
 export default function ItemFormGallery({
@@ -30,10 +29,15 @@ export default function ItemFormGallery({
     const { filter } = activeTabFields[rowIndex][colIndex] as GalleryField & { id: number }
 
     const [searchValue, setSearchValue] = useState(filter?.keywords?.join(', ') || '')
-    const [lockFilters, _setLockFilters] = useState(Boolean(filter?.keywords))
+
+    const isFilterLocked = Array.isArray(filter?.keywords) && filter?.keywords.length > 0
+    const [lockFilters, _setLockFilters] = useState(Boolean(isFilterLocked))
     function setLockFilters(value: boolean | ((prev: boolean) => boolean)) {
         const newVal = typeof value === 'function' ? value(lockFilters) : value
-        if (newVal && !searchValue) return _setLockFilters(false)
+        if (newVal && !searchValue) {
+            set({ filter: undefined })
+            return _setLockFilters(false)
+        }
 
         _setLockFilters(value)
         const keywords = searchValue.split(',').map(key => key.trim())
@@ -50,8 +54,8 @@ export default function ItemFormGallery({
             : media
     }, [media, searchValue])
 
-    const newMedia = itemForm.watch('media') as Media[] || []
-    const setNewMedia = (data: SetMediaCallBack | Media[]) =>
+    const newMedia = itemForm.watch('media') as ItemFormMedia[] || []
+    const setNewMedia = (data: SetMediaCallBack | ItemFormMedia[]) =>
         setValue('media', typeof data === 'function' ? data(newMedia) : data)
 
     const [showAddForm, setShowAddForm] = useState(false)
@@ -75,6 +79,7 @@ export default function ItemFormGallery({
                     title="add new image"
                     isToggled={showAddForm}
                     setIsToggled={setShowAddForm}
+                    onDragOver={() => setShowAddForm(true)}
                     isIconOnly
                 >
                     <BiImageAdd className="ml-1 text-xl" />
@@ -136,8 +141,8 @@ export default function ItemFormGallery({
                         key={'new-gallery-image' + Date.now() + index}
                         title={image.title as string | undefined}
                         keywords={image.keywords}
-                        src={URL.createObjectURL(image.path)}
-                        thumbnailSrc={URL.createObjectURL(image.path)}
+                        src={URL.createObjectURL(image.path as File)}
+                        thumbnailSrc={URL.createObjectURL(image.path as File)}
                         onEdit={(data) => setNewMedia(e =>
                             e.toSpliced(index, 1, { ...newMedia[index], title: data.title, keywords: data.keywords }))
                         }
@@ -161,7 +166,7 @@ export default function ItemFormGallery({
     )
 }
 
-type SetMediaCallBack = ((prev: Media[]) => Media[])
+type SetMediaCallBack = ((prev: ItemFormMedia[]) => ItemFormMedia[])
 
 interface AddImageForm { path: File, title?: string, keywords?: string }
 function AddImageForm({
@@ -170,7 +175,7 @@ function AddImageForm({
     filter,
 }: {
     setShowAddForm: Dispatch<SetStateAction<boolean>>,
-    setNewMedia: (data: SetMediaCallBack | Media[]) => void
+    setNewMedia: (data: SetMediaCallBack | ItemFormMedia[]) => void
     filter?: GalleryFieldFilter
 }) {
     const { handleSubmit, control, register, reset } = useForm<AddImageForm>({
@@ -182,10 +187,11 @@ function AddImageForm({
     function onSubmit(data: AddImageForm) {
         const newReq = {
             path: data.path,
+            ref: String(ItemFormCounterGen.next().value),
             title: data.title,
             keywords: data.keywords?.split(',').map(key => key.trim()) || [],
         }
-        setNewMedia(e => [newReq, ...e] as Media[])
+        setNewMedia(e => [newReq, ...e] as ItemFormMedia[])
         reset()
         setShowAddForm(false)
     }
