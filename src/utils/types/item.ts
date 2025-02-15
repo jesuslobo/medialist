@@ -49,20 +49,19 @@ export interface ItemTagsField { type: "tags" }
 export interface LogoField { label: string, logoPath?: string }
 export interface GalleryField { type: "gallery", filter?: GalleryFieldFilter }
 export interface GalleryFieldFilter { keywords?: string[] }
-export interface ItemImageField {type: 'image' , imageId: MediaData['id'] }
+export interface ItemImageField { type: 'image', imageId: MediaData['id'] }
+export interface ItemCardField {
+    type: "card",
+    imageId: string,
+    title?: string,
+    subText?: string,
+    variant: "banner" | "profile"
+}
 
 export interface ItemTextField { type: "text", variant: "long" | "short", text: string, }
 export interface ItemLabelTextField { type: "labelText", label: string, body: string, countable?: boolean }
 export interface ItemLinkField extends LogoField { type: "link", url: string }
 export interface ItemRatingField { type: "rating", rating: number, from: number }
-
-export interface ItemCardField {
-    type: "card",
-    variant: "small",
-    title: string,
-    description: string,
-    imagePath: string
-}
 
 /** Item Patch & POST response */
 export interface ItemSaveResponse {

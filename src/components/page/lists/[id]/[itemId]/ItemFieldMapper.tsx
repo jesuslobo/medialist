@@ -1,4 +1,5 @@
 import { ItemField } from "@/utils/types/item"
+import ItemPageCardField from "./fields/cards/ItemPageCardField"
 import ItemPageLabelTextField from "./fields/ItemPageLabelTextField"
 import ItemPageLinkField from "./fields/ItemPageLinkField"
 import ItemPageRatingField from "./fields/ItemPageRatingField"
@@ -29,7 +30,9 @@ export default function ItemFieldMapper({
         case "gallery":
             return <ItemPageGallery field={field} />
         case "image":
-            return <ItemPageImageField field={field}/>
+            return <ItemPageImageField field={field} />
+        case "card":
+            return <ItemPageCardField field={field} />
         default:
             return <></>
     }

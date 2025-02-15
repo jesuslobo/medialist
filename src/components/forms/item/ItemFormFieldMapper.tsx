@@ -1,4 +1,5 @@
 import { ItemFieldType } from "@/utils/types/item"
+import ItemFormCardField from "./fields/cards/ItemFormCardField"
 import ItemFormLabelTextField from "./fields/ItemFormLabelTextField"
 import ItemFormLinkField from "./fields/ItemFormLinkField"
 import ItemFormRatingField from "./fields/ItemFormRatingField"
@@ -31,6 +32,8 @@ export default function ItemFormFieldsMapper({
             return <ItemFormGallery {...position} />
         case "image":
             return <ItemFormImageField {...position} />
+        case "card":
+            return <ItemFormCardField {...position} />
         default:
             return <></>
     }

@@ -1,15 +1,17 @@
-import { ItemFieldType } from "@/utils/types/item";
+import { ItemField, ItemFieldType } from "@/utils/types/item";
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@heroui/react";
 import { useContext } from "react";
-import { BiImage, BiImages, BiLink, BiPlus, BiSolidStar } from "react-icons/bi";
+import { BiIdCard, BiImage, BiImages, BiLink, BiPlus, BiSolidStar } from "react-icons/bi";
 import { BsCardText } from "react-icons/bs";
+import { IoIosImage } from "react-icons/io";
 import { RxText } from "react-icons/rx";
 import { ItemFormContext, ItemFormField } from "../ItemFormProvider";
 
 export default function ItemFormLayoutAddFieldButton({ rowIndex }: { rowIndex: number }) {
     const { setActiveTabFields } = useContext(ItemFormContext)
 
-    function addField(type: ItemFieldType, variant?: string) {
+    type ItemFieldVariant = Extract<ItemField, { variant: string }>['variant'];
+    function addField(type: ItemFieldType, variant?: ItemFieldVariant) {
         setActiveTabFields(prev => {
             let newArray = [...prev]
             const newField = { id: Date.now().toString(), type, variant } as ItemFormField
@@ -49,6 +51,22 @@ export default function ItemFormLayoutAddFieldButton({ rowIndex }: { rowIndex: n
                         Label: Text
                     </DropdownItem>
                 </DropdownSection>
+                <DropdownSection title="Cards">
+                    <DropdownItem
+                        key="add-card-banner-field"
+                        onPress={() => addField("card", "banner")}
+                        startContent={<IoIosImage />}
+                    >
+                        Banner Card
+                    </DropdownItem>
+                    <DropdownItem
+                        key="add-image-field"
+                        onPress={() => addField("card", "profile")}
+                        startContent={<BiIdCard />}
+                    >
+                        Profile Card
+                    </DropdownItem >
+                </DropdownSection>
                 <DropdownSection title="Media">
                     <DropdownItem
                         key="add-gallery-field"
@@ -65,7 +83,7 @@ export default function ItemFormLayoutAddFieldButton({ rowIndex }: { rowIndex: n
                         Image
                     </DropdownItem>
                 </DropdownSection>
-                <DropdownSection title="Other">
+                <DropdownSection title="Misc.">
                     <DropdownItem
                         key="add-link-field"
                         onPress={() => addField("link")}
