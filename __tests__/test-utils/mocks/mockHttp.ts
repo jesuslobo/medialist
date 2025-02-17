@@ -6,7 +6,9 @@ import { Readable } from "stream";
 export default function $mockHttp(handler: (req: NextApiRequest, res: NextApiResponse) => Promise<any>) {
     const apiFactory: ApiFactory = async (method, data, options) => {
         const isForm = typeof data === 'object' && data instanceof Form
-        const res = httpMocks.createResponse();
+        const res = httpMocks.createResponse<NextApiResponse>(isForm ? {
+            eventEmitter: require('events').EventEmitter
+        } : undefined);
         const req = httpMocks.createRequest<NextApiRequest>({ method, ...options });
 
         if (isForm) {
@@ -23,12 +25,12 @@ export default function $mockHttp(handler: (req: NextApiRequest, res: NextApiRes
         }
         await handler(req, res)
 
-        // without this Promise the response res object won't be ready when submitting a form
-        // I debugged it, and the handler returns (even with await) before the bb.on('close',...) is done,
-        // thus it should wait for all operations to be done before returning the res object, so use setImmediate
-        // setTimeout also works
-        // warning: vi.useRealTimers() conflicts with setImmediate and will give a timeout error
-        if (isForm) await new Promise(setImmediate)
+        if (isForm) {
+            await new Promise((resolve) => {
+                res.once('finish', resolve)
+                res.once('error', resolve)
+            })
+        }
 
         return {
             res,
