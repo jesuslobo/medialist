@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === 'PATCH') {
       const dir = await $getDir(user.id, list.id, true);
       const form = $processFormData<ListData & ProcessedFormData>($LIST_FORM_SCHEMA(dir.list));
-      const { processFiles, processFields, data } = form;
+      const { processFiles, processFields, data, promises } = form;
 
       const bb = busboy({
         headers: req.headers,
@@ -61,10 +61,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           $deleteFile(THUMBNAILS_OPTIONS.LIST_COVER, dir.list, list.coverPath);
 
         form.data.updatedAt = new Date(Date.now())
-        const updatedList = await $updateLists(user.id, list.id, form.data)
+        const [updatedList] = await $updateLists(user.id, list.id, form.data)
 
-        res.status(200).json(updatedList[0]);
-        console.log('[Edited] api/lists/[id]:', updatedList[0].id + ' ' + updatedList[0].title);
+        await Promise.all(promises);
+        res.status(200).json(updatedList);
+        console.log('[Edited] api/lists/[id]:', updatedList.id + ' ' + updatedList.title);
       })
 
       bb.on('error', (error) => {

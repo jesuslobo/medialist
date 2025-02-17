@@ -39,7 +39,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'POST') {
             const { item: itemDir } = await $getDir(user.id, item.listId, item.id);
             const form = $processFormData<MediaData & ProcessedFormData>($ITEM_MEDIA_FORM_SCHEMA(itemDir as string));
-            const { processFiles, processFields, data } = form;
+            const { processFiles, processFields, data, promises } = form;
 
             const bb = busboy({
                 headers: req.headers,
@@ -55,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (!data.path)
                     return res.status(400).json({ message: 'Bad Request' });
 
-                const mediaDb = await $createItemMedia({
+                const [media] = await $createItemMedia({
                     id,
                     userId: user.id,
                     itemId: item.id,
@@ -67,7 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                     createdAt: new Date(Date.now())
                 })
 
-                const media = mediaDb[0]
+                await Promise.all(promises);
                 res.status(200).json(media);
                 console.log('[Create] api/items/[id]/media:', media.id + ' ' + media.title);
             })

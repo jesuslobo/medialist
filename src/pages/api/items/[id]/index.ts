@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const tags = await $getTags(user.id, item.listId)
 
             const form = await $processItemForm(user.id, item.listId, item.id)
-            const { processFiles, processFields, handleTags, mapLayoutsToPaths, handleMediaImages, dir, data } = form;
+            const { processFiles, processFields, handleTags, mapLayoutsToPaths, handleMediaImages, dir, data, promises } = form;
 
             const bb = busboy({
                 headers: req.headers,
@@ -88,16 +88,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 }
 
                 form.data.updatedAt = new Date(Date.now())
-                const updatedItem = await $updateItems(user.id, item.id, form.data)
+                const [updateItem] = await $updateItems(user.id, item.id, form.data)
 
+                await Promise.all(promises)
                 res.status(200).json({
-                    item: updatedItem[0],
+                    item: updateItem,
                     // for cache update on the client:
                     newTags: newTagsData,
                     newMedia: newMediaData,
                 } as ItemSaveResponse);
 
-                console.log('[Edited] api/items/[id]:', updatedItem[0].id + ' ' + updatedItem[0].title);
+                console.log('[Edited] api/items/[id]:', updateItem.id + ' ' + updateItem.title);
             })
 
             bb.on('error', () =>

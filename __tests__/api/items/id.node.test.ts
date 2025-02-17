@@ -1,4 +1,3 @@
-
 import itemsRouter from '@/pages/api/items/[id]';
 import { db } from '@/server/db';
 import { listsTagsTable } from '@/server/db/schema';
@@ -152,7 +151,6 @@ describe('api/items/[id]', async () => {
 
                 const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
 
-                await new Promise(setImmediate)
 
                 expect(body.item).toEqual({
                     ...item.itemData,
@@ -197,7 +195,6 @@ describe('api/items/[id]', async () => {
 
                 const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
 
-                await new Promise(setImmediate)
 
                 expect(body.item).toEqual({
                     ...item.itemData,
@@ -248,7 +245,6 @@ describe('api/items/[id]', async () => {
 
                 const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
 
-                await new Promise(setImmediate)
 
                 expect(body.item).toEqual({
                     ...item.itemData,
@@ -257,6 +253,7 @@ describe('api/items/[id]', async () => {
                     posterPath: null,
                 });
 
+                await new Promise(setImmediate)
                 const posterExists = fileExists(item.itemDir, item.itemData.posterPath as string, THUMBNAILS_OPTIONS.ITEM_POSTER)
                 expect(posterExists).toBe(false)
 
@@ -306,7 +303,6 @@ describe('api/items/[id]', async () => {
                 ]));
 
                 const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
-                await new Promise(setImmediate)
 
                 expect(body.item).toEqual({
                     ...item.itemData,
@@ -320,6 +316,7 @@ describe('api/items/[id]', async () => {
                     ]
                 })
 
+                await new Promise(setImmediate)
                 const logo1StillExists = fileExists(item.itemDir, logoPath1, THUMBNAILS_OPTIONS.LOGO)
                 expect(logo1StillExists).toBe(false)
 
@@ -361,7 +358,6 @@ describe('api/items/[id]', async () => {
                 form.append(`logoPaths[${logoId}]`, file, TEST_MOCK_FILE_NAME);
 
                 const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
-                await new Promise(setImmediate)
 
                 const logoPath2 = body.item.layout[0][2][0].logoPath
 
@@ -547,7 +543,6 @@ describe('api/items/[id]', async () => {
                 form.append(`mediaImages[${imageID2}]`, file, TEST_MOCK_FILE_NAME);
 
                 const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
-                await new Promise(setImmediate)
 
                 expect(body).toEqual({
                     item: {
@@ -617,7 +612,6 @@ describe('api/items/[id]', async () => {
                 ] as ItemLayoutTab[]))
 
                 const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
-                await new Promise(setImmediate)
 
                 expect(body).toEqual({
                     item: {
@@ -665,8 +659,6 @@ describe('api/items/[id]', async () => {
             form.append('fav', JSON.stringify(true));
 
             const { body, statusCode } = await $mockHttp(itemsRouter).patch(form, { cookies, query: { id: item.itemData.id } });
-
-            await new Promise(setImmediate)
 
             expect(body.item).toEqual({
                 ...item.itemData,

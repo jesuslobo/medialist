@@ -148,8 +148,6 @@ describe('api/lists/', async () => {
             const { cookies } = await user.createCookie();
             const { res, body } = await $mockHttp(listsRouter).post(formData, { cookies });
 
-            await new Promise(setImmediate) // wait for the file stream to be written
-
             expect(body).toEqual({
                 id: expect.any(String),
                 userId: userData.id,

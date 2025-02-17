@@ -108,7 +108,6 @@ describe('api/items/[id]/media', async () => {
             form.append('keywords', JSON.stringify(['keyword1', 'keyword2']));
 
             const { body, statusCode } = await $mockHttp(itemsMediaRouter).post(form, { cookies, query: { id: item.itemData.id } });
-            await new Promise(setImmediate);
 
             expect(body).toEqual({
                 id: expect.any(String),
@@ -138,7 +137,6 @@ describe('api/items/[id]/media', async () => {
 
             const { body, statusCode } = await $mockHttp(itemsMediaRouter).post(form, { cookies, query: { id: item.itemData.id } });
 
-            await new Promise(setImmediate);
 
             expect(body).toEqual({
                 id: expect.any(String),

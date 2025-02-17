@@ -147,7 +147,6 @@ describe('api/lists/[id]/items', async () => {
             ] as ItemLayoutTab[]))
 
             const { body, statusCode } = await $mockHttp(itemsRouter).post(form, { cookies, query: { id: listData.id } });
-            await new Promise(setImmediate)
 
             const item = body.item as ItemData
 
@@ -247,9 +246,7 @@ describe('api/lists/[id]/items', async () => {
 
             const form = new FormData();
             form.append('title', 'new item');
-debugger
             const { body, statusCode } = await $mockHttp(itemsRouter).post(form, { cookies, query: { id: listData.id } });
-            await new Promise(setImmediate)
 
             expect(body).toEqual({
                 item: {

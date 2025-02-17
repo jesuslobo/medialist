@@ -146,7 +146,6 @@ describe('api/lists/[id]', async () => {
             const fileExtension = TEST_MOCK_FILE_NAME.split('.')[1];
 
             const { body, statusCode } = await $mockHttp(listsRouter).patch(form, { cookies, query: { id: listData.id } });
-            await new Promise(setImmediate);
 
             expect(body).toEqual({
                 ...listData,
@@ -181,7 +180,6 @@ describe('api/lists/[id]', async () => {
             const fileExtension = TEST_MOCK_FILE_NAME.split('.')[1];
 
             const { body, statusCode } = await $mockHttp(listsRouter).patch(form, { cookies, query: { id: listData.id } });
-            await waitForFiles();
 
             expect(body).toEqual({
                 ...listData,
@@ -223,7 +221,6 @@ describe('api/lists/[id]', async () => {
             form.append('cover', 'null');
 
             const { body, statusCode } = await $mockHttp(listsRouter).patch(form, { cookies, query: { id: listData.id } });
-            await waitForFiles();
 
             expect(body).toEqual({
                 ...listData,
@@ -233,6 +230,8 @@ describe('api/lists/[id]', async () => {
             });
             expect(statusCode).toBe(200);
 
+            // wait for files to be deleted
+            await new Promise(res => setTimeout(res, 1000));
             //old cover and thumbnails are deleted
             expect(fs.existsSync(oldCoverDir)).toBe(false);
             THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>
@@ -260,5 +259,3 @@ describe('api/lists/[id]', async () => {
         await user.delete();
     })
 })
-
-const waitForFiles = async () => await new Promise(res => setTimeout(res, THUMBNAILS_OPTIONS.LIST_COVER.length + 5));

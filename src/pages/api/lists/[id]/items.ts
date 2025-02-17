@@ -44,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const tags = await $getTags(user.id, list.id)
 
             const form = await $processItemForm(user.id, list.id, itemId)
-            const { processFiles, processFields, handleTags, mapLayoutsToPaths, handleMediaImages } = form;
+            const { processFiles, processFields, handleTags, mapLayoutsToPaths, handleMediaImages, promises } = form;
 
             form.data['id'] = itemId;
             form.data['userId'] = user.id;
@@ -82,7 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 form.data.layout = mapLayoutsToPaths()
 
-                const item = await db
+                const [item] = await db
                     .insert(itemsTable)
                     .values(form.data)
                     .returning();
@@ -91,14 +91,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (form.data.media)
                     newMediaData = await $createItemMedia(newMediaData)
 
+                await Promise.all(promises)
                 res.status(201).json({
-                    item: item[0],
+                    item: item,
                     // for cache update on the client:
                     newTags: newTagsData,
                     newMedia: newMediaData,
                 } as ItemSaveResponse);
 
-                console.log('[Created] api/lists/[id]/items:', item[0].id + ' ' + item[0].title);
+                console.log('[Created] api/lists/[id]/items:', item.id + ' ' + item.title);
             })
 
             bb.on('error', () =>

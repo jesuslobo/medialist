@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const dir = await $getDir(user.id, id, true);
       const form = $processFormData<ListData & ProcessedFormData>($LIST_FORM_SCHEMA(dir.list));
-      const { processFiles, processFields, data } = form;
+      const { processFiles, processFields, data, promises } = form;
 
       const bb = busboy({
         headers: req.headers,
@@ -42,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (!data.title) return res.status(400).json({ message: 'Invalid Request' });
 
         const createdAt = new Date(Date.now());
-        const list = await $createLists({
+        const [list] = await $createLists({
           id: id,
           title: data.title,
           coverPath: data.coverPath,
@@ -51,7 +51,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           updatedAt: createdAt,
         })
 
-        res.status(201).json(list[0]);
+        await Promise.all(promises)
+        res.status(201).json(list);
       })
 
       bb.on('error', (error) => {
