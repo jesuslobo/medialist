@@ -16,7 +16,7 @@ export default async function $processItemForm(userId: string, listId: string, i
     const itemDir = dir.item as string;
 
     const form = $processFormData<ItemServerForm>($ITEM_FORM_SCHEMA(itemDir))
-    const { data, attachments } = form
+    const { data, attachments, promises } = form
 
     return {
         ...form,
@@ -29,6 +29,7 @@ export default async function $processItemForm(userId: string, listId: string, i
             item: itemDir,
             thumbnails: dir.itemThumbnails as string,
         },
+        promises,
     }
 };
 

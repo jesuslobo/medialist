@@ -1,22 +1,24 @@
 import busboy from "busboy";
 import internal from "stream";
-import { ThumbnailOptions } from "../../../utils/lib/fileHandling/thumbnailOptions";
 import $handleFileUpload from "../file/handleFileUpload";
+import { ThumbnailOptions } from "@/utils/lib/fileHandling/thumbnailOptions";
 
 /** function that will parseForm to fields */
 export default function $processFormData<T extends ProcessedFormData>(builder: ProcessFormDataBuilder) {
     let data = {} as T;
     let attachments = new Map<string, string>();
+    const promises = [] as Promise<any>[];
 
     return {
         processFields: (name: string, value: string) =>
             handleFields(name, value, builder, data),
         processFiles: async (name: string, stream: internal.Readable & { truncated?: boolean }, info: busboy.FileInfo, disableStreamResume: boolean = false) =>
-            await processFiles(name, stream, info, disableStreamResume, builder, data, attachments),
+            await processFiles(name, stream, info, disableStreamResume, builder, data, attachments, promises),
         /** left the implementation to the user,
          *  since JSON fields are complex, and searching everything inside can be bad when we know where to search */
         attachments,
         data,
+        promises,
     };
 }
 
@@ -58,6 +60,7 @@ async function processFiles(
     options: ProcessFormDataBuilder,
     data: ProcessedFormData,
     attachments: Map<string, string>,
+    promises: Promise<any>[],
 ) {
     for (let fieldName in options) {
         if (typeof options[fieldName] !== "object") continue
@@ -67,14 +70,15 @@ async function processFiles(
             aliases?.includes(name) ||
             attachTo && (name.startsWith(fieldName) || aliases?.some(alias => name.startsWith(alias)))
         ) {
-            const filePath = $handleFileUpload(stream, dir, {
+            const [fileName, filePromises] = $handleFileUpload(stream, dir, {
                 thumbnails: thumbnailOptions,
                 fileName: info.filename
             })
+            promises.push(...filePromises)
 
             return attachTo
-                ? attachments.set(name, filePath)
-                : data[fieldName] = filePath
+                ? attachments.set(name, fileName)
+                : data[fieldName] = fileName
         }
     }
 

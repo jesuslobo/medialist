@@ -1,8 +1,9 @@
 import { createWriteStream } from "fs";
 import path from "path";
 import internal from "stream";
-import { generateID } from "../../../utils/lib/generateID";
+import { pipeline } from "stream/promises";
 import { thumbnailName, ThumbnailOptions } from "../../../utils/lib/fileHandling/thumbnailOptions";
+import { generateID } from "../../../utils/lib/generateID";
 import { $webpTransformer } from "../lib/webpTransformer";
 
 interface Options {
@@ -10,12 +11,9 @@ interface Options {
     pathDir?: string,
     prefix?: string,
     thumbnails?: ThumbnailOptions[],
-    allowedTypes?: string[] // Not implemented yet
+    mimeTypes?: string[]
 }
 
-type fileName = string
-
-/** Maybe add support for plugins?  such as support for S3 transformer*/
 /** Uploading A Streamed File */
 export default function $handleFileUpload(
     fileStream: internal.Readable & { truncated?: boolean; },
@@ -24,6 +22,7 @@ export default function $handleFileUpload(
 ) {
     try {
         // File Naming
+        // remove file extension
         const fileExtension = options?.fileName ? path.extname(options?.fileName) : ''
 
         const generatedName = Date.now() + '_' + generateID()
@@ -31,22 +30,26 @@ export default function $handleFileUpload(
 
         const filePath = path.join(pathDir, fileName)
 
+        const promises = []
         // File Writing
         const writeOriginalFile = createWriteStream(filePath)
-        fileStream.pipe(writeOriginalFile) // Write the original file
+        promises.push(pipeline(fileStream, writeOriginalFile))
 
         if (options?.thumbnails)
             options.thumbnails.forEach((option) => {
                 const thumbnailPath = path.join(pathDir, thumbnailName(fileName, option))
                 const thumbnailStream = createWriteStream(thumbnailPath)
-                fileStream.pipe($webpTransformer(option.w, option.h)).pipe(thumbnailStream)
+                promises.push(pipeline(
+                    fileStream,
+                    $webpTransformer(option.w, option.h),
+                    thumbnailStream
+                ))
             })
 
-        return fileName as fileName
+        return [fileName, promises] as [string, Promise<void>[]]
     }
     catch (error) {
         console.log('[Image Uploading] Error: ', error)
         throw new Error('Error uploading an image')
     }
-
 }
