@@ -1,7 +1,7 @@
+import { ThumbnailOptions } from "@/utils/lib/fileHandling/thumbnailOptions";
 import busboy from "busboy";
 import internal from "stream";
 import $handleFileUpload from "../file/handleFileUpload";
-import { ThumbnailOptions } from "@/utils/lib/fileHandling/thumbnailOptions";
 
 /** function that will parseForm to fields */
 export default function $processFormData<T extends ProcessedFormData>(builder: ProcessFormDataBuilder) {
@@ -72,7 +72,8 @@ async function processFiles(
         ) {
             const [fileName, filePromises] = $handleFileUpload(stream, dir, {
                 thumbnails: thumbnailOptions,
-                fileName: info.filename
+                mimeType: info.mimeType,
+                fileName: info.filename,
             })
             promises.push(...filePromises)
 

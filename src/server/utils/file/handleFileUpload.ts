@@ -11,7 +11,7 @@ interface Options {
     pathDir?: string,
     prefix?: string,
     thumbnails?: ThumbnailOptions[],
-    mimeTypes?: string[]
+    mimeType?: string,
 }
 
 /** Uploading A Streamed File */
@@ -21,11 +21,9 @@ export default function $handleFileUpload(
     options?: Options,
 ) {
     try {
-        // File Naming
-        // remove file extension
         const fileExtension = options?.fileName ? path.extname(options?.fileName) : ''
 
-        const generatedName = Date.now() + '_' + generateID()
+        const generatedName = Date.now() + '_' + generateID(15)
         const fileName = (options?.prefix ? options.prefix + '_' : '') + generatedName + fileExtension
 
         const filePath = path.join(pathDir, fileName)
@@ -35,15 +33,21 @@ export default function $handleFileUpload(
         const writeOriginalFile = createWriteStream(filePath)
         promises.push(pipeline(fileStream, writeOriginalFile))
 
+        const ignoreThumbnail = Boolean(options?.mimeType?.includes('image/gif'))
         if (options?.thumbnails)
             options.thumbnails.forEach((option) => {
                 const thumbnailPath = path.join(pathDir, thumbnailName(fileName, option))
                 const thumbnailStream = createWriteStream(thumbnailPath)
-                promises.push(pipeline(
-                    fileStream,
-                    $webpTransformer(option.w, option.h),
-                    thumbnailStream
-                ))
+                if (ignoreThumbnail) {
+                    //just mock the thumbnail
+                    promises.push(pipeline(fileStream, thumbnailStream))
+                } else {
+                    promises.push(pipeline(
+                        fileStream,
+                        $webpTransformer(option.w, option.h),
+                        thumbnailStream
+                    ))
+                }
             })
 
         return [fileName, promises] as [string, Promise<void>[]]

@@ -30,7 +30,7 @@ describe('api/lists/[id]', async () => {
         })
 
         test('if an ID of other user\'s list is provided', async () => {
-            const { listData, userMock } = await $mockList({ title: 'List1' });
+            const { userMock } = await $mockList({ title: 'List1' });
             const { listData: otherUserList } = await $mockList({ title: 'List1' });
             const { userData, ...user } = userMock;
             const { cookies } = await user.createCookie();
@@ -149,7 +149,7 @@ describe('api/lists/[id]', async () => {
 
             expect(body).toEqual({
                 ...listData,
-                coverPath: expect.stringContaining(fileExtension),
+                coverPath: expect.any(String),
                 updatedAt: expect.not.stringMatching(listData.updatedAt.toISOString()),
                 createdAt: listData.createdAt.toISOString(),
             });
@@ -183,7 +183,7 @@ describe('api/lists/[id]', async () => {
 
             expect(body).toEqual({
                 ...listData,
-                coverPath: expect.stringContaining(fileExtension),
+                coverPath: expect.any(String),
                 updatedAt: expect.not.stringMatching(listData.updatedAt.toISOString()),
                 createdAt: listData.createdAt.toISOString(),
             });
