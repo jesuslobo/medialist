@@ -1,6 +1,7 @@
 import listsRouter from '@/pages/api/lists';
 import { THUMBNAILS_OPTIONS, thumbnailName } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { shortIdRegex } from '@/utils/lib/generateID';
+import { ApiErrorCode } from '@/utils/types/serverResponse';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import $mockUser from '@tests/test-utils/mocks/data/mockUser';
 import { TEST_MOCK_FILE_BUFFER, TEST_MOCK_FILE_NAME } from '@tests/test-utils/mocks/mockFile';
@@ -180,12 +181,18 @@ describe('api/lists/', async () => {
             formData.append('title', "");
             const r1 = await $mockHttp(listsRouter).post(formData, { cookies });
 
-            expect(r1.body).toEqual({ message: 'Invalid Request' });
+            expect(r1.body).toEqual({
+                message: 'Title is required',
+                errorCode: ApiErrorCode.BAD_REQUEST
+            })
             expect(r1.res.statusCode).toBe(400);
 
             const r2 = await $mockHttp(listsRouter).post(new FormData(), { cookies });
 
-            expect(r2.body).toEqual({ message: 'Invalid Request' });
+            expect(r2.body).toEqual({
+                message: 'Title is required',
+                errorCode: ApiErrorCode.BAD_REQUEST
+            })
             expect(r2.res.statusCode).toBe(400);
 
             await user.delete();

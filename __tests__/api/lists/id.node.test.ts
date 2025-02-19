@@ -1,6 +1,7 @@
 import listsRouter from '@/pages/api/lists/[id]/index';
 import { $generateShortID } from '@/server/utils/lib/generateID';
 import { THUMBNAILS_OPTIONS, thumbnailName } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { ApiErrorCode } from '@/utils/types/serverResponse';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import { TEST_MOCK_FILE_BUFFER, TEST_MOCK_FILE_NAME } from '@tests/test-utils/mocks/mockFile';
 import $mockHttp from '@tests/test-utils/mocks/mockHttp';
@@ -23,7 +24,7 @@ describe('api/lists/[id]', async () => {
             const { cookies } = await user.createCookie();
 
             const { body, statusCode } = await $mockHttp(listsRouter).get(undefined, { cookies, query: { id: $generateShortID() } });
-            expect(body).toEqual({ message: 'Not Found' });
+            expect(body).toEqual({ errorCode: ApiErrorCode.NOT_FOUND });
             expect(statusCode).toBe(404);
 
             await user.delete();
@@ -36,7 +37,7 @@ describe('api/lists/[id]', async () => {
             const { cookies } = await user.createCookie();
 
             const { body, statusCode } = await $mockHttp(listsRouter).get(undefined, { cookies, query: { id: otherUserList.id } });
-            expect(body).toEqual({ message: 'Not Found' });
+            expect(body).toEqual({ errorCode: ApiErrorCode.NOT_FOUND });
             expect(statusCode).toBe(404);
 
             await user.delete();
@@ -49,17 +50,17 @@ describe('api/lists/[id]', async () => {
         const { cookies } = await user.createCookie();
 
         const r1 = await $mockHttp(listsRouter).get(undefined, { cookies, query: { id: 'invalidID' } });
-        expect(r1.body).toEqual({ message: 'Bad Request' });
+        expect(r1.body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });
         expect(r1.statusCode).toBe(400);
 
         const r2 = await $mockHttp(listsRouter).get(undefined, { cookies, query: { id: '' } });
-        expect(r2.body).toEqual({ message: 'Bad Request' });
+        expect(r2.body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });
         expect(r2.statusCode).toBe(400);
 
         //to-add: 
         // const fakeString = 'a'.repeat(10 ** 10);
         // const r3 = await $mockHttp(listsRouter).get(undefined, { cookies, query: { id: fakeString } });
-        // expect(r3.body).toEqual({ message: 'Bad Request' });
+        // expect(r3.body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });
         // expect(r3.statusCode).toBe(400);
 
         await user.delete();
