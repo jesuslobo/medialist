@@ -2,6 +2,7 @@ import trashHandler from '@/pages/api/trash';
 import { db } from '@/server/db';
 import { itemsTable, listsTable } from '@/server/db/schema';
 import { $generateShortID } from '@/server/utils/lib/generateID';
+import { ApiCode, ApiErrorCode } from '@/utils/types/serverResponse';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import $mockUser from '@tests/test-utils/mocks/data/mockUser';
@@ -64,7 +65,7 @@ describe('api/trash', () => {
                 items: ['invalid-id']
             }, { cookies });
 
-            expect(req1.body).toEqual({ message: 'Bad Request' });
+            expect(req1.body).toEqual({errorCode: ApiErrorCode.BAD_REQUEST});
             expect(req1.statusCode).toBe(400);
 
             await user.delete();
@@ -90,10 +91,10 @@ describe('api/trash', () => {
                 items: [item1.id, $generateShortID(), item2.id]
             }, { cookies });
 
-            expect(req1.body).toEqual({ message: 'Bad Request' });
+            expect(req1.body).toEqual({errorCode: ApiErrorCode.BAD_REQUEST});
             expect(req1.statusCode).toBe(400);
 
-            expect(req2.body).toEqual({ message: 'Bad Request' });
+            expect(req2.body).toEqual({errorCode: ApiErrorCode.BAD_REQUEST});
             expect(req2.statusCode).toBe(400);
 
             await user.delete();
@@ -122,7 +123,7 @@ describe('api/trash', () => {
 
             await new Promise(setImmediate)
 
-            expect(body).toEqual({ message: 'Deleted' });
+            expect(body).toEqual({code: ApiCode.DESTROYED});
 
             expect(fs.existsSync(list1Dir)).toBe(false)
             expect(fs.existsSync(list2Dir)).toBe(false)
@@ -149,7 +150,7 @@ describe('api/trash', () => {
 
             await new Promise(setImmediate)
 
-            expect(body).toEqual({ message: 'Deleted' });
+            expect(body).toEqual({code: ApiCode.DESTROYED});
 
             expect(fs.existsSync(item1Dir)).toBe(false)
             expect(fs.existsSync(item2Dir)).toBe(false)
@@ -174,7 +175,7 @@ describe('api/trash', () => {
 
             await new Promise(setImmediate)
 
-            expect(body).toEqual({ message: 'Deleted' });
+            expect(body).toEqual({code: ApiCode.DESTROYED});
 
             expect(fs.existsSync(list1Dir)).toBe(false)
             expect(fs.existsSync(list2Dir)).toBe(false)
@@ -193,7 +194,7 @@ describe('api/trash', () => {
                 items: ['invalid-id']
             }, { cookies });
 
-            expect(req1.body).toEqual({ message: 'Bad Request' });
+            expect(req1.body).toEqual({errorCode: ApiErrorCode.BAD_REQUEST});
             expect(req1.statusCode).toBe(400);
 
             await user.delete();
@@ -219,10 +220,10 @@ describe('api/trash', () => {
                 items: [item1.id, $generateShortID(), item2.id]
             }, { cookies });
 
-            expect(req1.body).toEqual({ message: 'Bad Request' });
+            expect(req1.body).toEqual({errorCode: ApiErrorCode.BAD_REQUEST});
             expect(req1.statusCode).toBe(400);
 
-            expect(req2.body).toEqual({ message: 'Bad Request' });
+            expect(req2.body).toEqual({errorCode: ApiErrorCode.BAD_REQUEST});
             expect(req2.statusCode).toBe(400);
 
             await user.delete();
@@ -340,7 +341,7 @@ describe('api/trash', () => {
 
             const { body, statusCode } = await $mockHttp(trashHandler).patch({}, { cookies });
 
-            expect(body).toEqual({ message: 'Bad Request' });
+            expect(body).toEqual({errorCode: ApiErrorCode.BAD_REQUEST});
             expect(statusCode).toBe(400);
 
             await user.delete();

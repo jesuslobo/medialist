@@ -6,6 +6,7 @@ import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFolder from '@/server/utils/file/deleteFolder';
 import $getDir from '@/server/utils/file/getDir';
 import { validateShortID } from '@/utils/lib/generateID';
+import { ApiCode, ApiErrorCode } from '@/utils/types/serverResponse';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { unionAll } from 'drizzle-orm/sqlite-core';
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -20,7 +21,7 @@ interface RequestData { items: string[], lists: string[] }
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         const { user } = await $validateAuthCookies(req, res);
-        if (!user) return res.status(401).json({ message: 'Unauthorized' });
+        if (!user) return res.status(401).json({ errorCode: ApiErrorCode.UNAUTHORIZED })
 
         if (req.method === 'GET') {
             const listsAndItems = await getTrash(user.id)
@@ -30,18 +31,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (req.method === 'DELETE') {
             const { items, lists }: RequestData = JSON.parse(req.body);
             if (!Array.isArray(items) && !Array.isArray(lists))
-                return res.status(400).json({ message: 'Bad Request' })
+                return res.status(400).json(BAD_REQUEST)
 
             if (items?.some(id => !validateShortID(id)) || lists?.some(id => !validateShortID(id)))
-                return res.status(400).json({ message: 'Bad Request' })
+                return res.status(400).json(BAD_REQUEST)
 
             const trashDb = await getTrash(user.id, items, lists)
-            if (!trashDb.length) return res.status(400).json({ message: 'Bad Request' })
+            if (!trashDb.length) return res.status(400).json(BAD_REQUEST)
 
             if (items && items?.length !== trashDb.filter(item => item.listId).length ||
                 lists && lists?.length !== trashDb.filter(list => !list.listId).length
             )
-                return res.status(400).json({ message: 'Bad Request' })
+                return res.status(400).json(BAD_REQUEST)
             // folder structure: /users/:userId/:listId/:itemId, thus we just need to delete the folders
             let TrustedlistsIDs = new Set<string>([])
 
@@ -70,25 +71,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 })
             }
 
-            return res.status(200).json({ message: 'Deleted' });
+            return res.status(200).json({ code: ApiCode.DESTROYED });
         }
 
         if (req.method === 'PATCH') {
             const { items, lists }: RequestData = JSON.parse(req.body);
 
             if (!Array.isArray(items) && !Array.isArray(lists))
-                return res.status(400).json({ message: 'Bad Request' })
+                return res.status(400).json(BAD_REQUEST)
 
             if (items?.some(id => !validateShortID(id)) || lists?.some(id => !validateShortID(id)))
-                return res.status(400).json({ message: 'Bad Request' })
+                return res.status(400).json(BAD_REQUEST)
 
             const trashDb = await getTrash(user.id, items, lists)
-            if (!trashDb.length) return res.status(400).json({ message: 'Bad Request' })
+            if (!trashDb.length) return res.status(400).json(BAD_REQUEST)
 
             if (items && items?.length !== trashDb.filter(item => item.listId).length ||
                 lists && lists?.length !== trashDb.filter(list => !list.listId).length
             )
-                return res.status(400).json({ message: 'Bad Request' })
+                return res.status(400).json(BAD_REQUEST)
 
             let itemsData;
             let listsData;
@@ -104,10 +105,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(200).json({ items: itemsData || [], lists: listsData || [] });
         }
 
-        res.status(405).json({ message: 'Method Not Allowed' });
+        res.status(405).json({ errorCode: ApiErrorCode.METHOD_NOT_ALLOWED })
     } catch (error) {
         console.log("[Error] api/lists: ", error)
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ errorCode: ApiErrorCode.INTERNAL_SERVER_ERROR })
     }
 }
 
@@ -145,3 +146,5 @@ const getTrash = async (userId: string, itemsIDs?: string[], listIDs?: string[])
 
     return listsAndItems;
 }
+
+const BAD_REQUEST = { errorCode: ApiErrorCode.BAD_REQUEST }
