@@ -1,10 +1,9 @@
-import { db } from '@/server/db';
-import { listsTagsTable } from '@/server/db/schema';
+import { $deleteTags, $getTag, $updateTag } from '@/server/db/queries/tags';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import parseJSONReq from '@/utils/functions/parseJSONReq';
 import { validateLongID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
-import { and, eq } from 'drizzle-orm';
+import { ApiErrorCode, ServerResponse } from '@/utils/types/serverResponse';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 /** api/tags/[id]
@@ -14,25 +13,21 @@ import type { NextApiRequest, NextApiResponse } from 'next';
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const { id: tagID } = req.query;
-        if (!validateLongID(tagID)) return res.status(400).json({ message: 'Bad Request' });
-
         const { user } = await $validateAuthCookies(req, res);
-        if (!user) return res.status(401).json({ message: 'Unauthorized' });
+        if (!user)
+            return res.status(401).json({ errorCode: ApiErrorCode.UNAUTHORIZED });
+
+        const { id: tagID } = req.query;
+        if (!validateLongID(tagID))
+            return res.status(400).json({ errorCode: ApiErrorCode.BAD_REQUEST } as ServerResponse)
+
+        const tagsDb = await $getTag(user.id, tagID as TagData['id']);
+        if (tagsDb.length === 0)
+            return res.status(404).json({ errorCode: ApiErrorCode.NOT_FOUND });
+        const tag = tagsDb[0];
 
         if (req.method === 'GET') {
-            const tag = await db
-                .select()
-                .from(listsTagsTable)
-                .where(and(
-                    eq(listsTagsTable.userId, user.id),
-                    eq(listsTagsTable.id, tagID as TagData['id']),
-                )).limit(1);
-
-            if (tag.length === 0)
-                return res.status(404).json({ message: 'Not Found' })
-
-            return res.status(200).json(tag[0]);
+            return res.status(200).json(tag);
         }
 
         if (req.method === 'PATCH') {
@@ -43,41 +38,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 description,
                 groupName,
                 badgeable: badgeable || "",
-                updatedAt: new Date(Date.now())
+                updatedAt: new Date()
             }
 
-            const data = await db
-                .update(listsTagsTable)
-                .set(tagData)
-                .where(and(
-                    eq(listsTagsTable.userId, user.id),
-                    eq(listsTagsTable.id, tagID as TagData['id']),
-                ))
-                .limit(1)
-                .returning()
-
-            return res.status(200).json(data[0]);
+            const [updatedTag] = await $updateTag(user.id, tag.id, tagData);
+            return res.status(200).json(updatedTag);
         }
 
         if (req.method === 'DELETE') {
-            const data = await db
-                .delete(listsTagsTable)
-                .where(and(
-                    eq(listsTagsTable.userId, user.id),
-                    eq(listsTagsTable.id, tagID as TagData['id']),
-                ))
-                .limit(1)
-                .returning()
-
-            if (data.length === 0)
-                return res.status(404).json({ message: 'Not Found' })
-
-            return res.status(200).json(data[0])
+            const [deleteTag] = await $deleteTags(user.id, tag.id);
+            return res.status(200).json(deleteTag)
         }
 
-        res.status(405).json({ message: 'Method Not Allowed' });
+        res.status(405).json({ errorCode: ApiErrorCode.METHOD_NOT_ALLOWED });
     } catch (error) {
-        console.log("[Error] api/lists/[id]/tags: ", error)
-        res.status(500).json({ message: 'Internal Server Error' });
+        console.log("[Error] api/tags/[id]: ", error)
+        res.status(500).json({ errorCode: ApiErrorCode.INTERNAL_SERVER_ERROR });
     }
 }

@@ -1,5 +1,6 @@
 import tagsRouter from '@/pages/api/tags/[id]';
 import { $generateLongID } from '@/server/utils/lib/generateID';
+import { ApiErrorCode } from '@/utils/types/serverResponse';
 import $mockTag from '@tests/test-utils/mocks/data/mockTag';
 import $mockHttp from '@tests/test-utils/mocks/mockHttp';
 import { describe, expect, test, vi } from 'vitest';
@@ -17,7 +18,7 @@ describe('api/tags/[id]', async () => {
             const { cookies } = await user.createCookie();
 
             const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: $generateLongID() } });
-            expect(body).toEqual({ message: 'Not Found' });
+            expect(body).toEqual({ errorCode: ApiErrorCode.NOT_FOUND });
             expect(statusCode).toBe(404);
 
             await user.delete();
@@ -30,7 +31,7 @@ describe('api/tags/[id]', async () => {
             const { cookies } = await user.createCookie();
 
             const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: otherUserTag.id } });
-            expect(body).toEqual({ message: 'Not Found' });
+            expect(body).toEqual({ errorCode: ApiErrorCode.NOT_FOUND })
             expect(statusCode).toBe(404);
 
             await user.delete();
@@ -43,39 +44,17 @@ describe('api/tags/[id]', async () => {
         const { cookies } = await user.createCookie();
 
         const r1 = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: 'invalidID' } });
-        expect(r1.body).toEqual({ message: 'Bad Request' });
+        expect(r1.body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });
         expect(r1.statusCode).toBe(400);
 
         const r2 = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: '' } });
-        expect(r2.body).toEqual({ message: 'Bad Request' });
+        expect(r2.body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });
         expect(r2.statusCode).toBe(400);
 
         //to-add:
         // const fakeString = 'a'.repeat(10 ** 10);
         // const r3 = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: fakeString } });
-        // expect(r3.body).toEqual({ message: 'Bad Request' });
-        // expect(r3.statusCode).toBe(400);
-
-        await user.delete();
-    })
-
-    test('should return 400 Bad Request if an invalid ID is provided', async () => {
-        const { userMock } = await $mockTag({ label: 'tag1' });
-        const { userData, ...user } = userMock;
-        const { cookies } = await user.createCookie();
-
-        const r1 = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: 'invalidID' } });
-        expect(r1.body).toEqual({ message: 'Bad Request' });
-        expect(r1.statusCode).toBe(400);
-
-        const r2 = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: '' } });
-        expect(r2.body).toEqual({ message: 'Bad Request' });
-        expect(r2.statusCode).toBe(400);
-
-        //to-add: 
-        // const fakeString = 'a'.repeat(10 ** 10);
-        // const r3 = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: fakeString } });
-        // expect(r3.body).toEqual({ message: 'Bad Request' });
+        // expect(r3.body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });
         // expect(r3.statusCode).toBe(400);
 
         await user.delete();
