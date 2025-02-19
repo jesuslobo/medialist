@@ -80,8 +80,7 @@ interface ListPageContext {
     setShowTags: Dispatch<SetStateAction<boolean>>
     setTagsQuery: <Shallow>(value: string[]
         | ((old: string[] | null) => string[] | null)
-        | null, options?: Options<Shallow> |
-            undefined) => Promise<URLSearchParams>
+        | null) => Promise<URLSearchParams>
     tagsQuery: string[] | null,
     filterSettings: FilterSettings
     setFilterSettings: Dispatch<SetStateAction<FilterSettings>>,
