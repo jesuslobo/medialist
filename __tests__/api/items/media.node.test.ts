@@ -2,6 +2,7 @@ import itemsMediaRouter from '@/pages/api/items/[id]/media';
 import { $generateShortID } from '@/server/utils/lib/generateID';
 import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { longIdRegex } from '@/utils/lib/generateID';
+import { ApiErrorCode } from '@/utils/types/serverResponse';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
 import $mockItemMedia from '@tests/test-utils/mocks/data/mockItemMedia';
 import { TEST_MOCK_FILE_BUFFER, TEST_MOCK_FILE_NAME } from '@tests/test-utils/mocks/mockFile';
@@ -25,7 +26,7 @@ describe('api/items/[id]/media', async () => {
             const { cookies } = await user.createCookie();
 
             const { body, statusCode } = await $mockHttp(itemsMediaRouter).get(undefined, { cookies, query: { id: $generateShortID() } });
-            expect(body).toEqual({ message: 'Not Found' });
+            expect(body).toEqual({ errorCode: ApiErrorCode.NOT_FOUND });
             expect(statusCode).toBe(404);
 
             await item.delete();
@@ -38,7 +39,7 @@ describe('api/items/[id]/media', async () => {
             const { cookies } = await user.createCookie();
 
             const { body, statusCode } = await $mockHttp(itemsMediaRouter).get(undefined, { cookies, query: { id: otherUserItem.id } });
-            expect(body).toEqual({ message: 'Not Found' });
+            expect(body).toEqual({ errorCode: ApiErrorCode.NOT_FOUND });
             expect(statusCode).toBe(404);
 
             await item.delete();
@@ -51,17 +52,17 @@ describe('api/items/[id]/media', async () => {
         const { cookies } = await user.createCookie();
 
         const r1 = await $mockHttp(itemsMediaRouter).get(undefined, { cookies, query: { id: 'invalidID' } });
-        expect(r1.body).toEqual({ message: 'Bad Request' });
+        expect(r1.body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });
         expect(r1.statusCode).toBe(400);
 
         const r2 = await $mockHttp(itemsMediaRouter).get(undefined, { cookies, query: { id: '' } });
-        expect(r2.body).toEqual({ message: 'Bad Request' });
+        expect(r2.body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });
         expect(r2.statusCode).toBe(400);
 
         //to-add: 
         // const fakeString = 'a'.repeat(10 ** 10);
         // const r3 = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: fakeString } });
-        // expect(r3.body).toEqual({ message: 'Bad Request' });
+        // expect(r3.body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });}
         // expect(r3.statusCode).toBe(400);
 
         await item.delete();
@@ -167,7 +168,7 @@ describe('api/items/[id]/media', async () => {
 
             const { body, statusCode } = await $mockHttp(itemsMediaRouter).post(form, { cookies, query: { id: item.itemData.id } });
 
-            expect(body).toEqual({ message: 'Bad Request' });
+            expect(body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });
             expect(statusCode).toBe(400);
         })
 
