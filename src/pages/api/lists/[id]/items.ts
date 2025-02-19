@@ -1,9 +1,7 @@
-import { db } from '@/server/db';
-import { $getItems } from '@/server/db/queries/items';
+import { $createItems, $getItems } from '@/server/db/queries/items';
 import { $getList } from '@/server/db/queries/lists';
 import { $createItemMedia } from '@/server/db/queries/media';
 import { $createTags, $getTags } from '@/server/db/queries/tags';
-import { itemsTable } from '@/server/db/schema';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $processItemForm from '@/server/utils/lib/form/processItemForm';
 import { $generateShortID } from '@/server/utils/lib/generateID';
@@ -12,11 +10,13 @@ import { TagData } from '@/utils/types/global';
 import { ItemSaveResponse } from '@/utils/types/item';
 import { ListData } from '@/utils/types/list';
 import { MediaData } from '@/utils/types/media';
+import { ApiErrorCode } from '@/utils/types/serverResponse';
 import busboy from 'busboy';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-const MAX_UPLOAD_LIMIT = 1024 * 1024 * 50; // 50MB
+const MAX_UPLOAD_LIMIT = 1024 * 1024 * 50; // 100MB
 const MAX_ALLOWED_FILES = 40;
+const MAX_FIELD_SIZE = 1024 * 1024 * 5; // 5MB
 
 /** api/lists/[id]/items
  * Get: Get all items of a list
@@ -24,15 +24,14 @@ const MAX_ALLOWED_FILES = 40;
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const { id: listId } = req.query as { id: ListData['id'] };
-        if (!validateShortID(listId)) return res.status(400).json({ message: 'Bad Request' });
-
         const { user } = await $validateAuthCookies(req, res);
-        if (!user) return res.status(401).json({ message: 'Unauthorized' });
+        if (!user) return res.status(401).json({ errorCode: ApiErrorCode.UNAUTHORIZED })
+
+        const { id: listId } = req.query as { id: ListData['id'] };
+        if (!validateShortID(listId)) return res.status(400).json({ errorCode: ApiErrorCode.BAD_REQUEST });
 
         const listsDb = await $getList(user.id, listId);
-        if (listsDb.length === 0) return res.status(404).json({ message: 'Not Found' });
-
+        if (listsDb.length === 0) return res.status(404).json({ errorCode: ApiErrorCode.NOT_FOUND });
         const list = listsDb[0];
 
         if (req.method === 'GET') {
@@ -53,7 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             const bb = busboy({
                 headers: req.headers,
-                limits: { fields: 7, files: MAX_ALLOWED_FILES, fileSize: MAX_UPLOAD_LIMIT }
+                limits: { fields: 7, fieldSize: MAX_FIELD_SIZE, files: MAX_ALLOWED_FILES, fileSize: MAX_UPLOAD_LIMIT }
             })
 
             bb.on('field', processFields)
@@ -61,7 +60,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             bb.on('finish', async () => {
                 if (!form.data.title)
-                    return res.status(400).json({ message: 'Bad Request' });
+                    return res.status(400).json({
+                        message: 'Title is required',
+                        errorCode: ApiErrorCode.BAD_REQUEST
+                    });
 
                 let newTagsData: { id: string }[] = []
                 // new tags
@@ -83,10 +85,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
                 form.data.layout = mapLayoutsToPaths()
 
-                const [item] = await db
-                    .insert(itemsTable)
-                    .values(form.data)
-                    .returning();
+                const [item] = await $createItems(form.data)
 
                 // should be created after the item, since it uses the item id as a foreign key
                 if (form.data.media)
@@ -104,16 +103,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             })
 
             bb.on('error', () =>
-                res.status(500).json({ message: 'Internal Server Error' })
+                res.status(500).json({ errorCode: ApiErrorCode.INTERNAL_SERVER_ERROR })
             )
 
             return req.pipe(bb)
         }
 
-        res.status(405).json({ message: 'Method Not Allowed' });
+        res.status(405).json({ errorCode: ApiErrorCode.METHOD_NOT_ALLOWED })
     } catch (error) {
         console.log("[Error] api/lists/[id]/items: ", error)
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ errorCode: ApiErrorCode.INTERNAL_SERVER_ERROR })
     }
 }
 

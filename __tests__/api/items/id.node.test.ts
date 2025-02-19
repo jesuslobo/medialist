@@ -5,6 +5,7 @@ import { $generateID, $generateLongID, $generateShortID } from '@/server/utils/l
 import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
 import { longIdRegex } from '@/utils/lib/generateID';
 import { ItemLayoutTab } from '@/utils/types/item';
+import { ApiErrorCode } from '@/utils/types/serverResponse';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import $mockTag from '@tests/test-utils/mocks/data/mockTag';
@@ -30,7 +31,7 @@ describe('api/items/[id]', async () => {
             const { cookies } = await user.createCookie();
 
             const { body, statusCode } = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: $generateShortID() } });
-            expect(body).toEqual({ message: 'Not Found' });
+            expect(body).toEqual({ errorCode: ApiErrorCode.NOT_FOUND })
             expect(statusCode).toBe(404);
 
             await item.delete();
@@ -43,7 +44,7 @@ describe('api/items/[id]', async () => {
             const { cookies } = await user.createCookie();
 
             const { body, statusCode } = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: otherUserItem.id } });
-            expect(body).toEqual({ message: 'Not Found' });
+            expect(body).toEqual({ errorCode: ApiErrorCode.NOT_FOUND });
             expect(statusCode).toBe(404);
 
             await item.delete();
@@ -56,17 +57,17 @@ describe('api/items/[id]', async () => {
         const { cookies } = await user.createCookie();
 
         const r1 = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: 'invalidID' } });
-        expect(r1.body).toEqual({ message: 'Bad Request' });
+        expect(r1.body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });
         expect(r1.statusCode).toBe(400);
 
         const r2 = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: '' } });
-        expect(r2.body).toEqual({ message: 'Bad Request' });
+        expect(r2.body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST });
         expect(r2.statusCode).toBe(400);
 
         //to-add: 
         // const fakeString = 'a'.repeat(10 ** 10);
         // const r3 = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: fakeString } });
-        // expect(r3.body).toEqual({ message: 'Bad Request' });
+        // expect(r3.body).toEqual({errorCode: ApiErrorCode.BAD_REQUEST});
         // expect(r3.statusCode).toBe(400);
 
         await item.delete();
@@ -676,12 +677,19 @@ describe('api/items/[id]', async () => {
     })
 
     test('DELETE - delete an item by ID', async () => {
-        const { userMock, ...item } = await $mockItem();
+        const { userMock, ...item } = await $mockItem({
+            createdAt: new Date(2000, 1),
+            updatedAt: new Date(2000, 1),
+        });
         const { userData, ...user } = userMock;
         const { cookies } = await user.createCookie();
 
         const { body, statusCode } = await $mockHttp(itemsRouter).delete(undefined, { cookies, query: { id: item.itemData.id } });
-        expect(body).toEqual({ ...item.itemData, trash: true });
+        expect(body).toEqual({
+            ...item.itemData,
+            trash: true,
+            updatedAt: expect.not.stringMatching(item.itemData.updatedAt)
+        });
         expect(statusCode).toBe(200);
 
         await item.delete();

@@ -9,11 +9,13 @@ import { validateShortID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { ItemData, ItemLayoutTab, ItemSaveResponse, LogoField } from '@/utils/types/item';
 import { MediaData } from '@/utils/types/media';
+import { ApiErrorCode } from '@/utils/types/serverResponse';
 import busboy from 'busboy';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-const MAX_UPLOAD_LIMIT = 1024 * 1024 * 50; // 50MB
+const MAX_UPLOAD_LIMIT = 1024 * 1024 * 100; // 100MB
 const MAX_ALLOWED_FILES = 40;
+const MAX_FIELD_SIZE = 1024 * 1024 * 5; // 5MB
 
 /** api/items/[id]
  * Get:  gets an item by id
@@ -22,17 +24,15 @@ const MAX_ALLOWED_FILES = 40;
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
-        const { id } = req.query;
-        if (!validateShortID(id)) return res.status(400).json({ message: 'Bad Request' });
-
         const { user } = await $validateAuthCookies(req, res);
-        if (!user) return res.status(401).json({ message: 'Unauthorized' });
+        if (!user) return res.status(401).json({ errorCode: ApiErrorCode.UNAUTHORIZED });
+
+        const { id } = req.query;
+        if (!validateShortID(id)) return res.status(400).json({ errorCode: ApiErrorCode.BAD_REQUEST });
 
         const items = await $getItem(user.id, id as ItemData['id']);
-
         if (items.length === 0)
-            return res.status(404).json({ message: 'Not Found' })
-
+            return res.status(404).json({ errorCode: ApiErrorCode.NOT_FOUND });
         const item = items[0]
 
         if (req.method === 'GET')
@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             const bb = busboy({
                 headers: req.headers,
-                limits: { fields: 9, files: MAX_ALLOWED_FILES, fileSize: MAX_UPLOAD_LIMIT }
+                limits: { fields: 9, fieldSize: MAX_FIELD_SIZE, files: MAX_ALLOWED_FILES, fileSize: MAX_UPLOAD_LIMIT, }
             })
 
             bb.on('field', processFields)
@@ -102,7 +102,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             })
 
             bb.on('error', () =>
-                res.status(500).json({ message: 'Internal Server Error' })
+                res.status(500).json({ errorCode: ApiErrorCode.INTERNAL_SERVER_ERROR })
             )
 
             return req.pipe(bb)
@@ -119,10 +119,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             return res.status(200).json(updatedItem[0]);
         }
 
-        res.status(405).json({ message: 'Method Not Allowed' });
+        res.status(405).json({ errorCode: ApiErrorCode.METHOD_NOT_ALLOWED });
     } catch (error) {
         console.log("[Error] api/items/[id]: ", error)
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ errorCode: ApiErrorCode.INTERNAL_SERVER_ERROR });
     }
 
 }
