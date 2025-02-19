@@ -1,6 +1,6 @@
 import { $createItemMedia, $deleteItemMedia } from "@/server/db/queries/media";
+import { $generateID, $generateLongID } from "@/server/utils/lib/generateID";
 import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from "@/utils/lib/fileHandling/thumbnailOptions";
-import { generateID } from "@/utils/lib/generateID";
 import { MediaData } from "@/utils/types/media";
 import { writeFileSync } from "fs";
 import { join } from "path";
@@ -22,7 +22,7 @@ export default async function $mockItemMedia(
         : mockAFile(ItemMock.itemDir, THUMBNAILS_OPTIONS.ITEM_MEDIA);
 
     const itemMediaDb = await $createItemMedia({
-        id: generateID(),
+        id: $generateLongID(),
         userId: userMock.userData.id,
         itemId: ItemMock.itemData.id,
         title: 'mockItemMedia',
@@ -75,7 +75,7 @@ async function processParams(
 }
 
 function mockAFile(dir: string, thumbs?: ThumbnailOptions[]) {
-    const generatedName = Date.now() + '_' + generateID() + '.jpg'
+    const generatedName = Date.now() + '_' + $generateID(15) + '.jpg'
     writeFileSync(join(dir, generatedName), Buffer.from(''));
 
     thumbs?.forEach((option) =>

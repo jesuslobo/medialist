@@ -2,8 +2,8 @@ import { $createLists, $getLists } from '@/server/db/queries/lists';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $getDir from '@/server/utils/file/getDir';
 import { $LIST_FORM_SCHEMA } from '@/server/utils/lib/form/fromSchema';
+import { $generateShortID } from '@/server/utils/lib/generateID';
 import $processFormData, { ProcessedFormData } from '@/server/utils/lib/processFormData';
-import { generateID } from '@/utils/lib/generateID';
 import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === 'POST') {
-      const id = generateID();
+      const id = $generateShortID();
 
       const dir = await $getDir(user.id, id, true);
       const form = $processFormData<ListData & ProcessedFormData>($LIST_FORM_SCHEMA(dir.list));

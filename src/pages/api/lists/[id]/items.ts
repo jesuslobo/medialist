@@ -6,7 +6,8 @@ import { $createTags, $getTags } from '@/server/db/queries/tags';
 import { itemsTable } from '@/server/db/schema';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $processItemForm from '@/server/utils/lib/form/processItemForm';
-import { generateID, validatedID } from '@/utils/lib/generateID';
+import { $generateShortID } from '@/server/utils/lib/generateID';
+import { validateShortID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { ItemSaveResponse } from '@/utils/types/item';
 import { ListData } from '@/utils/types/list';
@@ -24,7 +25,7 @@ const MAX_ALLOWED_FILES = 40;
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         const { id: listId } = req.query as { id: ListData['id'] };
-        if (!validatedID(listId)) return res.status(400).json({ message: 'Bad Request' });
+        if (!validateShortID(listId)) return res.status(400).json({ message: 'Bad Request' });
 
         const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
@@ -40,7 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         if (req.method === 'POST') {
-            const itemId = generateID()
+            const itemId = $generateShortID()
             const tags = await $getTags(user.id, list.id)
 
             const form = await $processItemForm(user.id, list.id, itemId)

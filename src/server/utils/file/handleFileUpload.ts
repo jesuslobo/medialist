@@ -3,7 +3,7 @@ import path from "path";
 import internal from "stream";
 import { pipeline } from "stream/promises";
 import { thumbnailName, ThumbnailOptions } from "../../../utils/lib/fileHandling/thumbnailOptions";
-import { generateID } from "../../../utils/lib/generateID";
+import { $generateID } from "../lib/generateID";
 import { $webpTransformer } from "../lib/webpTransformer";
 
 interface Options {
@@ -23,7 +23,7 @@ export default function $handleFileUpload(
     try {
         const fileExtension = options?.fileName ? path.extname(options?.fileName) : ''
 
-        const generatedName = Date.now() + '_' + generateID(15)
+        const generatedName = Date.now() + '_' + $generateID(15)
         const fileName = (options?.prefix ? options.prefix + '_' : '') + generatedName + fileExtension
 
         const filePath = path.join(pathDir, fileName)

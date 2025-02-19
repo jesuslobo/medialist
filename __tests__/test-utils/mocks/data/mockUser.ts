@@ -3,7 +3,7 @@ import { usersTable } from "@/server/db/schema";
 import { $hashPassword } from "@/server/utils/auth/auth";
 import { $createSession, $generateSessionToken } from "@/server/utils/auth/session";
 import $deleteFolder from "@/server/utils/file/deleteFolder";
-import { generateID } from "@/utils/lib/generateID";
+import { $generateID, $generateShortID } from "@/server/utils/lib/generateID";
 import { eq } from "drizzle-orm";
 import { mkdir } from "fs/promises";
 import { join } from "path";
@@ -15,8 +15,8 @@ export default async function $mockUser(username?: string, password: string = 't
 
     const date = createdAt || new Date()
     const userData = await db.insert(usersTable).values({
-        id: generateID(),
-        username: (username || generateID(5).toLowerCase()),
+        id: $generateShortID(),
+        username: (username || $generateID(5).toLowerCase()),
         passwordHash,
         createdAt: date,
         updatedAt: date,

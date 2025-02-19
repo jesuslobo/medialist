@@ -3,8 +3,9 @@ import { $createItemMedia, $getItemMedia } from '@/server/db/queries/media';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $getDir from '@/server/utils/file/getDir';
 import { $ITEM_MEDIA_FORM_SCHEMA } from '@/server/utils/lib/form/fromSchema';
+import { $generateLongID } from '@/server/utils/lib/generateID';
 import $processFormData, { ProcessedFormData } from '@/server/utils/lib/processFormData';
-import { generateID, validatedID } from '@/utils/lib/generateID';
+import { validateShortID } from '@/utils/lib/generateID';
 import { ItemData } from '@/utils/types/item';
 import { MediaData } from '@/utils/types/media';
 import busboy from 'busboy';
@@ -19,7 +20,7 @@ const MAX_FILE_SIZE = 1024 * 1024 * 20 // 50MB
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         const { id } = req.query;
-        if (!validatedID(id)) return res.status(400).json({ message: 'Bad Request' });
+        if (!validateShortID(id)) return res.status(400).json({ message: 'Bad Request' });
 
         const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
@@ -50,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             bb.on('file', processFiles)
 
             bb.on('finish', async () => {
-                const id = generateID();
+                const id = $generateLongID();
 
                 if (!data.path)
                     return res.status(400).json({ message: 'Bad Request' });

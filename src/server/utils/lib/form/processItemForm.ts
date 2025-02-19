@@ -1,8 +1,8 @@
-import { generateID } from "@/utils/lib/generateID";
 import { TagData } from "@/utils/types/global";
 import { ItemData, ItemField, ItemImageField, ItemLayoutTab, LogoField } from "@/utils/types/item";
 import { MediaData } from "@/utils/types/media";
 import $getDir from "../../file/getDir";
+import { $generateLongID } from "../generateID";
 import $processFormData, { ProcessedFormData } from "../processFormData";
 import { $ITEM_FORM_SCHEMA } from "./fromSchema";
 
@@ -70,7 +70,7 @@ function handleMediaImages(data: ItemServerForm, mediaImages: Map<String, string
         if (!mediaImages.has(key)) return
 
         const path = mediaImages.get(key) as string
-        const id = generateID()
+        const id = $generateLongID()
         // we store id of the image, so we can use it in the layout with images-related fileds
         mediaImages.set(key, id)
 
@@ -98,7 +98,7 @@ function handleTags(tagsIDs: { id: string }[], data: ItemServerForm, userId: str
     requestTags.forEach(tag => {
         // tag could be a new tag name or an existing tag id
         // if A user can type a tag of 10 letters that can escape validation
-        if (tag.length !== 10) {
+        if (tag.length !== 20) {
             newTags.push(tag) // no need to check if it exists
         } else if (tagsIDs.some(t => t.id === tag)) {
             data.tags.push(tag)
@@ -111,7 +111,7 @@ function handleTags(tagsIDs: { id: string }[], data: ItemServerForm, userId: str
     if (newTags.length) {
         newTagsData = newTags.map(label => {
             let tagData = {
-                id: generateID(),
+                id: $generateLongID(),
                 userId,
                 listId,
                 label,

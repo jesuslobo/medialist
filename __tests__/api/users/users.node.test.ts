@@ -2,7 +2,8 @@ import usersRoute from '@/pages/api/users';
 import { db } from '@/server/db';
 import { usersTable } from '@/server/db/schema';
 import { $verifyPassword } from '@/server/utils/auth/auth';
-import { generateID } from '@/utils/lib/generateID';
+import { $generateID } from '@/server/utils/lib/generateID';
+import { shortIdRegex } from '@/utils/lib/generateID';
 import $mockUser from '@tests/test-utils/mocks/data/mockUser';
 import $mockHttp from '@tests/test-utils/mocks/mockHttp';
 import { eq } from 'drizzle-orm';
@@ -45,13 +46,13 @@ describe('api/users/', () => {
 
     describe('POST - register a new user', () => {
         test('should create a new user', async () => {
-            const username = generateID(5);
-            const password = generateID(6);
+            const username = $generateID(5);
+            const password = $generateID(6);
 
             const { body, statusCode, headers: reqHeaders } = await $mockHttp(usersRoute).post({ username, password });
 
             expect(body).toEqual({
-                id: expect.stringMatching(/^[123456789ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz]{10}$/),
+                id: expect.stringMatching(shortIdRegex),
                 role: expect.stringMatching(/user|admin/),
                 username: username.toLowerCase(),
             })
@@ -99,7 +100,7 @@ describe('api/users/', () => {
             const oldDate = new Date(2000, 1)
             const { userData: { id, createdAt, updatedAt, password, username }, ...user } = await $mockUser(undefined, undefined, oldDate)
             const { cookies } = await user.createCookie()
-            const newUsername = generateID(5)
+            const newUsername = $generateID(5)
 
             const { body, statusCode } = await $mockHttp(usersRoute).patch({ newUsername, oldPassword: password }, { cookies });
 
@@ -128,7 +129,7 @@ describe('api/users/', () => {
             const { userData, ...user } = await $mockUser(undefined, undefined, oldDate)
             const { id, createdAt, updatedAt, password, username } = userData
             const { cookies } = await user.createCookie()
-            const newPassword = generateID(6)
+            const newPassword = $generateID(6)
 
             const { body, statusCode } = await $mockHttp(usersRoute).patch({ newPassword, oldPassword: password }, { cookies });
 
@@ -157,7 +158,7 @@ describe('api/users/', () => {
             const user = await $mockUser()
             const { cookies } = await user.createCookie()
 
-            const reqBody = { newPassword: generateID(6), username: "newUsername", oldPassword: 'invalidpasswordexample' }
+            const reqBody = { newPassword: $generateID(6), username: "newUsername", oldPassword: 'invalidpasswordexample' }
             const { body, statusCode } = await $mockHttp(usersRoute).patch(reqBody, { cookies });
 
             const newUser = await db.select().from(usersTable).where(eq(usersTable.id, user.userData.id)).limit(1)
@@ -181,7 +182,7 @@ describe('api/users/', () => {
             const user = await $mockUser()
             const { cookies } = await user.createCookie()
 
-            const reqBody = { newPassword: generateID(6), username: "newUsername" }
+            const reqBody = { newPassword: $generateID(6), username: "newUsername" }
             const { body, statusCode } = await $mockHttp(usersRoute).patch(reqBody, { cookies });
 
             const newUser = await db.select().from(usersTable).where(eq(usersTable.id, user.userData.id)).limit(1)

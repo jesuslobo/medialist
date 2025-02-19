@@ -1,5 +1,6 @@
 import listsRouter from '@/pages/api/lists';
 import { THUMBNAILS_OPTIONS, thumbnailName } from '@/utils/lib/fileHandling/thumbnailOptions';
+import { shortIdRegex } from '@/utils/lib/generateID';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import $mockUser from '@tests/test-utils/mocks/data/mockUser';
 import { TEST_MOCK_FILE_BUFFER, TEST_MOCK_FILE_NAME } from '@tests/test-utils/mocks/mockFile';
@@ -121,7 +122,7 @@ describe('api/lists/', async () => {
             const { res, body } = await $mockHttp(listsRouter).post(formData, { cookies });
 
             expect(body).toEqual({
-                id: expect.any(String),
+                id: expect.stringMatching(shortIdRegex),
                 userId: userData.id,
                 title: 'Test List',
                 coverPath: null,
@@ -149,7 +150,7 @@ describe('api/lists/', async () => {
             const { res, body } = await $mockHttp(listsRouter).post(formData, { cookies });
 
             expect(body).toEqual({
-                id: expect.any(String),
+                id: expect.stringMatching(shortIdRegex),
                 userId: userData.id,
                 title: 'Test List',
                 coverPath: expect.any(String),

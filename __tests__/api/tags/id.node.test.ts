@@ -1,5 +1,5 @@
 import tagsRouter from '@/pages/api/tags/[id]';
-import { generateID } from '@/utils/lib/generateID';
+import { $generateLongID } from '@/server/utils/lib/generateID';
 import $mockTag from '@tests/test-utils/mocks/data/mockTag';
 import $mockHttp from '@tests/test-utils/mocks/mockHttp';
 import { describe, expect, test, vi } from 'vitest';
@@ -16,7 +16,7 @@ describe('api/tags/[id]', async () => {
             const { userData, ...user } = userMock;
             const { cookies } = await user.createCookie();
 
-            const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: generateID() } });
+            const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: $generateLongID() } });
             expect(body).toEqual({ message: 'Not Found' });
             expect(statusCode).toBe(404);
 
@@ -100,13 +100,19 @@ describe('api/tags/[id]', async () => {
 
     describe('PATCH - update a tag by id', () => {
         test('should change tag data', async () => {
-            const tag = await $mockTag();
+            const tag = await $mockTag({
+                createdAt: new Date(2000,1),
+                updatedAt: new Date(2000,1)
+            });
             const { tagData, userMock } = tag;
             const { cookies } = await userMock.createCookie();
             const { body, statusCode } = await $mockHttp(tagsRouter).patch({ label: 'newLabel' }, { cookies, query: { id: tagData.id } });
 
             expect(body).toEqual({
-                ...tagData, label: 'newLabel', createdAt: tagData.createdAt.toISOString(), updatedAt: tagData.updatedAt.toISOString()
+                ...tagData,
+                label: 'newLabel',
+                createdAt: tagData.createdAt.toISOString(),
+                updatedAt: expect.not.stringMatching(tagData.updatedAt.toISOString())
             })
             expect(statusCode).toBe(200)
 

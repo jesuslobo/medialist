@@ -1,6 +1,7 @@
 import itemsRouter from '@/pages/api/lists/[id]/items';
+import { $generateID, $generateShortID } from '@/server/utils/lib/generateID';
 import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
-import { generateID } from '@/utils/lib/generateID';
+import { longIdRegex, shortIdRegex } from '@/utils/lib/generateID';
 import { ItemData, ItemLayoutTab } from '@/utils/types/item';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
@@ -25,7 +26,7 @@ describe('api/lists/[id]/items', async () => {
             const { userData, ...user } = userMock;
             const { cookies } = await user.createCookie();
 
-            const { body, statusCode } = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: generateID() } });
+            const { body, statusCode } = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: $generateShortID() } });
             expect(body).toEqual({ message: 'Not Found' });
             expect(statusCode).toBe(404);
 
@@ -103,7 +104,6 @@ describe('api/lists/[id]/items', async () => {
 
     describe('POST - create an item in the list', () => {
         // to add: default header, default layout,
-        // to add: should check if that no item files are created when an error does occur
 
         test('should create item with title, poster, cover, layout (with logos), media images, and tags (existing + new)', async () => {
             const list = await $mockList();
@@ -126,10 +126,10 @@ describe('api/lists/[id]/items', async () => {
                 'newTag that will be created'
             ]))
 
-            const logoID = generateID(10)
+            const logoID = $generateID(10)
             form.append(`logoPaths[${logoID}]`, file, TEST_MOCK_FILE_NAME);
 
-            const [imageID1, imageID2] = [generateID(10), generateID(10)]
+            const [imageID1, imageID2] = [$generateID(10), $generateID(10)]
             form.append('media', JSON.stringify([
                 { title: 'image1', path: imageID1, keywords: ['keyword1', 'keyword2'] },
                 { title: null, path: 'shouldIgnorethis' },
@@ -152,7 +152,7 @@ describe('api/lists/[id]/items', async () => {
 
             expect(body).toEqual({
                 item: {
-                    id: expect.any(String),
+                    id: expect.stringMatching(shortIdRegex),
                     userId: userMock.userData.id,
                     listId: listData.id,
                     createdAt: expect.any(String),
@@ -183,7 +183,7 @@ describe('api/lists/[id]/items', async () => {
                     ],
                 },
                 newTags: [{
-                    id: expect.any(String),
+                    id: expect.stringMatching(longIdRegex),
                     listId: listData.id,
                     userId: userMock.userData.id,
                     label: 'newTag that will be created',
@@ -192,7 +192,7 @@ describe('api/lists/[id]/items', async () => {
                 }],
                 newMedia: [
                     {
-                        id: expect.any(String),
+                        id: expect.stringMatching(longIdRegex),
                         userId: userMock.userData.id,
                         itemId: item.id,
                         path: expect.any(String),
@@ -203,7 +203,7 @@ describe('api/lists/[id]/items', async () => {
                         updatedAt: expect.any(String)
                     },
                     {
-                        id: expect.any(String),
+                        id: expect.stringMatching(longIdRegex),
                         userId: userMock.userData.id,
                         itemId: item.id,
                         path: expect.any(String),
@@ -250,7 +250,7 @@ describe('api/lists/[id]/items', async () => {
 
             expect(body).toEqual({
                 item: {
-                    id: expect.any(String),
+                    id: expect.stringMatching(shortIdRegex),
                     userId: userMock.userData.id,
                     listId: listData.id,
                     createdAt: expect.any(String),

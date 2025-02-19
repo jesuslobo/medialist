@@ -1,13 +1,11 @@
-import { db } from '@/server/db';
 import { $getList } from '@/server/db/queries/lists';
 import { $createTags, $getTags } from '@/server/db/queries/tags';
-import { listsTagsTable } from '@/server/db/schema';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
+import { $generateLongID } from '@/server/utils/lib/generateID';
 import parseJSONReq from '@/utils/functions/parseJSONReq';
-import { generateID, validatedID } from '@/utils/lib/generateID';
+import { validateShortID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { ListData } from '@/utils/types/list';
-import { and, eq } from 'drizzle-orm';
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 /** api/lists/[id]/tags
@@ -19,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const body = parseJSONReq(await req.body);
         const listID = req.query.id;
 
-        if (!validatedID(listID)) return res.status(400).json({ message: 'Bad Request' });
+        if (!validateShortID(listID)) return res.status(400).json({ message: 'Bad Request' });
 
         const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });
@@ -38,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const { label, description, groupName, badgeable } = body;
             if (!label) return res.status(400).json({ message: 'Bad Request' });
 
-            const id = generateID()
+            const id = $generateLongID()
             let tagData: TagData = {
                 id,
                 label,

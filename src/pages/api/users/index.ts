@@ -3,7 +3,7 @@ import { usersTable } from '@/server/db/schema';
 import { $hashPassword, $verifyPassword } from '@/server/utils/auth/auth';
 import { $setSessionTokenCookie, $validateAuthCookies } from '@/server/utils/auth/cookies';
 import { $createSession, $generateSessionToken } from '@/server/utils/auth/session';
-import { generateID } from '@/utils/lib/generateID';
+import { $generateShortID } from '@/server/utils/lib/generateID';
 import { validatePassword, validateUsername } from '@/utils/lib/validate';
 import { ServerResponseError } from '@/utils/types/global';
 import { eq } from 'drizzle-orm';
@@ -56,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             const passwordHash = await $hashPassword(password)
 
-            const userID = generateID()
+            const userID = $generateShortID()
             const createdAt = new Date(Date.now())
 
             const adminUserExists = await checkForAdminUserExists();

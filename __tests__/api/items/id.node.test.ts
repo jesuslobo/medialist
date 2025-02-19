@@ -1,8 +1,9 @@
 import itemsRouter from '@/pages/api/items/[id]';
 import { db } from '@/server/db';
 import { listsTagsTable } from '@/server/db/schema';
+import { $generateID, $generateLongID, $generateShortID } from '@/server/utils/lib/generateID';
 import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
-import { generateID } from '@/utils/lib/generateID';
+import { longIdRegex } from '@/utils/lib/generateID';
 import { ItemLayoutTab } from '@/utils/types/item';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
@@ -28,7 +29,7 @@ describe('api/items/[id]', async () => {
             const { userData, ...user } = userMock;
             const { cookies } = await user.createCookie();
 
-            const { body, statusCode } = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: generateID() } });
+            const { body, statusCode } = await $mockHttp(itemsRouter).get(undefined, { cookies, query: { id: $generateShortID() } });
             expect(body).toEqual({ message: 'Not Found' });
             expect(statusCode).toBe(404);
 
@@ -345,7 +346,7 @@ describe('api/items/[id]', async () => {
                 const logo1Exists = fileExists(item.itemDir, logoPath1, THUMBNAILS_OPTIONS.LOGO)
                 expect(logo1Exists).toBe(true)
 
-                const logoId = generateID()
+                const logoId = $generateID()
                 const form = new FormData();
                 form.append('layout', JSON.stringify([
                     [
@@ -432,7 +433,7 @@ describe('api/items/[id]', async () => {
                 const form = new FormData();
                 // tags are provided by an array of IDs, of we provide a new 'ID',
                 // it should create a new tag with that 'ID' as a name
-                const fakeId = generateID()
+                const fakeId = $generateLongID()
                 const { tagData: otherUserTag } = await $mockTag()
 
                 form.append('tags', JSON.stringify([tag1.id, fakeId, otherUserTag.id, 'new Tag to be added']));
@@ -532,7 +533,7 @@ describe('api/items/[id]', async () => {
                 const { cookies } = await user.createCookie();
 
                 const form = new FormData();
-                const [imageID1, imageID2] = [generateID(10), generateID(10)]
+                const [imageID1, imageID2] = [$generateID(10), $generateID(10)]
 
                 form.append('media', JSON.stringify([
                     { title: 'image1', path: imageID1, keywords: ['keyword1', 'keyword2'] },
@@ -552,7 +553,7 @@ describe('api/items/[id]', async () => {
                     newTags: [],
                     newMedia: [
                         {
-                            id: expect.any(String),
+                            id: expect.stringMatching(longIdRegex),
                             userId: userMock.userData.id,
                             itemId: item.itemData.id,
                             path: expect.any(String),
@@ -563,7 +564,7 @@ describe('api/items/[id]', async () => {
                             updatedAt: expect.any(String)
                         },
                         {
-                            id: expect.any(String),
+                            id: expect.stringMatching(longIdRegex),
                             userId: userMock.userData.id,
                             itemId: item.itemData.id,
                             path: expect.any(String),
@@ -583,6 +584,7 @@ describe('api/items/[id]', async () => {
                 expect(media2Exists).toBe(true)
             })
 
+            // causes MaxListenersExceededWarning
             test('should create media and map it to an image field in the layout', async () => {
                 const { userMock, ...item } = await $mockItem({
                     layout: [[
@@ -597,7 +599,7 @@ describe('api/items/[id]', async () => {
                 const { cookies } = await user.createCookie();
 
                 const form = new FormData();
-                const imageID1 = generateID(10)
+                const imageID1 = $generateID(10)
 
                 form.append('media', JSON.stringify([
                     { title: 'image1', path: imageID1, keywords: ['keyword1', 'keyword2'] },
@@ -626,7 +628,7 @@ describe('api/items/[id]', async () => {
                     newTags: [],
                     newMedia: [
                         {
-                            id: expect.any(String),
+                            id: expect.stringMatching(longIdRegex),
                             userId: userMock.userData.id,
                             itemId: item.itemData.id,
                             path: expect.any(String),

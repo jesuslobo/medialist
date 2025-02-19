@@ -1,12 +1,11 @@
-import { ListData } from "@/utils/types/list";
-import $mockUser from "./mockUser";
-import { db } from "@/server/db";
 import { $createLists, $deleteLists } from "@/server/db/queries/lists";
-import { generateID } from "@/utils/lib/generateID";
-import { join } from "path";
-import { fs } from "memfs";
+import { $generateID, $generateShortID } from "@/server/utils/lib/generateID";
 import { THUMBNAILS_OPTIONS, thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
+import { ListData } from "@/utils/types/list";
 import { mkdirSync } from "fs";
+import { fs } from "memfs";
+import { join } from "path";
+import $mockUser from "./mockUser";
 
 type List = Partial<ListData> & {
     /* will create a empty files with thumbnail-like names, since we Only care about the the file existence*/
@@ -19,14 +18,14 @@ export default async function $mockList(listData?: List, userMock?: Awaited<Retu
 
     const userId = userMock.userData.id
 
-    const id = generateID();
+    const id = $generateShortID();
     const listDir = join(userMock.userDir, id);
 
     mkdirSync(join(listDir, 'thumbnails'), { recursive: true });
 
     let coverPath = listData?.coverPath;
     if (listData?.cover) {
-        const generatedName = Date.now() + '_' + generateID() + '.jpg'
+        const generatedName = Date.now() + '_' + $generateID(15) + '.jpg'
         fs.writeFileSync(join(listDir, generatedName), Buffer.from(''));
         coverPath = generatedName
 

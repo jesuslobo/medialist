@@ -1,6 +1,6 @@
 import itemsMediaRouter from '@/pages/api/media/[id]';
+import { $generateLongID } from '@/server/utils/lib/generateID';
 import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
-import { generateID } from '@/utils/lib/generateID';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
 import $mockItemMedia from '@tests/test-utils/mocks/data/mockItemMedia';
 import $mockHttp from '@tests/test-utils/mocks/mockHttp';
@@ -12,7 +12,7 @@ vi.mock('node:fs')
 vi.mock('node:fs/promises')
 vi.mock('@/server/db');
 
-describe('api/items/[id]/media', async () => {
+describe('api/media/[id]', async () => {
     describe('should return 404', () => {
         test('if a fake/unexisting media ID is provided', async () => {
             const item = await $mockItem({ title: 'Item' });
@@ -20,7 +20,7 @@ describe('api/items/[id]/media', async () => {
             const { cookies } = await user.createCookie();
             const media = await $mockItemMedia({}, item);
 
-            const { body, statusCode } = await $mockHttp(itemsMediaRouter).get(undefined, { cookies, query: { id: generateID() } });
+            const { body, statusCode } = await $mockHttp(itemsMediaRouter).get(undefined, { cookies, query: { id: $generateLongID() } });
             expect(body).toEqual({ message: 'Not Found' });
             expect(statusCode).toBe(404);
 

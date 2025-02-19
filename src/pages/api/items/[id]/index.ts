@@ -5,7 +5,7 @@ import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFile from '@/server/utils/file/deleteFile';
 import $processItemForm from '@/server/utils/lib/form/processItemForm';
 import { THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
-import { validatedID } from '@/utils/lib/generateID';
+import { validateShortID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { ItemData, ItemLayoutTab, ItemSaveResponse, LogoField } from '@/utils/types/item';
 import { MediaData } from '@/utils/types/media';
@@ -23,7 +23,7 @@ const MAX_ALLOWED_FILES = 40;
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         const { id } = req.query;
-        if (!validatedID(id)) return res.status(400).json({ message: 'Bad Request' });
+        if (!validateShortID(id)) return res.status(400).json({ message: 'Bad Request' });
 
         const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });

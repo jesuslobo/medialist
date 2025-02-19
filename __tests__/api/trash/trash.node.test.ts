@@ -1,15 +1,13 @@
 import trashHandler from '@/pages/api/trash';
 import { db } from '@/server/db';
 import { itemsTable, listsTable } from '@/server/db/schema';
-import { thumbnailName, ThumbnailOptions } from '@/utils/lib/fileHandling/thumbnailOptions';
-import { generateID } from '@/utils/lib/generateID';
+import { $generateShortID } from '@/server/utils/lib/generateID';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import $mockUser from '@tests/test-utils/mocks/data/mockUser';
 import $mockHttp from '@tests/test-utils/mocks/mockHttp';
 import { eq } from 'drizzle-orm';
 import { fs } from 'memfs';
-import { join } from 'path';
 import { describe, expect, test, vi } from 'vitest';
 
 vi.mock('node:fs')
@@ -83,13 +81,13 @@ describe('api/trash', () => {
             const { itemData: item2 } = await $mockItem({ trash: true }); // of another user
 
             const req1 = await $mockHttp(trashHandler).delete({
-                lists: [generateID(), list2.id],
-                items: [generateID(), item2.id]
+                lists: [$generateShortID(), list2.id],
+                items: [$generateShortID(), item2.id]
             }, { cookies });
 
             const req2 = await $mockHttp(trashHandler).delete({
-                lists: [list1.id, generateID(), list2.id],
-                items: [item1.id, generateID(), item2.id]
+                lists: [list1.id, $generateShortID(), list2.id],
+                items: [item1.id, $generateShortID(), item2.id]
             }, { cookies });
 
             expect(req1.body).toEqual({ message: 'Bad Request' });
@@ -212,13 +210,13 @@ describe('api/trash', () => {
             const { itemData: item2 } = await $mockItem({ trash: true }); // of another user
 
             const req1 = await $mockHttp(trashHandler).patch({
-                lists: [generateID(), list2.id],
-                items: [generateID(), item2.id]
+                lists: [$generateShortID(), list2.id],
+                items: [$generateShortID(), item2.id]
             }, { cookies });
 
             const req2 = await $mockHttp(trashHandler).patch({
-                lists: [list1.id, generateID(), list2.id],
-                items: [item1.id, generateID(), item2.id]
+                lists: [list1.id, $generateShortID(), list2.id],
+                items: [item1.id, $generateShortID(), item2.id]
             }, { cookies });
 
             expect(req1.body).toEqual({ message: 'Bad Request' });
@@ -350,15 +348,3 @@ describe('api/trash', () => {
     })
 
 })
-
-const fileExists = (dir: string, fileName: string, thumbnailOptions: ThumbnailOptions[]) => {
-    const fileExisst = fs.existsSync(join(dir, fileName))
-
-    const thumbnailsExists = thumbnailOptions
-        ? thumbnailOptions.map((option) =>
-            fs.existsSync(join(dir, thumbnailName(fileName, option)))
-        ).every(Boolean)
-        : true
-
-    return fileExisst && thumbnailsExists
-}

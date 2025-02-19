@@ -1,6 +1,6 @@
 import listsRouter from '@/pages/api/lists/[id]/index';
+import { $generateShortID } from '@/server/utils/lib/generateID';
 import { THUMBNAILS_OPTIONS, thumbnailName } from '@/utils/lib/fileHandling/thumbnailOptions';
-import { generateID } from '@/utils/lib/generateID';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import { TEST_MOCK_FILE_BUFFER, TEST_MOCK_FILE_NAME } from '@tests/test-utils/mocks/mockFile';
 import $mockHttp from '@tests/test-utils/mocks/mockHttp';
@@ -22,7 +22,7 @@ describe('api/lists/[id]', async () => {
             const { userData, ...user } = userMock;
             const { cookies } = await user.createCookie();
 
-            const { body, statusCode } = await $mockHttp(listsRouter).get(undefined, { cookies, query: { id: generateID() } });
+            const { body, statusCode } = await $mockHttp(listsRouter).get(undefined, { cookies, query: { id: $generateShortID() } });
             expect(body).toEqual({ message: 'Not Found' });
             expect(statusCode).toBe(404);
 

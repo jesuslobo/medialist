@@ -5,7 +5,7 @@ import $getDir from '@/server/utils/file/getDir';
 import { $LIST_FORM_SCHEMA } from '@/server/utils/lib/form/fromSchema';
 import $processFormData, { ProcessedFormData } from '@/server/utils/lib/processFormData';
 import { THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
-import { validatedID } from '@/utils/lib/generateID';
+import { validateShortID } from '@/utils/lib/generateID';
 import { ListData } from '@/utils/types/list';
 import busboy from 'busboy';
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -18,7 +18,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { id } = req.query as { id: ListData['id'] };
-    if (!validatedID(id)) return res.status(400).json({ message: 'Bad Request' });
+    if (!validateShortID(id)) return res.status(400).json({ message: 'Bad Request' });
 
     const { user } = await $validateAuthCookies(req, res);
     if (!user) return res.status(401).json({ message: 'Unauthorized' });

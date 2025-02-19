@@ -5,7 +5,7 @@ import $deleteFile from '@/server/utils/file/deleteFile';
 import $getDir from '@/server/utils/file/getDir';
 import parseJSONReq from '@/utils/functions/parseJSONReq';
 import { THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
-import { validatedID } from '@/utils/lib/generateID';
+import { validateLongID } from '@/utils/lib/generateID';
 import { ItemData } from '@/utils/types/item';
 import { MediaData } from '@/utils/types/media';
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -18,7 +18,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         const { id } = req.query;
-        if (!validatedID(id)) return res.status(400).json({ message: 'Bad Request' });
+        if (!validateLongID(id)) return res.status(400).json({ message: 'Bad Request' });
 
         const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });

@@ -2,7 +2,7 @@ import { db } from '@/server/db';
 import { listsTagsTable } from '@/server/db/schema';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import parseJSONReq from '@/utils/functions/parseJSONReq';
-import { validatedID } from '@/utils/lib/generateID';
+import { validateLongID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
 import { and, eq } from 'drizzle-orm';
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -13,10 +13,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
  * Delete: Delete a tag by ID
  */
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    //need more validation especially for listid
     try {
         const { id: tagID } = req.query;
-        if (!validatedID(tagID)) return res.status(400).json({ message: 'Bad Request' });
+        if (!validateLongID(tagID)) return res.status(400).json({ message: 'Bad Request' });
 
         const { user } = await $validateAuthCookies(req, res);
         if (!user) return res.status(401).json({ message: 'Unauthorized' });

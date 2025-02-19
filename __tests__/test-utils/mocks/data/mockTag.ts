@@ -1,5 +1,5 @@
 import { $createTags, $deleteTags } from "@/server/db/queries/tags";
-import { generateID } from "@/utils/lib/generateID";
+import { $generateLongID } from "@/server/utils/lib/generateID";
 import { TagData } from "@/utils/types/global";
 import $mockList from "./mockList";
 import $mockUser from "./mockUser";
@@ -15,7 +15,7 @@ export default async function $mockTag(
     const { userMock, listMock } = await processParams(listOrUserMock);
 
     const tagDb = await $createTags({
-        id: generateID(),
+        id: $generateLongID(),
         label: 'mockTagLabel',
         userId: userMock.userData.id,
         listId: listMock.listData.id,

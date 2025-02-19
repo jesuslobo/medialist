@@ -1,5 +1,6 @@
 import tagsRouter from '@/pages/api/lists/[id]/tags';
-import { generateID } from '@/utils/lib/generateID';
+import { $generateShortID } from '@/server/utils/lib/generateID';
+import { longIdRegex } from '@/utils/lib/generateID';
 import $mockList from '@tests/test-utils/mocks/data/mockList';
 import $mockTag from '@tests/test-utils/mocks/data/mockTag';
 import $mockHttp from '@tests/test-utils/mocks/mockHttp';
@@ -11,32 +12,32 @@ vi.mock('@/server/db');
 
 describe('api/lists/[id]/tags', async () => {
 
-      describe('should return 404', () => {
-            test('if a fake/unexisting list ID is provided', async () => {
-                const { userMock } = await $mockList({ title: 'List1' });
-                const { userData, ...user } = userMock;
-                const { cookies } = await user.createCookie();
+    describe('should return 404', () => {
+        test('if a fake/unexisting list ID is provided', async () => {
+            const { userMock } = await $mockList({ title: 'List1' });
+            const { userData, ...user } = userMock;
+            const { cookies } = await user.createCookie();
 
-                const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: generateID() } });
-                expect(body).toEqual({ message: 'Not Found' });
-                expect(statusCode).toBe(404);
+            const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: $generateShortID() } });
+            expect(body).toEqual({ message: 'Not Found' });
+            expect(statusCode).toBe(404);
 
-                await user.delete();
-            })
-
-            test('if an ID of other user\'s list is provided', async () => {
-                const { listData, userMock } = await $mockList({ title: 'List1' });
-                const { listData: otherUserList } = await $mockList({ title: 'List1' });
-                const { userData, ...user } = userMock;
-                const { cookies } = await user.createCookie();
-
-                const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: otherUserList.id } });
-                expect(body).toEqual({ message: 'Not Found' });
-                expect(statusCode).toBe(404);
-
-                await user.delete();
-            })
+            await user.delete();
         })
+
+        test('if an ID of other user\'s list is provided', async () => {
+            const { listData, userMock } = await $mockList({ title: 'List1' });
+            const { listData: otherUserList } = await $mockList({ title: 'List1' });
+            const { userData, ...user } = userMock;
+            const { cookies } = await user.createCookie();
+
+            const { body, statusCode } = await $mockHttp(tagsRouter).get(undefined, { cookies, query: { id: otherUserList.id } });
+            expect(body).toEqual({ message: 'Not Found' });
+            expect(statusCode).toBe(404);
+
+            await user.delete();
+        })
+    })
 
     test('should return 400 Bad Request if an invalid ID is provided', async () => {
         const { userMock } = await $mockList({ title: 'List1' });
@@ -106,7 +107,7 @@ describe('api/lists/[id]/tags', async () => {
             const { body, statusCode } = await $mockHttp(tagsRouter).post({ label: 'new tag' }, { cookies, query: { id: listData.id } });
 
             expect(body).toEqual({
-                id: expect.any(String),
+                id: expect.stringMatching(longIdRegex),
                 label: 'new tag',
                 userId: userMock.userData.id,
                 listId: listData.id,
@@ -144,7 +145,7 @@ describe('api/lists/[id]/tags', async () => {
             const { body, statusCode } = await $mockHttp(tagsRouter).post({ label: 'new tag', userId: fakeList.userMock.userDir }, { cookies, query: { id: listData.id } });
 
             expect(body).toEqual({
-                id: expect.any(String),
+                id: expect.stringMatching(longIdRegex),
                 label: 'new tag',
                 userId: userMock.userData.id,
                 listId: listData.id,

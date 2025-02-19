@@ -1,6 +1,7 @@
 import itemsMediaRouter from '@/pages/api/items/[id]/media';
+import { $generateShortID } from '@/server/utils/lib/generateID';
 import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from '@/utils/lib/fileHandling/thumbnailOptions';
-import { generateID } from '@/utils/lib/generateID';
+import { longIdRegex } from '@/utils/lib/generateID';
 import { $mockItem } from '@tests/test-utils/mocks/data/mockItem';
 import $mockItemMedia from '@tests/test-utils/mocks/data/mockItemMedia';
 import { TEST_MOCK_FILE_BUFFER, TEST_MOCK_FILE_NAME } from '@tests/test-utils/mocks/mockFile';
@@ -23,7 +24,7 @@ describe('api/items/[id]/media', async () => {
             const { userData, ...user } = userMock;
             const { cookies } = await user.createCookie();
 
-            const { body, statusCode } = await $mockHttp(itemsMediaRouter).get(undefined, { cookies, query: { id: generateID() } });
+            const { body, statusCode } = await $mockHttp(itemsMediaRouter).get(undefined, { cookies, query: { id: $generateShortID() } });
             expect(body).toEqual({ message: 'Not Found' });
             expect(statusCode).toBe(404);
 
@@ -110,7 +111,7 @@ describe('api/items/[id]/media', async () => {
             const { body, statusCode } = await $mockHttp(itemsMediaRouter).post(form, { cookies, query: { id: item.itemData.id } });
 
             expect(body).toEqual({
-                id: expect.any(String),
+                id: expect.stringMatching(longIdRegex),
                 userId: userData.id,
                 itemId: item.itemData.id,
                 title: 'mediaTitle',
@@ -139,7 +140,7 @@ describe('api/items/[id]/media', async () => {
 
 
             expect(body).toEqual({
-                id: expect.any(String),
+                id: expect.stringMatching(longIdRegex),
                 userId: userData.id,
                 itemId: item.itemData.id,
                 title: null,

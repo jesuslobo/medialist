@@ -5,7 +5,7 @@ import { itemsTable, listsTable } from '@/server/db/schema';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
 import $deleteFolder from '@/server/utils/file/deleteFolder';
 import $getDir from '@/server/utils/file/getDir';
-import { validatedID } from '@/utils/lib/generateID';
+import { validateShortID } from '@/utils/lib/generateID';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { unionAll } from 'drizzle-orm/sqlite-core';
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -32,7 +32,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (!Array.isArray(items) && !Array.isArray(lists))
                 return res.status(400).json({ message: 'Bad Request' })
 
-            if (items?.some(id => !validatedID(id)) || lists?.some(id => !validatedID(id)))
+            if (items?.some(id => !validateShortID(id)) || lists?.some(id => !validateShortID(id)))
                 return res.status(400).json({ message: 'Bad Request' })
 
             const trashDb = await getTrash(user.id, items, lists)
@@ -79,7 +79,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             if (!Array.isArray(items) && !Array.isArray(lists))
                 return res.status(400).json({ message: 'Bad Request' })
 
-            if (items?.some(id => !validatedID(id)) || lists?.some(id => !validatedID(id)))
+            if (items?.some(id => !validateShortID(id)) || lists?.some(id => !validateShortID(id)))
                 return res.status(400).json({ message: 'Bad Request' })
 
             const trashDb = await getTrash(user.id, items, lists)

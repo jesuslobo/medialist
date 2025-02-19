@@ -1,6 +1,6 @@
 import { $createItems, $deleteItems } from "@/server/db/queries/items";
-import { THUMBNAILS_OPTIONS, thumbnailName, ThumbnailOptions } from "@/utils/lib/fileHandling/thumbnailOptions";
-import { generateID } from "@/utils/lib/generateID";
+import { $generateID, $generateShortID } from "@/server/utils/lib/generateID";
+import { thumbnailName, ThumbnailOptions, THUMBNAILS_OPTIONS } from "@/utils/lib/fileHandling/thumbnailOptions";
 import { ItemData, ItemField, ItemLayoutHeader } from "@/utils/types/item";
 import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
@@ -30,7 +30,7 @@ export async function $mockItem(
     const suppliedUserMock = listOrUserMock !== undefined;
     const { userMock, listMock } = await processParams(listOrUserMock);
 
-    const id = generateID();
+    const id = $generateShortID();
     const itemDir = join(listMock.listDir, id)
 
     mkdirSync(join(itemDir, 'thumbnails'), { recursive: true });
@@ -103,7 +103,7 @@ async function processParams(
 }
 
 function mockAFile(dir: string, thumbs?: ThumbnailOptions[]) {
-    const generatedName = Date.now() + '_' + generateID() + '.jpg'
+    const generatedName = Date.now() + '_' + $generateID(15) + '.jpg'
     writeFileSync(join(dir, generatedName), Buffer.from(''));
 
     thumbs?.forEach((option) =>
