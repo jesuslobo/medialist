@@ -4,7 +4,7 @@ import ErrorPage from "@/components/layouts/ErrorPage";
 import ListsLoading from "@/components/layouts/loading/ListsLoading";
 import TitleBar from "@/components/ui/bars/TitleBar";
 import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton";
-import { validatedID } from "@/utils/lib/generateID";
+import { validateShortID } from "@/utils/lib/generateID";
 import httpClient from "@/utils/lib/httpClient";
 import { mutateListCache, singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery";
 import { ListData } from "@/utils/types/list";
@@ -80,7 +80,7 @@ function EditListPage() {
 export default function EditListPageHOC() {
     const router = useRouter()
     const listId = router.query.id as ListData['id']
-    return validatedID(listId)
+    return validateShortID(listId)
         ? <EditListPage />
         : <ErrorPage message="Bad List ID, Page Doesn't Exist" MainMessage="404!" hideTryAgain />
 }

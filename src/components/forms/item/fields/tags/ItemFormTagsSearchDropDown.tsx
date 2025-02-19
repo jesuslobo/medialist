@@ -1,5 +1,5 @@
 import { sortTagsByGroup } from "@/utils/functions/sortTagsByGroup"
-import { validatedID } from "@/utils/lib/generateID"
+import { validateLongID } from "@/utils/lib/generateID"
 import { Button, Checkbox, CheckboxGroup, Divider, Input, Popover, PopoverContent, PopoverTrigger } from "@heroui/react"
 import { Dispatch, KeyboardEvent, SetStateAction, useContext, useRef, useState } from "react"
 import { BiPurchaseTag } from "react-icons/bi"
@@ -17,7 +17,7 @@ export default function ItemFormTagsSearchDropDown({
 
     const [displayedTags, setDisplayedTags] = useState(tags)
     const newTags = selectedTags
-        .filter(value => !validatedID(value))
+        .filter(value => !validateLongID(value))
         .map(value => { return { id: value, label: value } })
 
     const groupedDisplayedTags = [

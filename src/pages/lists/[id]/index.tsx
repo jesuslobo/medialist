@@ -6,7 +6,7 @@ import ListPageSearchBar from "@/components/page/lists/[id]/ListPageSearchBar"
 import ListPageSubNavBar from "@/components/page/lists/[id]/ListPageSubNavBar"
 import ListPageTagsList from "@/components/page/lists/[id]/tags/ListPageTagsList"
 import TitleBar from "@/components/ui/bars/TitleBar"
-import { validatedID } from "@/utils/lib/generateID"
+import { validateShortID } from "@/utils/lib/generateID"
 import { itemsQueryOptions, setupItemsCache } from "@/utils/lib/tanquery/itemsQuery"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
 import { tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
@@ -61,7 +61,7 @@ function ListPage() {
 export default function ListPageHOC() {
     const router = useRouter()
     const listId = router.query.id as ListData['id']
-    return validatedID(listId)
+    return validateShortID(listId)
         ? <ListPage />
         : <Error404 />
 }

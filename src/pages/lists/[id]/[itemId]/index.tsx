@@ -2,7 +2,7 @@ import ErrorPage from "@/components/layouts/ErrorPage"
 import ItemPageHeader from "@/components/page/lists/[id]/[itemId]/Header"
 import ItemPageLayout from "@/components/page/lists/[id]/[itemId]/ItemPageLayout"
 import { ItemPageProvider } from "@/components/page/lists/[id]/[itemId]/ItemPageProvider"
-import { validatedID } from "@/utils/lib/generateID"
+import { validateShortID } from "@/utils/lib/generateID"
 import { itemQueryOptions } from "@/utils/lib/tanquery/itemsQuery"
 import { allMediaQueryOptions, setupMediaCache } from "@/utils/lib/tanquery/mediaQuery"
 import { tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
@@ -49,7 +49,7 @@ export default function ItemPageHOC() {
     const itemId = router.query.itemId as ItemData['id']
     const listId = router.query.id as ListData['id']
 
-    return validatedID(listId) && validatedID(itemId)
+    return validateShortID(listId) && validateShortID(itemId)
         ? <ItemPage />
         : <Error404 />
 }

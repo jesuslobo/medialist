@@ -5,7 +5,7 @@ import ItemFormProvider, { ItemFormCounterGen, ItemFormData, ItemFormField, Item
 import ItemFormLayoutTitleBar from "@/components/forms/item/layoutTitleBar/ItemFormLayoutTitleBar"
 import ErrorPage from "@/components/layouts/ErrorPage"
 import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton"
-import { validatedID } from "@/utils/lib/generateID"
+import { validateShortID } from "@/utils/lib/generateID"
 import httpClient from "@/utils/lib/httpClient"
 import { itemQueryOptions, mutateItemCache } from "@/utils/lib/tanquery/itemsQuery"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
@@ -170,7 +170,7 @@ export default function EditItemPageHOC() {
     const itemId = router.query.itemId as ItemData['id']
     const listId = router.query.id as ListData['id']
 
-    return validatedID(listId) && validatedID(itemId)
+    return validateShortID(listId) && validateShortID(itemId)
         ? <EditItemPage />
         : <ErrorPage message="Bad Item ID, Page Doesn't Exist" MainMessage="404!" hideTryAgain />
 }

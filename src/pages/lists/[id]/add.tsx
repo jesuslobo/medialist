@@ -6,7 +6,7 @@ import ItemFormLayoutTitleBar from "@/components/forms/item/layoutTitleBar/ItemF
 import ErrorPage from "@/components/layouts/ErrorPage"
 import ListsLoading from "@/components/layouts/loading/ListsLoading"
 import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton"
-import { validatedID } from "@/utils/lib/generateID"
+import { validateShortID } from "@/utils/lib/generateID"
 import httpClient from "@/utils/lib/httpClient"
 import { mutateItemCache } from "@/utils/lib/tanquery/itemsQuery"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
@@ -145,7 +145,7 @@ function AddItemPage() {
 export default function AddItemPageHOC() {
     const router = useRouter()
     const listId = router.query.id as ListData['id']
-    return validatedID(listId)
+    return validateShortID(listId)
         ? <AddItemPage />
         : <ErrorPage message="Bad List ID, Page Doesn't Exist" MainMessage="404!" hideTryAgain />
 }
