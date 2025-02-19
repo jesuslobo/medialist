@@ -25,8 +25,7 @@ export const badgeColors = new Map<string, color>([
 export interface UserData {
     id: string
     username: string
-    // roles: 'admin' | 'member'
-    // email: string
+    roles: 'admin' | 'user'
     created_at: Date
     updated_at: Date
 }
@@ -42,11 +41,4 @@ export interface SessionAgent {
     browser?: string
     os?: string
     device?: string
-}
-
-type Cause = { username?: string; password?: string; }
-
-export interface ServerResponseError {
-    message?: string;
-    cause?: Cause
 }

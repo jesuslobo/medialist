@@ -5,7 +5,7 @@ import { $setSessionTokenCookie, $validateAuthCookies } from '@/server/utils/aut
 import { $createSession, $generateSessionToken } from '@/server/utils/auth/session';
 import { $generateShortID } from '@/server/utils/lib/generateID';
 import { validatePassword, validateUsername } from '@/utils/lib/validate';
-import { ServerResponseError } from '@/utils/types/global';
+import { ApiErrorCode, ServerResponse, UserErrorCode } from '@/utils/types/serverResponse';
 import { eq } from 'drizzle-orm';
 import { mkdir } from 'fs/promises';
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -22,9 +22,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         if (req.method === 'GET') {
             const { user } = await $validateAuthCookies(req, res);
-            if (!user) return res.status(401).json({ message: 'Unauthorized' });
-            const userRes = { ...user, passwordHash: undefined }
+            if (!user)
+                return res.status(401).json({ errorCode: ApiErrorCode.UNAUTHORIZED } as ServerResponse);
 
+            const userRes = { ...user, passwordHash: undefined }
             return res.status(200).json(userRes);
         }
 
@@ -33,26 +34,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const { username: reqUser, password } = JSON.parse(body || {})
             const username = reqUser?.toLowerCase()
 
-            if (!username || !password) return res.status(400).json({ message: 'Invalid Request' })
+            if (!username || !password)
+                return res.status(400).json({ errorCode: ApiErrorCode.BAD_REQUEST } as ServerResponse)
 
             if (!validateUsername(username))
                 return res.status(400).json({
                     cause: { username: "Invalid Username" },
-                    message: 'Invalid Request'
-                } as Error)
+                    errorCode: UserErrorCode.INVALID_USERNAME
+                } as ServerResponse)
 
             if (!validatePassword(password))
                 return res.status(400).json({
                     cause: { password: "Invalid Password" },
-                    message: 'Invalid Request'
-                } as Error)
+                    errorCode: UserErrorCode.INVALID_PASSWORD
+                } as ServerResponse)
 
             const userExists = await db.select().from(usersTable).where(eq(usersTable.username, username))
 
             if (userExists[0]) return res.status(400).json({
                 cause: { username: 'User Already Exists' },
-                message: 'Invalid Request'
-            } as ServerResponseError)
+                errorCode: UserErrorCode.USERNAME_EXISTS
+            } as ServerResponse)
 
             const passwordHash = await $hashPassword(password)
 
@@ -62,7 +64,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const adminUserExists = await checkForAdminUserExists();
             const role = adminUserExists ? 'user' : 'admin';
 
-            const user = await db
+            const [user] = await db
                 .insert(usersTable)
                 .values({
                     id: userID,
@@ -78,15 +80,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             await mkdir(userDir, { recursive: true }) // create media directory
 
             const token = $generateSessionToken();
-            const session = await $createSession(token, user[0].id, req.headers['user-agent']);
+            const session = await $createSession(token, user.id, req.headers['user-agent']);
 
             $setSessionTokenCookie(res, token, session.expiresAt)
-            return res.status(201).json(user[0])
+            return res.status(201).json(user)
         }
 
         if (req.method === 'PATCH') {
             const { user } = await $validateAuthCookies(req, res);
-            if (!user) return res.status(401).json({ message: 'Unauthorized' });
+            if (!user) return res.status(401).json({});
             const body = await req.body;
             const { newUsername: reqNewUser, newPassword, oldPassword } = JSON.parse(body || {})
 
@@ -95,21 +97,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
             if (!oldPassword) return res.status(400).json({
                 cause: { oldPassword: "Required" },
-                message: 'Invalid Request'
-            } as Error)
+                errorCode: UserErrorCode.INVALID_PASSWORD
+            } as ServerResponse)
 
             const validOldPassword = await $verifyPassword(oldPassword, user.passwordHash);
             if (!validOldPassword) return res.status(400).json({
                 cause: { oldPassword: "Invalid Old Password" },
-                message: 'Invalid Request'
-            } as Error)
+                errorCode: UserErrorCode.INVALID_PASSWORD
+            } as ServerResponse)
 
             if (newPassword) {
                 if (!validatePassword(newPassword))
                     return res.status(400).json({
-                        cause: { newPassword: "Invalid Password" },
-                        message: 'Invalid Request'
-                    } as Error)
+                        cause: { newPassword: "Invalid New Password" },
+                        errorCode: UserErrorCode.INVALID_PASSWORD
+                    } as ServerResponse)
 
                 dbHashNewPassword = await $hashPassword(newPassword)
             }
@@ -120,38 +122,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 if (!validateUsername(newUsername))
                     return res.status(400).json({
                         cause: { username: "Invalid Username" },
-                        message: 'Invalid Request'
-                    } as Error)
+                        errorCode: UserErrorCode.INVALID_USERNAME
+                    } as ServerResponse)
 
                 const userExists = await db.select().from(usersTable).where(eq(usersTable.username, newUsername))
                 if (userExists.length !== 0) return res.status(400).json({
                     cause: { username: 'User Already Exists' },
-                    message: 'Invalid Request'
-                } as ServerResponseError)
+                    errorCode: UserErrorCode.USERNAME_EXISTS
+                } as ServerResponse)
 
                 dbNewUsernameReq = newUsername
             }
-            const updatedAt = new Date(Date.now())
-
-            const updatedUser = await db
+            const [updatedUser] = await db
                 .update(usersTable)
                 .set({
                     username: dbNewUsernameReq,
                     passwordHash: dbHashNewPassword,
-                    updatedAt
+                    updatedAt: new Date(Date.now())
                 })
                 .where(eq(usersTable.id, user.id))
                 .limit(1)
                 .returning()
 
-            return res.status(200).json({ ...updatedUser[0], passwordHash: undefined })
+            return res.status(200).json({ ...updatedUser, passwordHash: undefined })
         }
 
-        res.status(405).json({ message: 'Method Not Allowed' });
+        res.status(405).json({ errorCode: ApiErrorCode.METHOD_NOT_ALLOWED } as ServerResponse);
 
     } catch (error) {
         console.error("[Error] api/users: ", error);
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ errorCode: ApiErrorCode.INTERNAL_SERVER_ERROR } as ServerResponse);
     }
 }
 

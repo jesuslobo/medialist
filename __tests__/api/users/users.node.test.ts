@@ -4,6 +4,7 @@ import { usersTable } from '@/server/db/schema';
 import { $verifyPassword } from '@/server/utils/auth/auth';
 import { $generateID } from '@/server/utils/lib/generateID';
 import { shortIdRegex } from '@/utils/lib/generateID';
+import { ApiErrorCode, UserErrorCode } from '@/utils/types/serverResponse';
 import $mockUser from '@tests/test-utils/mocks/data/mockUser';
 import $mockHttp from '@tests/test-utils/mocks/mockHttp';
 import { eq } from 'drizzle-orm';
@@ -14,6 +15,9 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 vi.mock('node:fs')
 vi.mock('node:fs/promises')
 vi.mock('@/server/db');
+
+// to add
+// max length for username and password
 
 beforeEach(() => vol.reset())
 
@@ -39,7 +43,7 @@ describe('api/users/', () => {
         test('shouldn\'t get userdata without cookies', async () => {
             const { body, statusCode } = await $mockHttp(usersRoute).get();
 
-            expect(body).toEqual({ message: 'Unauthorized' })
+            expect(body).toEqual({ errorCode: ApiErrorCode.UNAUTHORIZED })
             expect(statusCode).toBe(401)
         })
     })
@@ -73,7 +77,7 @@ describe('api/users/', () => {
 
             expect(body).toEqual({
                 cause: { username: "User Already Exists" },
-                message: 'Invalid Request'
+                errorCode: UserErrorCode.USERNAME_EXISTS
             })
             expect(statusCode).toBe(400)
 
@@ -83,14 +87,14 @@ describe('api/users/', () => {
         test('shouldn\'t create a new user without a username', async () => {
             const { body, statusCode } = await $mockHttp(usersRoute).post({ password: 'testpassword' });
 
-            expect(body).toEqual({ message: 'Invalid Request' })
+            expect(body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST })
             expect(statusCode).toBe(400)
         })
 
         test('shouldn\'t create a new user without a password', async () => {
             const { body, statusCode } = await $mockHttp(usersRoute).post({ username: 'testusername' });
 
-            expect(body).toEqual({ message: 'Invalid Request' })
+            expect(body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST })
             expect(statusCode).toBe(400)
         })
     })
@@ -171,7 +175,7 @@ describe('api/users/', () => {
 
             expect(body).toEqual({
                 cause: { oldPassword: "Invalid Old Password" },
-                message: 'Invalid Request'
+                errorCode: UserErrorCode.INVALID_PASSWORD
             })
             expect(statusCode).toBe(400)
 
@@ -195,7 +199,7 @@ describe('api/users/', () => {
 
             expect(body).toEqual({
                 cause: { oldPassword: "Required" },
-                message: 'Invalid Request'
+                errorCode: UserErrorCode.INVALID_PASSWORD
             })
             expect(statusCode).toBe(400)
 

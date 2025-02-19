@@ -1,6 +1,6 @@
 import httpClient from "@/utils/lib/httpClient";
 import { mutateUserCache } from "@/utils/lib/tanquery/usersQuery";
-import { ServerResponseError, UserData } from "@/utils/types/global";
+import { UserData } from "@/utils/types/global";
 import { Input } from "@heroui/react";
 import { useMutation } from "@tanstack/react-query";
 import Head from "next/head";
@@ -17,7 +17,7 @@ function LoginForm() {
         onSuccess: (data) => mutateUserCache(data),
     })
 
-    const resErrorCause = (mutation.error as ServerResponseError)?.cause
+    const resErrorCause = mutation.error?.cause as { username?: string; password?: string; }
 
     function onSubmit(data: UserLoginForm) {
         const formData = { username: data.username.trim(), password: data.password }

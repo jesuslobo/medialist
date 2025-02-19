@@ -1,6 +1,7 @@
 import sessionsHandler from '@/pages/api/sessions';
 import { db } from '@/server/db';
 import { sessionsTable } from '@/server/db/schema';
+import { ApiCode, ApiErrorCode, UserErrorCode } from '@/utils/types/serverResponse';
 import $mockUser from '@tests/test-utils/mocks/data/mockUser';
 import $mockHttp from '@tests/test-utils/mocks/mockHttp';
 import { eq, sql } from 'drizzle-orm';
@@ -65,7 +66,10 @@ describe('api/sessions/', () => {
             const { userData: { password }, ...user } = await $mockUser()
             const { body, statusCode } = await $mockHttp(sessionsHandler).post({ username: 'wrongusername', password });
 
-            expect(body).toEqual({ message: 'Invalid Username Or Password' })
+            expect(body).toEqual({
+                message: 'Invalid Username Or Password',
+                errorCode: UserErrorCode.INVALID_LOGIN
+            })
             expect(statusCode).toBe(400)
 
             await user.delete()
@@ -75,7 +79,10 @@ describe('api/sessions/', () => {
             const { userData: { username }, ...user } = await $mockUser()
             const { body, statusCode } = await $mockHttp(sessionsHandler).post({ username, password: 'wrongpassword' });
 
-            expect(body).toEqual({ message: 'Invalid Username Or Password' })
+            expect(body).toEqual({
+                message: 'Invalid Username Or Password',
+                errorCode: UserErrorCode.INVALID_LOGIN
+            })
             expect(statusCode).toBe(400)
 
             await user.delete()
@@ -85,7 +92,7 @@ describe('api/sessions/', () => {
             const { userData: { password }, ...user } = await $mockUser()
             const { body, statusCode } = await $mockHttp(sessionsHandler).post({ password });
 
-            expect(body).toEqual({ message: 'Invalid Request' })
+            expect(body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST })
             expect(statusCode).toBe(400)
 
             await user.delete()
@@ -95,7 +102,7 @@ describe('api/sessions/', () => {
             const { userData: { username }, ...user } = await $mockUser()
             const { body, statusCode } = await $mockHttp(sessionsHandler).post({ username });
 
-            expect(body).toEqual({ message: 'Invalid Request' })
+            expect(body).toEqual({ errorCode: ApiErrorCode.BAD_REQUEST })
             expect(statusCode).toBe(400)
 
             await user.delete()
@@ -108,7 +115,10 @@ describe('api/sessions/', () => {
             const { cookies } = await user.createCookie()
             const { body, statusCode } = await $mockHttp(sessionsHandler).delete(undefined, { cookies });
 
-            expect(body).toEqual({ message: 'Logged Out' })
+            expect(body).toEqual({
+                code: ApiCode.DESTROYED,
+                message: 'Logged Out',
+            })
             expect(statusCode).toBe(200)
 
             await user.delete()
@@ -125,7 +135,10 @@ describe('api/sessions/[id]', () => {
         const params = { id: (sessions[0].id as string).slice(0, 10) }
         const { body, statusCode } = await $mockHttp(sessionsHandler).delete(undefined, { cookies, params });
 
-        expect(body).toEqual({ message: 'Logged Out' })
+        expect(body).toEqual({
+            code: ApiCode.DESTROYED,
+            message: 'Logged Out',
+        })
         expect(statusCode).toBe(200)
 
         const sessionsAfterDelete = await getAllSessions(id);
