@@ -60,17 +60,17 @@ export default function ItemFormLayoutTitleBar({
                 </ToggleButton>
 
                 <ItemFormLayoutChangeLayoutButton />
-                <Dropdown>
+                {/* <Dropdown>
                     <DropdownTrigger>
                         <Button isIconOnly>
                             <BiDotsVerticalRounded size={20} />
                         </Button>
                     </DropdownTrigger>
                     <DropdownMenu aria-label="Layout Options">
-                        <DropdownItem >Save As a Template</DropdownItem>
-                        <DropdownItem >Load A Template</DropdownItem>
+                        <DropdownItem key="Save-as-a-template" >Save As a Template</DropdownItem>
+                        <DropdownItem key="Load-a-template" >Load A Template</DropdownItem>
                     </DropdownMenu>
-                </Dropdown>
+                </Dropdown> */}
             </div>
         </TitleBar>
     )

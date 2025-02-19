@@ -4,8 +4,8 @@ import ItemPageLayoutColumn from "./LayoutColumn"
 
 const gridTemplate = {
     one_row: "1fr",
-    left_sidebar: "minmax(10vw, 22vw) minmax(22vw, 75vw)",
-    right_sidebar: "minmax(22vw, 75vw) minmax(10vw, 22vw)",
+    left_sidebar: "minmax(10vw, 25vw) minmax(25vw, 75vw)",
+    right_sidebar: "minmax(25vw, 75vw) minmax(10vw, 25vw)",
     two_rows: "1fr 1fr",
     three_rows: "1fr 1fr 1fr",
 }

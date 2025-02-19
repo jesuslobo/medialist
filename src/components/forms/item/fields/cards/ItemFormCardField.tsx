@@ -53,7 +53,7 @@ export default function ItemFormCardField({
                                 className="w-full h-full object-cover aspect-square"
                                 alt="image-card"
                                 src={src}
-                                onClick={() => setIsViewOpen(true)}
+                                onClick={onOpen}
                             />
                             : <Button onPress={onOpen} onDragOver={onOpen} className="aspect-square w-full h-40">
                                 <BiImageAdd className="text-2xl" /> Select Image
@@ -67,7 +67,7 @@ export default function ItemFormCardField({
                                 className="h-36 object-cover aspect-square"
                                 alt="image-card"
                                 src={src}
-                                onClick={() => setIsViewOpen(true)}
+                                onClick={onOpen}
                             />
                             : <Button onPress={onOpen} onDragOver={onOpen} className="aspect-square h-36">
                                 <BiImageAdd className="text-4xl" />
