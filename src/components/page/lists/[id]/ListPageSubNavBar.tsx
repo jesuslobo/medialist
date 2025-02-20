@@ -13,6 +13,7 @@ import { CiGrid2H } from "react-icons/ci";
 import { FaDiamond } from "react-icons/fa6";
 import { IoGridOutline } from "react-icons/io5";
 import { LuDiamond } from "react-icons/lu";
+import EditListModal from "./EditListModal";
 import { ListPageContext } from "./ListPageProvider";
 
 export default function ListPageSubNavBar() {
@@ -132,7 +133,8 @@ function ListActionsDropMenu({
         }
     })
 
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const deleteDisclosure = useDisclosure();
+    const editDisclosure = useDisclosure();
 
     return (
         <>
@@ -151,7 +153,7 @@ function ListActionsDropMenu({
                     <DropdownItem
                         key="edit"
                         startContent={<BiPencil className="text-lg" />}
-                        onPress={() => router.push(`/lists/${list.id}/edit`)}
+                        onPress={editDisclosure.onOpen}
                     >
                         Edit
                     </DropdownItem>
@@ -170,7 +172,7 @@ function ListActionsDropMenu({
                             startContent={<BiTrash className="text-lg" />}
                             className="text-danger"
                             color="danger"
-                            onPress={onOpen}
+                            onPress={deleteDisclosure.onOpen}
                         >
                             Move to Trash
                         </DropdownItem>
@@ -178,39 +180,55 @@ function ListActionsDropMenu({
 
                 </DropdownMenu>
             </Dropdown>
-            <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
-                <DeleteModal onPress={() => mutateTrash.mutate(true)} />
-            </Modal>
+            <DeleteModal
+                onPress={() => mutateTrash.mutate(true)}
+                isOpen={deleteDisclosure.isOpen}
+                onOpenChange={deleteDisclosure.onOpenChange}
+            />
+            <EditListModal
+                isOpen={editDisclosure.isOpen}
+                onOpenChange={editDisclosure.onOpenChange}
+            />
         </>
     )
 }
 
-function DeleteModal({ onPress }: { onPress: () => void }) {
+function DeleteModal({
+    onPress,
+    isOpen,
+    onOpenChange
+}: {
+    onPress: () => void,
+    isOpen: boolean,
+    onOpenChange: () => void
+}) {
     return (
-        <ModalContent>
-            {(onClose) => (
-                <>
-                    <ModalHeader className="flex flex-col gap-1">Are You Sure?</ModalHeader>
-                    <ModalBody>
-                        <p>This list will be moved to the trash. You can restore it from there.</p>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button
-                            color="danger"
-                            variant="bordered"
-                            onPress={() => {
-                                onPress()
-                                onClose()
-                            }}
-                        >
-                            Move to Trash
-                        </Button>
-                        <Button color="primary" onPress={onClose}>
-                            Cancel
-                        </Button>
-                    </ModalFooter>
-                </>
-            )}
-        </ModalContent>
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
+            <ModalContent>
+                {(onClose) => (
+                    <>
+                        <ModalHeader className="flex flex-col gap-1">Are You Sure?</ModalHeader>
+                        <ModalBody>
+                            <p>This list will be moved to the trash. You can restore it from there.</p>
+                        </ModalBody>
+                        <ModalFooter>
+                            <Button
+                                color="danger"
+                                variant="bordered"
+                                onPress={() => {
+                                    onPress()
+                                    onClose()
+                                }}
+                            >
+                                Move to Trash
+                            </Button>
+                            <Button color="primary" onPress={onClose}>
+                                Cancel
+                            </Button>
+                        </ModalFooter>
+                    </>
+                )}
+            </ModalContent>
+        </Modal>
     )
 }
