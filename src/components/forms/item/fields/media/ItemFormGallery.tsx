@@ -10,7 +10,7 @@ import { GalleryField, GalleryFieldFilter, ItemData } from "@/utils/types/item"
 import { MediaData } from "@/utils/types/media"
 import { Button, Card, Chip, Input, Textarea } from "@heroui/react"
 import { useMutation } from "@tanstack/react-query"
-import { Dispatch, SetStateAction, useContext, useMemo, useState } from "react"
+import React, { Dispatch, SetStateAction, useContext, useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { BiFilterAlt, BiImageAdd, BiLockOpenAlt, BiSave, BiSearch, BiSolidLockAlt, BiX } from "react-icons/bi"
 import { ItemFormMedia } from "../../ItemFormProvider"
@@ -25,9 +25,8 @@ export default function ItemFormGallery({
 }) {
     const { list, media, activeTabFields, setActiveTabFields, item, itemForm } = useContext(ItemFormContext)
     const { setValue } = itemForm
-    const { remove, set } = useItemFormLayoutField(rowIndex, colIndex, setActiveTabFields)
-    const { filter } = activeTabFields[rowIndex][colIndex] as GalleryField & { id: number }
-
+    const { remove, set, field } = useItemFormLayoutField<GalleryField>(rowIndex, colIndex, setActiveTabFields, activeTabFields)
+    const { filter } = field
     const [searchValue, setSearchValue] = useState(filter?.keywords?.join(', ') || '')
 
     const isFilterLocked = Array.isArray(filter?.keywords) && filter?.keywords.length > 0
@@ -135,20 +134,10 @@ export default function ItemFormGallery({
                     />
                 }
 
-                {newMedia.map((image, index) =>
-                    <MediaImageCard
-                        // react for some reason refuses to properly update this unless it has a new key every time
-                        key={'new-gallery-image' + Date.now() + index}
-                        title={image.title as string | undefined}
-                        keywords={image.keywords}
-                        src={URL.createObjectURL(image.path as File)}
-                        thumbnailSrc={URL.createObjectURL(image.path as File)}
-                        onEdit={(data) => setNewMedia(e =>
-                            e.toSpliced(index, 1, { ...newMedia[index], title: data.title, keywords: data.keywords }))
-                        }
-                        onDelete={() => setNewMedia(e => e.filter((_, i) => i !== index))}
-                    />
-                )}
+                <MemoizedNewMedia
+                    newMedia={newMedia}
+                    setNewMedia={setNewMedia}
+                />
 
                 {filteredMedia.map((image, index) =>
                     <MediaImageCard
@@ -240,3 +229,26 @@ function AddImageForm({
     )
 }
 
+const MemoizedNewMedia = React.memo(function MappedNewMedia({
+    newMedia,
+    setNewMedia,
+}: {
+    newMedia: ItemFormMedia[]
+    setNewMedia: Dispatch<SetStateAction<ItemFormMedia[]>>
+}) {
+    return (<>
+        {newMedia.map((image, index) =>
+            <MediaImageCard
+                key={'new-gallery-image' + image.ref}
+                title={image.title as string | undefined}
+                keywords={image.keywords}
+                src={URL.createObjectURL(image.path as File)}
+                thumbnailSrc={URL.createObjectURL(image.path as File)}
+                onEdit={(data) => setNewMedia(e =>
+                    e.toSpliced(index, 1, { ...newMedia[index], title: data.title, keywords: data.keywords }))
+                }
+                onDelete={() => setNewMedia(e => e.filter((_, i) => i !== index))}
+            />
+        )}
+    </>)
+}, ({ newMedia: prev }, { newMedia: next }) => JSON.stringify(prev) === JSON.stringify(next))

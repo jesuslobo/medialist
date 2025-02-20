@@ -1,10 +1,10 @@
+import ItemPageTextField from "@/components/page/lists/[id]/[itemId]/fields/ItemPageTextField"
 import { ItemTextField } from "@/utils/types/item"
 import { Button, Input, Textarea } from "@heroui/react"
 import { useContext, useState } from "react"
 import { BiX } from "react-icons/bi"
 import { useItemFormLayoutField } from "../ItemFormLayoutSection"
 import { ItemFormContext } from "../ItemFormProvider"
-import ItemPageTextField from "@/components/page/lists/[id]/[itemId]/fields/ItemPageTextField"
 
 export default function ItemFormTextField({
     rowIndex,
@@ -14,28 +14,27 @@ export default function ItemFormTextField({
     colIndex: number,
 }) {
     const { activeTabFields, setActiveTabFields, isPreviewMode } = useContext(ItemFormContext)
-    const { set, remove } = useItemFormLayoutField(rowIndex, colIndex, setActiveTabFields)
+    const { remove, field, useDebounce } = useItemFormLayoutField<ItemTextField>(rowIndex, colIndex, setActiveTabFields, activeTabFields)
 
-    const currentField = activeTabFields[rowIndex][colIndex] as ItemTextField & { id: number }
-
+    const [text, setText] = useDebounce('text')
     const [hover, setHover] = useState(false)
 
     const props = {
         className: "shadow-sm rounded-xl",
         type: "text",
-        value: currentField.text,
-        onValueChange: (text: string) => set({ text }),
+        value: text,
+        onValueChange: setText,
         isRequired: true
     }
 
     return (
         <article
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
+            onMouseEnter={() => isPreviewMode && setHover(true)}
+            onMouseLeave={() => isPreviewMode && setHover(false)}
         >
             {hover || !isPreviewMode ?
                 <div className="flex gap-x-1 items-center animate-fade-in">
-                    {currentField.variant === "short"
+                    {field.variant === "short"
                         ? <Input
                             variant="bordered"
                             label="Text"
@@ -58,7 +57,7 @@ export default function ItemFormTextField({
                 </div>
                 : <ItemPageTextField
                     className="animate-fade-in px-2"
-                    field={currentField}
+                    field={field}
                 />
             }
         </article>

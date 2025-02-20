@@ -16,9 +16,8 @@ export default function ItemFormImageField({
     colIndex: number,
 }) {
     const { activeTabFields, setActiveTabFields, isPreviewMode, itemForm, item, list, media } = useContext(ItemFormContext)
-    const { set, remove } = useItemFormLayoutField(rowIndex, colIndex, setActiveTabFields)
-
-    const { imageId } = activeTabFields[rowIndex][colIndex] as ItemImageField & { id: number }
+    const { set, remove, field } = useItemFormLayoutField<ItemImageField>(rowIndex, colIndex, setActiveTabFields, activeTabFields)
+    const { imageId } = field
 
     const itemSrc = item && `/users/${list.userId}/${list.id}/${(item as ItemData).id}`
     const newMedia = itemForm.watch('media') as ItemFormMedia[]
@@ -41,8 +40,8 @@ export default function ItemFormImageField({
         {(hover || !isPreviewMode) &&
             <div
                 className="flex items-center justify-center gap-x-2 pb-3 "
-                onMouseEnter={() => setHover(true)}
-                onMouseLeave={() => setHover(false)}
+                onMouseEnter={() => isPreviewMode && setHover(true)}
+                onMouseLeave={() => isPreviewMode && setHover(false)}
             >
                 {selectedImage &&
                     <Button className="flex-grow" onPress={onOpen} onDragOver={onOpen}>
@@ -60,8 +59,8 @@ export default function ItemFormImageField({
                 alt="image-card"
                 src={src}
                 onClick={() => setIsViewOpen(true)}
-                onMouseEnter={() => setHover(true)}
-                onMouseLeave={() => setHover(false)}
+                onMouseEnter={() => isPreviewMode && setHover(true)}
+                onMouseLeave={() => isPreviewMode && setHover(false)}
             />
             : <Card className=" flex items-center justify-center h-full w-full p-4 bg-accented/70 border-none rounded-2xl shadow-lg animate-fade-in">
                 <Button onPress={onOpen} onDragOver={onOpen} size="lg">

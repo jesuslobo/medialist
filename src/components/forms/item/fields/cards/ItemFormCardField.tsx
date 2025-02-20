@@ -1,5 +1,4 @@
 import ItemPageCardField from "@/components/page/lists/[id]/[itemId]/fields/cards/ItemPageCardField"
-import ImageViewerModal from "@/components/ui/modals/ImageViewerModal"
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions"
 import { ItemCardField, ItemData } from "@/utils/types/item"
 import { Button, Image, Input, InputProps, Textarea, TextAreaProps, useDisclosure } from "@heroui/react"
@@ -17,16 +16,13 @@ export default function ItemFormCardField({
     colIndex: number,
 }) {
     const { activeTabFields, setActiveTabFields, isPreviewMode, itemForm, item, list, media } = useContext(ItemFormContext)
-    const useField = useItemFormLayoutField(rowIndex, colIndex, setActiveTabFields)
-    const { set } = useField
-    const currentField = activeTabFields[rowIndex][colIndex] as ItemCardField & { id: number }
-    const { imageId, variant } = currentField
-
+    const useField = useItemFormLayoutField<ItemCardField>(rowIndex, colIndex, setActiveTabFields, activeTabFields)
+    const { set, field } = useField
+    const { imageId, variant } = field
     const itemSrc = item && `/users/${list.userId}/${list.id}/${(item as ItemData).id}`
     const newMedia = itemForm.watch('media') as ItemFormMedia[]
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
-    const [isViewOpen, setIsViewOpen] = useState(false)
     const [hover, setHover] = useState(false)
 
     const selectedImage = useMemo(() =>
@@ -41,12 +37,12 @@ export default function ItemFormCardField({
     return (<>
         <SelectImageModal isOpen={isOpen} onOpenChange={onOpenChange} set={set} />
         <article
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
+            onMouseEnter={() => isPreviewMode && setHover(true)}
+            onMouseLeave={() => isPreviewMode && setHover(false)}
         >
             {(hover || !isPreviewMode)
                 ? variant === "banner"
-                    ? <BannerForm useField={useField} field={currentField} >
+                    ? <BannerForm useField={useField} >
                         {selectedImage
                             ? <Image
                                 title="click to view full image"
@@ -60,7 +56,7 @@ export default function ItemFormCardField({
                             </Button>
                         }
                     </BannerForm>
-                    : <ProfileForm useField={useField} field={currentField} >
+                    : <ProfileForm useField={useField} >
                         {selectedImage
                             ? <Image
                                 title="click to view full image"
@@ -74,18 +70,10 @@ export default function ItemFormCardField({
                             </Button>
                         }
                     </ProfileForm>
-                : <ItemPageCardField field={{ src, ...currentField }} isEditing />
+                : <ItemPageCardField field={{ src, ...field }} isEditing />
             }
-
-            {src &&
-                <ImageViewerModal
-                    imageSrc={src}
-                    isOpen={isViewOpen}
-                    setIsOpen={setIsViewOpen}
-                />}
         </article>
-    </>
-    )
+    </>)
 };
 
 const inputProps: InputProps & TextAreaProps = {
@@ -94,18 +82,17 @@ const inputProps: InputProps & TextAreaProps = {
 }
 
 interface FormProps {
-    useField: ReturnType<typeof useItemFormLayoutField>,
-    field: ItemCardField,
+    useField: ReturnType<typeof useItemFormLayoutField<ItemCardField>>,
     children?: React.ReactNode
 }
 
 function BannerForm({
     useField,
-    field,
     children
 }: FormProps) {
-    const { set, remove } = useField
-    const { title, subText } = field
+    const { remove, useDebounce } = useField
+    const [title, setTitle] = useDebounce("title")
+    const [subText, setSubText] = useDebounce("subText")
 
     return (
         <div className="grid gap-y-2">
@@ -117,14 +104,14 @@ function BannerForm({
                 {...inputProps}
                 placeholder="Title..."
                 value={title}
-                onValueChange={(title) => set({ title })}
+                onValueChange={setTitle}
                 isRequired
             />
             <Input
                 {...inputProps}
                 placeholder="Subtext..."
                 value={subText}
-                onValueChange={(subText) => set({ subText })}
+                onValueChange={setSubText}
             />
         </div>
     )
@@ -132,11 +119,12 @@ function BannerForm({
 
 function ProfileForm({
     useField,
-    field,
     children
 }: FormProps) {
-    const { set, remove } = useField
-    const { title, subText } = field
+    const { remove, useDebounce } = useField
+
+    const [title, setTitle] = useDebounce("title")
+    const [subText, setSubText] = useDebounce("subText")
 
     return (
         <div className="flex flex-row gap-2">
@@ -147,7 +135,7 @@ function ProfileForm({
                         {...inputProps}
                         placeholder="Title..."
                         value={title}
-                        onValueChange={(title) => set({ title })}
+                        onValueChange={setTitle}
                         isRequired
                     />
                     <Button
@@ -163,7 +151,7 @@ function ProfileForm({
                     placeholder="Subtext..."
                     className="flex-grow h-full"
                     value={subText}
-                    onValueChange={(subText) => set({ subText })}
+                    onValueChange={setSubText}
                 />
             </div>
         </div>

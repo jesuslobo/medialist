@@ -13,8 +13,8 @@ export default function ItemFormRatingField({
     colIndex: number
 }) {
     const { activeTabFields, setActiveTabFields } = useContext(ItemFormContext)
-    const { set, remove } = useItemFormLayoutField(rowIndex, colIndex, setActiveTabFields)
-    const { from, rating } = activeTabFields[rowIndex][colIndex] as ItemRatingField & { id: number }
+    const { set, remove, field } = useItemFormLayoutField<ItemRatingField>(rowIndex, colIndex, setActiveTabFields, activeTabFields)
+    const { from, rating } = field
 
     if (from === undefined || rating === undefined)
         set({ from: 10, rating: 0 })

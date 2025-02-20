@@ -1,3 +1,4 @@
+import ItemPageLinkField from "@/components/page/lists/[id]/[itemId]/fields/ItemPageLinkField"
 import ImageInput from "@/components/ui/form/ImageUploader"
 import { ItemLinkField } from "@/utils/types/item"
 import { Button, Input, InputProps } from "@heroui/react"
@@ -6,7 +7,6 @@ import { BiX } from "react-icons/bi"
 import { LuImagePlus } from "react-icons/lu"
 import { useItemFormLayoutField } from "../ItemFormLayoutSection"
 import { ItemFormContext } from "../ItemFormProvider"
-import ItemPageLinkField from "@/components/page/lists/[id]/[itemId]/fields/ItemPageLinkField"
 
 export default function ItemFormLinkField({
     rowIndex,
@@ -17,21 +17,22 @@ export default function ItemFormLinkField({
 }) {
     const { activeTabFields, setActiveTabFields, item, isPreviewMode } = useContext(ItemFormContext)
 
-    const { set, remove } = useItemFormLayoutField(rowIndex, colIndex, setActiveTabFields)
-    const currentField = activeTabFields[rowIndex][colIndex] as ItemLinkField & { id: number, logoPath: File | null | string }
+    const { set, remove, field, useDebounce } = useItemFormLayoutField<ItemLinkField & { logoPath: File }>(rowIndex, colIndex, setActiveTabFields, activeTabFields)
 
     const itemDir = item && `/users/${item.userId}/${item.listId}/${item.id}`
     const [logo, setLogo] = useState<string | null>(null)
+    const [url, setUrl] = useDebounce('url')
+    const [label, setLabel] = useDebounce('label')
 
     const [hover, setHover] = useState(false)
 
     useEffect(() => {
-        if ((currentField?.logoPath as any) instanceof File) // :D
-            readImage(currentField.logoPath as File)
-        else if (typeof currentField.logoPath === 'string')
-            setLogo(`${itemDir}/${currentField.logoPath}`)
+        if ((field?.logoPath as any) instanceof File) // :D
+            readImage(field.logoPath as File)
+        else if (typeof field.logoPath === 'string')
+            setLogo(`${itemDir}/${field.logoPath}`)
         else setLogo(null)
-    }, [currentField.logoPath])
+    }, [field.logoPath])
 
 
     const inputProps: InputProps = {
@@ -53,22 +54,22 @@ export default function ItemFormLinkField({
 
     return (
         <article
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
+            onMouseEnter={() => isPreviewMode && setHover(true)}
+            onMouseLeave={() => isPreviewMode && setHover(false)}
         >
             {hover || !isPreviewMode
                 ? <div className="className flex gap-x-1 items-center animate-fade-in">
                     <Input
                         placeholder="Label"
-                        value={currentField.label}
-                        onValueChange={(label) => set({ label })}
+                        value={label}
+                        onValueChange={setLabel}
                         {...inputProps}
                     />
                     :
                     <Input
                         placeholder="Link"
-                        value={currentField.url}
-                        onValueChange={(url) => set({ url })}
+                        value={url}
+                        onValueChange={setUrl}
                         validate={(url) => url.match(/^(http|https):\/\/[^ "]+$/i) ? null : 'Invalid URL'}
                         {...inputProps}
                     />
@@ -77,7 +78,7 @@ export default function ItemFormLinkField({
                         className="flex-none"
                         innerContent={<LuImagePlus size={23} />}
                         value={logo}
-                        onChange={(logoPath) => set({ logoPath })}
+                        onChange={(logoPath) => set({ logoPath: logoPath as File & string })} // TS ????
                     />
 
                     <Button
@@ -90,7 +91,7 @@ export default function ItemFormLinkField({
                 </div>
                 : <ItemPageLinkField
                     className=" animate-fade-in"
-                    field={{ ...currentField, logoPath: logo || '' }}
+                    field={{ ...field, logoPath: logo || '' }}
                     isEditing
                 />
             }

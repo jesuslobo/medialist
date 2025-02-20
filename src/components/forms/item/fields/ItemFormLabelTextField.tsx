@@ -16,11 +16,11 @@ export default function ItemFormLabelTextField({
     colIndex: number
 }) {
     const { activeTabFields, setActiveTabFields, isPreviewMode } = useContext(ItemFormContext)
-    const { set, remove } = useItemFormLayoutField(rowIndex, colIndex, setActiveTabFields)
+    const { set, remove, field, useDebounce } = useItemFormLayoutField<ItemLabelTextField>(rowIndex, colIndex, setActiveTabFields, activeTabFields)
+    const { countable } = field
 
-    const currentField = activeTabFields[rowIndex][colIndex] as ItemLabelTextField & { id: number }
-    const { countable } = currentField
-
+    const [label, setLabel] = useDebounce("label")
+    const [body, setBody] = useDebounce("body")
     const [hover, setHover] = useState(false)
 
     const inputProps: InputProps = {
@@ -31,23 +31,23 @@ export default function ItemFormLabelTextField({
 
     return (
         <article
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
+            onMouseEnter={() => isPreviewMode && setHover(true)}
+            onMouseLeave={() => isPreviewMode && setHover(false)}
         >
             {hover || !isPreviewMode ?
                 <div className="flex gap-x-1 items-center animate-fade-in">
                     <Input
                         placeholder="Label"
-                        value={currentField.label}
-                        onValueChange={(label) => set({ label })}
+                        value={label}
+                        onValueChange={setLabel}
                         {...inputProps}
                         isRequired
                     />
                     :<Input
                         placeholder="Body"
                         type={countable ? "number" : "text"}
-                        value={currentField.body}
-                        onValueChange={(body) => set({ body })}
+                        value={body}
+                        onValueChange={setBody}
                         {...inputProps}
                     />
                     <ToggleButton
@@ -68,7 +68,7 @@ export default function ItemFormLabelTextField({
                 </div>
                 : <ItemPageLabelTextField
                     className="animate-fade-in px-2"
-                    field={currentField}
+                    field={field}
                     isEditing
                 />
             }

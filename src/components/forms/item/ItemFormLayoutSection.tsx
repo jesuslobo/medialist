@@ -2,9 +2,10 @@ import { ItemFormContext, ItemFormField } from "@/components/forms/item/ItemForm
 import SortableMultiContainersWrapper from "@/components/ui/layout/drag&drop/logic/SortableMultiContainersWrapper"
 import SortableContainer from "@/components/ui/layout/drag&drop/SortableContainer"
 import SortableItem from "@/components/ui/layout/drag&drop/SortableItem"
+import { ItemField } from "@/utils/types/item"
 import { DragOverlay } from "@dnd-kit/core"
 import { Divider } from "@heroui/react"
-import { Dispatch, SetStateAction, useContext } from "react"
+import { Dispatch, SetStateAction, useContext, useState } from "react"
 import ItemFormFieldsMapper from "./ItemFormFieldMapper"
 import ItemFormLayoutAddFieldButton from "./layoutTitleBar/ItemFormLayoutAddFieldButton"
 
@@ -59,12 +60,34 @@ export default function ItemFormLayoutSection() {
     )
 }
 
-export function useItemFormLayoutField(
+// store the timeouts outside of react states
+let timeoutsStore = new Map<string, NodeJS.Timeout>() 
+export function useItemFormLayoutField<T extends ItemField>(
     row: number,
     col: number,
-    setFields: Dispatch<SetStateAction<ItemFormField[][]>>
+    setFields: Dispatch<SetStateAction<ItemFormField[][]>>,
+    fields: ItemFormField[][],
 ) {
-    function set(value: object) {
+    const field = fields && fields[row][col] as T & { id: number }
+
+    // to do: make key: string (for keys) | callback
+    function useDebounce<K extends keyof T>(key: K, delay = 450) {
+        // updates the internal state, giving the illusion of a controlled component chaning its value
+        // but sets the value of the form after the delay, to avoid unnecessary re-renders
+        const [internalState, _setInternalState] = useState(field[key] as T[K])
+
+        const fieldTimeOutKey = `${row}-${col}-${key as string}`
+        function setInternalState(value: T[K]) {
+            clearTimeout(timeoutsStore.get(fieldTimeOutKey))
+            _setInternalState(value)
+            // {[K]: T[k] } somehow is not Patrial<T> according to TS :D
+            const val = { [key]: value } as unknown as Partial<T>
+            timeoutsStore.set(fieldTimeOutKey, setTimeout(() => set(val), delay))
+        }
+        return [internalState, setInternalState] as [T[K], (value: T[K]) => void]
+    }
+
+    function set(value: Partial<T>) {
         setFields((prev) => {
             let newArray = [...prev]
             newArray[row][col] = { ...newArray[row][col], ...value }
@@ -82,6 +105,8 @@ export function useItemFormLayoutField(
 
     return {
         set,
-        remove
+        remove,
+        useDebounce,
+        field
     }
 }
