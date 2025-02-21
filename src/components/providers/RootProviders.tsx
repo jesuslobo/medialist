@@ -1,6 +1,7 @@
-import { HeroUIProvider } from "@heroui/react";
+import { HeroUIProvider, ToastProps, ToastProvider } from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { NuqsAdapter } from "nuqs/adapters/next/pages";
 import React, { lazy, useEffect, useState } from "react";
 import AuthProvider from "./AuthProvider";
 
@@ -29,20 +30,29 @@ export default function RootProviders({
     return (
         <>
             <QueryClientProvider client={queryClient}>
-                <HeroUIProvider>
-                    <NextThemesProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
+                <NextThemesProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
+                    <HeroUIProvider>
+                        <ToastProvider toastProps={toastProps} placement="bottom-right" />
                         <AuthProvider>
-                            {children}
+                            <NuqsAdapter>
+                                {children}
+                            </NuqsAdapter>
                         </AuthProvider>
-                    </NextThemesProvider>
-                </HeroUIProvider>
+                    </HeroUIProvider>
+                </NextThemesProvider>
 
                 {showDevtools && (
                     <React.Suspense fallback={null}>
                         <ReactQueryDevtoolsProduction />
                     </React.Suspense>
                 )}
-            </QueryClientProvider>
+            </QueryClientProvider >
         </>
     )
 }
+
+const toastProps = {
+    variant: 'bordered',
+    shouldShowTimeoutProgess: true,
+    timeout: 1500,
+} as ToastProps
