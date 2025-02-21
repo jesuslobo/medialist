@@ -20,7 +20,7 @@ export default function RootProviders({
 }: {
     children: React.ReactNode
 }) {
-    const [showDevtools, setShowDevtools] = useState(true)
+    const [showDevtools, setShowDevtools] = useState(false)
 
     useEffect(() => {
         // @ts-expect-error

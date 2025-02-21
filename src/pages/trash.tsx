@@ -7,9 +7,10 @@ import ToggleButton from "@/components/ui/buttons/ToggleButton";
 import httpClient from "@/utils/lib/httpClient";
 import { mutateItemCache } from "@/utils/lib/tanquery/itemsQuery";
 import { mutateListCache } from "@/utils/lib/tanquery/listsQuery";
+import { simpleToast } from "@/utils/toast";
 import { ItemData } from "@/utils/types/item";
 import { ListData } from "@/utils/types/list";
-import { Button, CheckboxGroup, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
+import { addToast, Button, CheckboxGroup, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Head from "next/head";
 import { useEffect, useState } from "react";
@@ -31,9 +32,11 @@ export default function TrashPage() {
 
     const deleteMutation = useMutation({
         mutationFn: (data: ServerData) => httpClient().delete('trash', data),
+        onError: () => addToast(simpleToast('Failed To Clear The Trash', 'danger')),
         onSuccess: () => {
             trashData.refetch()
             setSelected([])
+            addToast(simpleToast('Trash Cleared'))
             deleteMutation.reset()
         },
     })

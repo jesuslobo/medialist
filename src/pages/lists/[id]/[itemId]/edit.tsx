@@ -11,9 +11,10 @@ import { itemQueryOptions, mutateItemCache } from "@/utils/lib/tanquery/itemsQue
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
 import { allMediaQueryOptions, mutateMediaCache } from "@/utils/lib/tanquery/mediaQuery"
 import { mutateTagCache, tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
+import { errorToast, simpleToast } from "@/utils/toast"
 import { ItemData, ItemSaveResponse } from "@/utils/types/item"
 import { ListData } from "@/utils/types/list"
-import { Button, Spinner } from "@heroui/react"
+import { addToast, Button, Spinner } from "@heroui/react"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import Head from "next/head"
 import { useRouter } from "next/router"
@@ -37,11 +38,12 @@ function EditItemPage() {
 
     const mutation = useMutation({
         mutationFn: (formData: FormData) => httpClient().patch(`items/${itemId}`, formData),
+        onError: () => addToast(errorToast('Try Again', () => handleSubmit(onSubmit)())),
         onSuccess: ({ item, newTags, newMedia }: ItemSaveResponse) => {
             mutateItemCache(item, "edit")
             newTags?.forEach(tag => mutateTagCache(tag, "add"))
             newMedia?.forEach(media => mutateMediaCache(media, "add"))
-
+            addToast(simpleToast(`${list?.data?.title} / ${item.title} - Edited`))
             router.push(`/lists/${listId}/${item.id}`)
         },
     })

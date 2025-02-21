@@ -12,8 +12,10 @@ import { mutateItemCache } from "@/utils/lib/tanquery/itemsQuery"
 import { singleListQueryOptions } from "@/utils/lib/tanquery/listsQuery"
 import { mutateMediaCache } from "@/utils/lib/tanquery/mediaQuery"
 import { mutateTagCache, tagsQueryOptions } from "@/utils/lib/tanquery/tagsQuery"
+import { errorToast, simpleToast } from "@/utils/toast"
 import { ItemSaveResponse } from "@/utils/types/item"
 import { ListData } from "@/utils/types/list"
+import { addToast } from "@heroui/react"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import Head from "next/head"
 import { useRouter } from "next/router"
@@ -41,10 +43,12 @@ function AddItemPage() {
 
     const mutation = useMutation({
         mutationFn: (formData: FormData) => httpClient().post(`lists/${listId}/items`, formData),
+        onError: () => addToast(errorToast('Try Again', () => handleSubmit(onSubmit)())),
         onSuccess: ({ item, newTags, newMedia }: ItemSaveResponse) => {
             mutateItemCache(item, "add")
             newTags?.forEach(tag => mutateTagCache(tag, "add"))
             newMedia?.forEach(media => mutateMediaCache(media, "add"))
+            addToast(simpleToast(`${list?.title} / ${item.title} - Created`))
             router.push(`/lists/${listId}/${item.id}`)
         },
     })

@@ -1,10 +1,11 @@
 import { queryClient } from "@/components/providers/RootProviders";
 import ToggleButton from "@/components/ui/buttons/ToggleButton";
 import httpClient from "@/utils/lib/httpClient";
-import { mutateItemCache } from "@/utils/lib/tanquery/itemsQuery";
+import { mutateListCache } from "@/utils/lib/tanquery/listsQuery";
+import { actionToast, simpleToast } from "@/utils/toast";
 import { badgeColors } from "@/utils/types/global";
-import { ItemData } from "@/utils/types/item";
-import { Button, ButtonProps, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
+import { ListData } from "@/utils/types/list";
+import { addToast, Button, ButtonProps, Divider, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, useDisclosure } from "@heroui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import { useContext } from "react";
@@ -125,11 +126,16 @@ function ListActionsDropMenu({
                 ? httpClient().delete(`lists/${list.id}`)
                 : httpClient().patch(`trash`, { lists: [list.id] })
         },
-        onSuccess: (res: { items: ItemData } | ItemData) => {
-            if ('items' in res)
-                return mutateItemCache(res.items, 'add') //restored
-            router.push('/')
-            mutateItemCache(res, 'delete')// moved to trash
+        onSuccess: (res: { lists: ListData } | ListData) => { // listData on trash, {lists: ListData} on restore
+            const isRestored = 'lists' in res
+            addToast(simpleToast(
+                `${list.title} - ${isRestored ? 'Restored' : 'Moved to Trash'}`,
+                isRestored ? 'primary' : 'warning')
+            )
+
+            if (isRestored)
+                return mutateListCache(res.lists, 'add') //restoredelse
+            mutateListCache(res, 'delete')// moved to trash
         }
     })
 

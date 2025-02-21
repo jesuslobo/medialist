@@ -2,9 +2,11 @@ import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton";
 import ImageInput from "@/components/ui/form/ImageUploader";
 import httpClient from "@/utils/lib/httpClient";
 import { mutateListCache } from "@/utils/lib/tanquery/listsQuery";
+import { actionToast, errorToast } from "@/utils/toast";
 import { ListData } from "@/utils/types/list";
-import { Card, CardBody, CardFooter, Input } from "@heroui/react";
+import { addToast, Card, CardBody, CardFooter, Input } from "@heroui/react";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/router";
 import { Dispatch, SetStateAction } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { BiCheckDouble, BiImageAdd, BiPlus, BiRevision } from "react-icons/bi";
@@ -18,13 +20,16 @@ export default function NewListForm({
 }: {
     setIsAddMode: Dispatch<SetStateAction<boolean>>
 }) {
+    const router = useRouter()
     const listForm = useForm<ListFormData>()
     const { handleSubmit, register, control, reset } = listForm
 
     const mutation = useMutation({
         mutationFn: (formData: FormData) => httpClient().post('lists', formData),
-        onSuccess: (data) => {
-            mutateListCache(data, "add")
+        onError: () => addToast(errorToast('Try Again', () => handleSubmit(onSubmit)())),
+        onSuccess: (list: ListData) => {
+            mutateListCache(list, "add")
+            addToast(actionToast(`${list.title} - Created`, () => router.push(`/lists/${list.id}`)))
             reset()
             setIsAddMode(false)
         },

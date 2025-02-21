@@ -2,8 +2,9 @@ import StatusSubmitButton from "@/components/ui/buttons/StatusSubmitButton";
 import ImageInput from "@/components/ui/form/ImageUploader";
 import httpClient from "@/utils/lib/httpClient";
 import { mutateListCache } from "@/utils/lib/tanquery/listsQuery";
+import { errorToast, simpleToast } from "@/utils/toast";
 import { ListData } from "@/utils/types/list";
-import { Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
+import { addToast, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useContext } from "react";
 import { Controller, FieldPath, useForm } from "react-hook-form";
@@ -34,8 +35,10 @@ export default function EditListModal({
 
     const mutation = useMutation({
         mutationFn: (formData: FormData) => httpClient().patch(`lists/${list.id}`, formData),
+        onError: () => addToast(errorToast('Try Again', () => handleSubmit(onSubmit)())),
         onSuccess: (data: ListData) => {
             mutateListCache(data, "edit")
+            addToast(simpleToast(`${data.title} Updated`))
             reset({
                 cover: data.coverPath ? `${listSrc}/${data.coverPath}` : null,
                 title: data.title,

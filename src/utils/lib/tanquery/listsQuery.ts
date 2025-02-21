@@ -30,7 +30,7 @@ export const singleListQueryOptions = (listId: string) => queryOptions<ListData>
     queryFn: async () => await httpClient().get(`lists/${listId}`),
 })
 
-/** - Edit AllLists Cache wiht a single List's info
+/** - Edit AllLists Cache with a single List's info
  * all lists share the same cache */
 export const mutateListCache = (data: ListData, type: "edit" | "add" | "delete" /* send to trash*/) => {
     const isDelete = type === "delete";
