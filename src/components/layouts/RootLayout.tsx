@@ -31,8 +31,8 @@ export default function RootLayout({
             <Head>
                 <title>MediaList</title>
             </Head>
-            <div className='text-foreground grid grid-cols-sidebar sm:grid-cols-1'>
-                <div className='sm:hidden w-full h-screen z-50 animate-fade-in'>
+            <div className='text-foreground grid grid-cols-sidebar xs:grid-cols-1'>
+                <div className='xs:hidden w-full h-screen z-50 animate-fade-in'>
                     <BaseNavBar
                         className="fixed top-0 p-5 pt-10 h-screen"
                         buttonsVarient='sideLabel'
@@ -49,9 +49,9 @@ export default function RootLayout({
                 </div>
                 <BaseNavBar
                     items={navItems}
-                    className='hidden sm:flex fixed bottom-0 w-full shadow-custom-md p-3 bg-accented animate-fade-in'
+                    className='hidden xs:flex fixed bottom-0 w-full shadow-custom-md p-3 bg-accented animate-fade-in'
                 />
-                <div className={twJoin(poppins.className, 'py-5 ltr:pr-5 rtl:pl-5 sm:px-5')}>
+                <div className={twJoin(poppins.className, 'py-5 ltr:pr-5 rtl:pl-5 xs:px-5')}>
                     <div>{children}</div>
                 </div>
             </div>

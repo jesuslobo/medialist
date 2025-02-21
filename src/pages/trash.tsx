@@ -157,7 +157,7 @@ export default function TrashPage() {
             </div>
 
             <CheckboxGroup value={selected} onChange={setSelected}>
-                <main className="grid grid-cols-3 lg:grid-cols-2 sm:flex sm:flex-col gap-3 items-start">
+                <main className="grid grid-cols-3 lg:grid-cols-2 xs:flex xs:flex-col gap-3 items-start">
                     {visibleEntities.map((item, i) => <TrashCardCheckBox key={item.id + i} data={item} />)}
                 </main>
             </CheckboxGroup>

@@ -24,10 +24,9 @@ const config: Config = {
       screens: {
         '2xl': { 'min': '1535px' },
         'xl': { 'min': '1279px' },
-        // 'lg': { 'max': '1023px' },
         'lg': { 'max': '1279px' },
         'md': { 'max': '767px' },
-        'sm': { 'max': '639px' },
+        'xs': { 'max': '639px' },
       },
       aspectRatio: {
         '3/2': '3/2',
@@ -88,7 +87,7 @@ const config: Config = {
           }
         },
       }
-    } as HeroUIPluginConfig & Record<string, string | object | boolean>) //even though nextUI uses tw-colors plugin, apparently it is not friendly with custom colors
+    } as HeroUIPluginConfig) //even though nextUI uses tw-colors plugin, apparently it is not friendly with custom colors
   ],
 };
 export default config;
