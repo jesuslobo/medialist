@@ -116,7 +116,7 @@ export default function ItemFormProvider({
         // when editing an item
         if (item) {
             const { coverPath, posterPath, layout, tags: itemTags, ...itemData } = item
-            const itemSrc = `/users/${item.userId}/${item.listId}/${item.id}`
+            const itemSrc = `/api/file/${item.userId}/${item.listId}/${item.id}`
 
             const cover = coverPath ? `${itemSrc}/${coverPath}` : null
             const poster = posterPath ? `${itemSrc}/${posterPath}` : null

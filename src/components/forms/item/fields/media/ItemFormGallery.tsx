@@ -58,7 +58,7 @@ export default function ItemFormGallery({
         setValue('media', typeof data === 'function' ? data(newMedia) : data)
 
     const [showAddForm, setShowAddForm] = useState(false)
-    const itemSrc = item && `/users/${list.userId}/${list.id}/${(item as ItemData).id}`
+    const itemSrc = item && `/api/file/${list.userId}/${list.id}/${(item as ItemData).id}`
 
     const editMutation = useMutation({
         mutationFn: async (data: Pick<MediaData, 'keywords' | 'title' | 'id'>) =>

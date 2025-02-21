@@ -19,7 +19,7 @@ export default function ItemFormCardField({
     const useField = useItemFormLayoutField<ItemCardField>(rowIndex, colIndex, setActiveTabFields, activeTabFields)
     const { set, field } = useField
     const { imageId, variant } = field
-    const itemSrc = item && `/users/${list.userId}/${list.id}/${(item as ItemData).id}`
+    const itemSrc = item && `/api/file/${list.userId}/${list.id}/${(item as ItemData).id}`
     const newMedia = itemForm.watch('media') as ItemFormMedia[]
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();

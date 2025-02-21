@@ -20,7 +20,7 @@ export function ItemPageProvider({
     const headerType = item?.header?.type || "poster_beside"
     const [activeTabIndex, setActiveTabIndex] = useState(0)
 
-    const itemSrc = `/users/${item.userId}/${item.listId}/${item.id}`
+    const itemSrc = `/api/file/${item.userId}/${item.listId}/${item.id}`
     const posterSrc = item.posterPath && `${itemSrc}/${thumbnailName(item.posterPath, { w: 700 })}`
     const originalPoster = item.posterPath && `${itemSrc}/${item.posterPath}`
     const coverSrc = item.coverPath && `${itemSrc}/${thumbnailName(item.coverPath, { w: 700 })}`

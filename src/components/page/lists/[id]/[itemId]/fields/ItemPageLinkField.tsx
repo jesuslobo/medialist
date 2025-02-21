@@ -24,7 +24,7 @@ export default function ItemPageLinkField({
 
     const [imageIsLoaded, setImageIsLoaded] = useState(true)
 
-    const itemSrc = isEditing ? logoPath : `/users/${item.userId}/${item.listId}/${item.id}`
+    const itemSrc = isEditing ? logoPath : `/api/file/${item.userId}/${item.listId}/${item.id}`
     const logoSrc = isEditing ? logoPath : logoPath && `${itemSrc}/${thumbnailName(logoPath, { w: 50 })}`
 
     return (

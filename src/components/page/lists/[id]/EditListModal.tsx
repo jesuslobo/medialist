@@ -23,7 +23,7 @@ export default function EditListModal({
     onOpenChange: () => void
 }) {
     const { list } = useContext(ListPageContext)
-    const listSrc = `/users/${list.userId}/${list.id}`
+    const listSrc = `/api/file/${list.userId}/${list.id}`
 
     const listForm = useForm<ListFormData>({
         defaultValues: {

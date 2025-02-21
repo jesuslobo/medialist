@@ -31,7 +31,7 @@ export default function SelectImageModal({
         )
     }, [searchValue, media, newMedia])
 
-    const itemSrc = item && `/users/${list.userId}/${list.id}/${(item as ItemData).id}`
+    const itemSrc = item && `/api/file/${list.userId}/${list.id}/${(item as ItemData).id}`
 
     return (
         <Modal isOpen={isOpen} placement="center" onOpenChange={onOpenChange} size="4xl">

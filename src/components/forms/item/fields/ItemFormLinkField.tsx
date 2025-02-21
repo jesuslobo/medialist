@@ -19,7 +19,7 @@ export default function ItemFormLinkField({
 
     const { set, remove, field, useDebounce } = useItemFormLayoutField<ItemLinkField & { logoPath: File }>(rowIndex, colIndex, setActiveTabFields, activeTabFields)
 
-    const itemDir = item && `/users/${item.userId}/${item.listId}/${item.id}`
+    const itemDir = item && `/api/file/${item.userId}/${item.listId}/${item.id}`
     const [logo, setLogo] = useState<string | null>(null)
     const [url, setUrl] = useDebounce('url')
     const [label, setLabel] = useDebounce('label')

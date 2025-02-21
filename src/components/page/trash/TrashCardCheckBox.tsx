@@ -20,8 +20,8 @@ export default function TrashCardCheckBox({ data }: { data: TrashData }) {
     const [imageIsLoaded, setImageIsLoaded] = useState(true);
     const { user } = useUser()
     const router = useRouter()
-    const imgSrc = isItem && data.coverPath ? `/users/${user.id}/${data.listId}/${data.id}/${thumbnailName(data.coverPath as string, { w: 300 })}`
-        : data.coverPath ? `/users/${user.id}/${data.id}/${thumbnailName(data.coverPath, { w: 300 })}` : null
+    const imgSrc = isItem && data.coverPath ? `/api/file/${user.id}/${data.listId}/${data.id}/${thumbnailName(data.coverPath as string, { w: 300 })}`
+        : data.coverPath ? `/api/file/${user.id}/${data.id}/${thumbnailName(data.coverPath, { w: 300 })}` : null
 
     function pushLink() {
         if (isItem) router.push(`/lists/${data.listId}/${data.id}`)

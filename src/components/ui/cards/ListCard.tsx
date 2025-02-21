@@ -23,7 +23,7 @@ export default function ListCard({ list }: { list: ListData }) {
                         radius="lg"
                         alt={list.title}
                         className=" object-cover aspect-square bg-accented shadow-lg"
-                        src={`/users/${list.userId}/${list.id}/${thumbnailName(list.coverPath, { w: 300 })}`}
+                        src={`/api/file/${list.userId}/${list.id}/${thumbnailName(list.coverPath, { w: 300 })}`}
                         onError={() => setImageIsLoaded(false)}
                     />
                     : <Card

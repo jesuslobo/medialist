@@ -27,7 +27,7 @@ export default function ItemCardsList({
                     ? <Image
                         className="aspect-[2/3] object-cover"
                         alt={item.title}
-                        src={`/users/${item.userId}/${item.listId}/${item.id}/${thumbnailName(item.posterPath, { w: 700 })}`}
+                        src={`/api/file/${item.userId}/${item.listId}/${item.id}/${thumbnailName(item.posterPath, { w: 700 })}`}
                         onError={() => setImageIsLoaded(false)}
                     />
                     : <Card className="aspect-[2/3] h-full w-full p-2 bg-accented flex items-center justify-center capitalize text-xl" >

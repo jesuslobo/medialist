@@ -32,7 +32,7 @@ export default function ItemCard({
                 ? <Image
                     alt={item.title}
                     className="object-cover aspect-[2/3]"
-                    src={`/users/${item.userId}/${item.listId}/${item.id}/${thumbnailName(item.posterPath, { w: 700 })}`}
+                    src={`/api/file/${item.userId}/${item.listId}/${item.id}/${thumbnailName(item.posterPath, { w: 700 })}`}
                     onError={() => setImageIsLoaded(false)}
                 />
                 : <Card className=" aspect-2/3 h-full w-full p-2 bg-accented flex items-center justify-center capitalize text-xl">
