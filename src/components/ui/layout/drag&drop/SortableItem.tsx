@@ -1,7 +1,7 @@
 import { UniqueIdentifier } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { HTMLAttributes } from "react";
+import { HTMLAttributes, JSX } from "react";
 
 type DivAttributes = Omit<HTMLAttributes<HTMLLIElement>, 'id'>
 

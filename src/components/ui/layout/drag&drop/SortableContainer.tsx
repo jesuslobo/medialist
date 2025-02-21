@@ -1,6 +1,6 @@
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
-import { HTMLAttributes } from "react"
+import { HTMLAttributes, JSX } from "react"
 import SortableItem from "./SortableItem"
 import { SortableItemType } from "./logic/SortableMultiContainersWrapper"
 

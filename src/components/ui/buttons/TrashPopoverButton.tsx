@@ -1,5 +1,5 @@
 import { Button, Popover, PopoverContent, PopoverProps, PopoverTrigger } from "@heroui/react";
-import { useState } from "react";
+import { JSX, useState } from "react";
 import { BiTrashAlt, BiX } from "react-icons/bi";
 
 interface TrashPopoverProps extends Omit<PopoverProps, 'children'> {

@@ -1,6 +1,6 @@
 import { closestCorners, DndContext, DragEndEvent, DragOverEvent, DragStartEvent, MouseSensor, Over, TouchSensor, UniqueIdentifier, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import { Dispatch, ReactNode, SetStateAction, useState } from "react";
+import { Dispatch, JSX, ReactNode, SetStateAction, useState } from "react";
 
 export interface SortableItemType {
     id: UniqueIdentifier | string
