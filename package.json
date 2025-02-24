@@ -11,7 +11,7 @@
     "test": "vitest",
     "test:migrate": "set DATABASE_PATH=tests.db && npx drizzle-kit migrate",
     "db:gen": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "drizzle-kit migrate --config=drizzle.config.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {

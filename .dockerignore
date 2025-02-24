@@ -1,0 +1,30 @@
+# Misc.
+**/.dockerignore
+**/.git
+**/.gitignore
+**/.vscode
+*.md
+LICENSE
+
+# Build Data
+**/.env
+**/docker-compose*
+**/compose.y*ml
+**/Dockerfile*
+**/node_modules
+**/npm-debug.log
+**/build
+**/dist
+**/.next
+*.tsbuildinfo
+next-env.d.ts
+.next
+
+# Testing
+**/__tests__
+**/__mocks__
+
+# User Data
+public/users
+volumes
+*.db

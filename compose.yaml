@@ -1,0 +1,13 @@
+services:
+  medialist:
+    build:
+      context: .
+    environment:
+      DATABASE_PATH: db/${DATABASE_PATH}
+    env_file:
+      - .env
+    ports:
+      - ${PORT}:${PORT}
+    volumes:
+      - ./volumes/data/users:/app/public/users
+      - ./volumes/data:/app/db
