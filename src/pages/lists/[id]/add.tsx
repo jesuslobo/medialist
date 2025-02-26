@@ -1,7 +1,7 @@
 import ItemFormHeaderSection from "@/components/forms/item/ItemFormHeaderSection"
 import ItemFormHeaderTitleBar from "@/components/forms/item/ItemFormHeaderTitleBar"
 import ItemFormLayoutSection from "@/components/forms/item/ItemFormLayoutSection"
-import ItemFormProvider, { ItemFormData, ItemFormField, ItemFormLayoutTab, ItemFormLogoField } from "@/components/forms/item/ItemFormProvider"
+import ItemFormProvider, { ItemFormCounterGen, ItemFormData, ItemFormField, ItemFormLayoutTab, ItemFormLogoField } from "@/components/forms/item/ItemFormProvider"
 import ItemFormLayoutTitleBar from "@/components/forms/item/layoutTitleBar/ItemFormLayoutTitleBar"
 import ErrorPage from "@/components/layouts/ErrorPage"
 import ListsLoading from "@/components/layouts/loading/ListsLoading"
@@ -61,14 +61,14 @@ function AddItemPage() {
         const formData = new FormData()
         const logoFieldsTypes = ["badge", "link"]
 
-        let keys = 0
+        const genKey = () => String(ItemFormCounterGen.next().value)
         let layout = layoutTabs.map((tab) =>
             tab.map((row, rowIndex) =>
                 rowIndex === 0
                     ? row //header
                     : (row as ItemFormField[]).map((field) => {
                         if (logoFieldsTypes.includes(field.type)) {
-                            const key = String(keys++)
+                            const key = genKey()
                             const fieldT = field as ItemFormLogoField
                             if (fieldT?.logoPath)
                                 formData.append(`logoPaths[${key}]`, fieldT.logoPath as File)
@@ -93,7 +93,7 @@ function AddItemPage() {
 
         if (data.media) {
             const media = data.media.map(media => {
-                const key = String(keys++)
+                const key = media.ref
                 formData.append(`mediaImages[${key}]`, media.path as File)
                 return {
                     title: media.title,

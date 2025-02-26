@@ -27,8 +27,8 @@ export default function ItemFormImageField({
     const [hover, setHover] = useState(false)
 
     const selectedImage = useMemo(() =>
-        newMedia.find(image => image.ref == imageId) ||
-        media.find(image => image.id === imageId),
+        newMedia?.find(image => image.ref == imageId) ||
+        media?.find(image => image.id === imageId),
         [imageId, newMedia])
 
     const src = selectedImage && (selectedImage.id !== undefined

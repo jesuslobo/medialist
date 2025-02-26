@@ -20,14 +20,14 @@ export default function ItemFormCardField({
     const { set, field } = useField
     const { imageId, variant } = field
     const itemSrc = item && `/api/file/${list.userId}/${list.id}/${(item as ItemData).id}`
-    const newMedia = itemForm.watch('media') as ItemFormMedia[]
+    const newMedia = itemForm.watch('media') as ItemFormMedia[] || []
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [hover, setHover] = useState(false)
 
     const selectedImage = useMemo(() =>
-        newMedia.find(image => image.ref == imageId) ||
-        media.find(image => image.id === imageId),
+        newMedia?.find(image => image.ref == imageId) ||
+        media?.find(image => image.id === imageId),
         [imageId, newMedia])
 
     const src = (selectedImage && (selectedImage.id !== undefined

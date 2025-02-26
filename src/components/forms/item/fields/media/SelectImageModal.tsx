@@ -20,7 +20,7 @@ export default function SelectImageModal({
     const newMedia = itemForm.watch("media") as ItemFormMedia[]
     const [searchValue, setSearchValue] = useState("")
     const filteredMedia = useMemo(() => {
-        const images = [...newMedia, ...media] as ItemFormMedia[]
+        const images = [...(newMedia || []), ...media] as ItemFormMedia[]
 
         if (!searchValue) return images
         const value = searchValue.trim().toLowerCase()
@@ -88,10 +88,11 @@ function AddImage({
         }
 
         const getMedia = itemForm.getValues("media") as ItemFormMedia[]
-        itemForm.setValue("media", [newImage, ...getMedia])
+        itemForm.setValue("media", [newImage, ...(getMedia || [])])
         set({ imageId: newImage.ref })
         onClose()
     }
+
     return (
         <Card
             className="object-cover w-full aspect-square border-5 border-accented hover:scale-105 hover:border-primary cursor-pointer animate-fade-in"
