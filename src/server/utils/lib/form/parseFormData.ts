@@ -1,28 +1,31 @@
 import { ThumbnailOptions } from "@/utils/lib/fileHandling/thumbnailOptions";
 import busboy from "busboy";
 import internal from "stream";
-import $handleFileUpload from "../file/handleFileUpload";
+import $handleFileUpload from "../../file/handleFileUpload";
 
 /** function that will parseForm to fields */
-export default function $processFormData<T extends ProcessedFormData>(builder: ProcessFormDataBuilder) {
+export default function $parseFormData<T extends ProcessedFormData>(
+    builder: ProcessFormDataBuilder,
+    bbConfig: busboy.BusboyConfig,
+    callback: (data: T, attachments: Map<string, string>) => Promise<any>
+) {
     let data = {} as T;
     let attachments = new Map<string, string>();
     const promises = [] as Promise<any>[];
 
-    return {
-        processFields: (name: string, value: string) =>
-            handleFields(name, value, builder, data),
-        processFiles: async (name: string, stream: internal.Readable & { truncated?: boolean }, info: busboy.FileInfo, disableStreamResume: boolean = false) =>
-            await processFiles(name, stream, info, disableStreamResume, builder, data, attachments, promises),
-        /** left the implementation to the user,
-         *  since JSON fields are complex, and searching everything inside can be bad when we know where to search */
-        attachments,
-        data,
-        promises,
-    };
+    const bb = busboy(bbConfig)
+    bb.on('field', (name, value) => processField(name, value, builder, data))
+    bb.on('file', (name, stream, info) => processFiles(name, stream, info, false, builder, data, attachments, promises))
+
+    bb.on('finish', async () => {
+        await Promise.all(promises)
+        await callback(data, attachments)
+    })
+
+    return bb
 }
 
-function handleFields(
+function processField(
     name: string,
     value: string,
     options: ProcessFormDataBuilder,

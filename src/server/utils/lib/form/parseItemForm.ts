@@ -1,36 +1,60 @@
 import { TagData } from "@/utils/types/global";
 import { ItemData, ItemField, ItemImageField, ItemLayoutTab, LogoField } from "@/utils/types/item";
 import { MediaData } from "@/utils/types/media";
+import { NextApiRequest } from "next";
 import $getDir from "../../file/getDir";
 import { $generateLongID } from "../generateID";
-import $processFormData, { ProcessedFormData } from "../processFormData";
 import { $ITEM_FORM_SCHEMA } from "./fromSchema";
+import $parseFormData, { ProcessedFormData } from "./parseFormData";
 
 type ItemServerForm = ItemData & ProcessedFormData & {
     media?: Pick<MediaData, 'path' | 'title' | 'keywords'>[]
 }
 
+type callback = (
+    data: ItemServerForm,
+    attachments: Map<string, string>,
+    dir: { item: string, thumbnails: string },
+    mapLayoutsToPaths: () => ItemLayoutTab[],
+    newMedia: () => MediaData[],
+    processTags: (tagsData: { id: string }[]) => TagData[]
+) => Promise<any>
+
+const MAX_UPLOAD_LIMIT = 1024 * 1024 * 100; // 100MB
+const MAX_ALLOWED_FILES = 50;
+const MAX_FIELD_SIZE = 1024 * 1024 * 5; // 5MB
+
 /** Any Extra logic should be in BB's onFinish */
-export default async function $processItemForm(userId: string, listId: string, itemId: string) {
-    const dir = await $getDir(userId, listId, itemId, true);
-    const itemDir = dir.item as string;
+export default async function $parseItemForm(
+    userId: string, listId: string, itemId: string,
+    req: NextApiRequest,
+    callback: callback
+) {
+    const _dir = await $getDir(userId, listId, itemId, true);
+    const itemDir = _dir.item as string;
 
-    const form = $processFormData<ItemServerForm>($ITEM_FORM_SCHEMA(itemDir))
-    const { data, attachments, promises } = form
-
-    return {
-        ...form,
-        /** Directly assemble the addresses of new logos to their fields, SHOULD be used after handleMediaImages() */
-        mapLayoutsToPaths: () => mapFieldsToPaths(data, attachments),
-        handleMediaImages: () => handleMediaImages(data, attachments, userId, itemId),
-        /** Returns an Array of New Tags */
-        handleTags: (tagsData: { id: string }[]) => handleTags(tagsData, data, userId, listId),
-        dir: {
-            item: itemDir,
-            thumbnails: dir.itemThumbnails as string,
-        },
-        promises,
+    const bbConfig = {
+        headers: req.headers,
+        limits: { fields: 9, fieldSize: MAX_FIELD_SIZE, files: MAX_ALLOWED_FILES, fileSize: MAX_UPLOAD_LIMIT }
     }
+
+    const form = $parseFormData<ItemServerForm>(
+        $ITEM_FORM_SCHEMA(itemDir),
+        bbConfig,
+        async (data, attachments) => {
+            const mapLayoutsToPaths = () => mapFieldsToPaths(data, attachments)
+            const newMedia = () => handleMediaImages(data, attachments, userId, itemId)
+            /** Returns an Array of New Tags */
+            const newTags = (tagsData: { id: string }[]) => handleTags(tagsData, data, userId, listId)
+            const dir = {
+                item: itemDir,
+                thumbnails: _dir.itemThumbnails as string,
+            }
+            await callback(data, attachments, dir, mapLayoutsToPaths, newMedia, newTags)
+        }
+    )
+
+    return form
 };
 
 // map fileds to paths

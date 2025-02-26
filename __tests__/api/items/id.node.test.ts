@@ -211,6 +211,7 @@ describe('api/items/[id]', async () => {
                 const newCoverExists = fileExists(item.itemDir, body.item.coverPath as string, THUMBNAILS_OPTIONS.ITEM_COVER)
                 expect(newCoverExists).toBe(true)
 
+                await new Promise(setImmediate) // wait for the files to be deleted
                 const oldPosterExists = fileExists(item.itemDir, item.itemData.posterPath as string, THUMBNAILS_OPTIONS.ITEM_POSTER)
                 expect(oldPosterExists).toBe(false)
 

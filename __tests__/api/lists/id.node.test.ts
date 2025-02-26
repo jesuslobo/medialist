@@ -196,6 +196,8 @@ describe('api/lists/[id]', async () => {
                 expect(fs.existsSync(join(listDir, thumbnailName(body.coverPath, option)))).toBe(true)
             )
 
+            await new Promise(res => setTimeout(res, 1000)); // wait for files to be deleted
+
             //old cover and thumbnails are deleted
             expect(fs.existsSync(oldCoverDir)).toBe(false);
             THUMBNAILS_OPTIONS.LIST_COVER.forEach((option) =>

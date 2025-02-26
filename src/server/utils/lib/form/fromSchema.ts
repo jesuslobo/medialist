@@ -1,5 +1,5 @@
 import { THUMBNAILS_OPTIONS } from "@/utils/lib/fileHandling/thumbnailOptions";
-import { ProcessFormDataBuilder } from "../processFormData";
+import { ProcessFormDataBuilder } from "./parseFormData";
 
 const $LIST_FORM_SCHEMA = (dir: string) => ({
   title: 'String',

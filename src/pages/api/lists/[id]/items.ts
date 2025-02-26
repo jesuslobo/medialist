@@ -3,7 +3,7 @@ import { $getList } from '@/server/db/queries/lists';
 import { $createItemMedia } from '@/server/db/queries/media';
 import { $createTags, $getTags } from '@/server/db/queries/tags';
 import { $validateAuthCookies } from '@/server/utils/auth/cookies';
-import $processItemForm from '@/server/utils/lib/form/processItemForm';
+import $parseItemForm from '@/server/utils/lib/form/parseItemForm';
 import { $generateShortID } from '@/server/utils/lib/generateID';
 import { validateShortID } from '@/utils/lib/generateID';
 import { TagData } from '@/utils/types/global';
@@ -11,12 +11,7 @@ import { ItemSaveResponse } from '@/utils/types/item';
 import { ListData } from '@/utils/types/list';
 import { MediaData } from '@/utils/types/media';
 import { ApiErrorCode } from '@/utils/types/serverResponse';
-import busboy from 'busboy';
 import type { NextApiRequest, NextApiResponse } from 'next';
-
-const MAX_UPLOAD_LIMIT = 1024 * 1024 * 50; // 100MB
-const MAX_ALLOWED_FILES = 40;
-const MAX_FIELD_SIZE = 1024 * 1024 * 5; // 5MB
 
 /** api/lists/[id]/items
  * Get: Get all items of a list
@@ -43,70 +38,60 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const itemId = $generateShortID()
             const tags = await $getTags(user.id, list.id)
 
-            const form = await $processItemForm(user.id, list.id, itemId)
-            const { processFiles, processFields, handleTags, mapLayoutsToPaths, handleMediaImages, promises } = form;
+            const form = await $parseItemForm(user.id, list.id, itemId, req,
+                async (data, _, __, mapLayouts, newMedia, newTags) => {
+                    if (!data.title)
+                        return res.status(400).json({
+                            message: 'Title is required',
+                            errorCode: ApiErrorCode.BAD_REQUEST
+                        });
 
-            form.data['id'] = itemId;
-            form.data['userId'] = user.id;
-            form.data['listId'] = list.id;
+                    data.id = itemId
+                    data.listId = list.id
+                    data.userId = user.id
 
-            const bb = busboy({
-                headers: req.headers,
-                limits: { fields: 7, fieldSize: MAX_FIELD_SIZE, files: MAX_ALLOWED_FILES, fileSize: MAX_UPLOAD_LIMIT }
-            })
+                    let newTagsData: { id: string }[] = []
+                    // new tags
+                    if (data?.tags && data.tags.length > 0) {
+                        newTagsData = newTags(tags);
+                        if (newTagsData.length > 0)
+                            await $createTags(newTagsData as TagData[]);
+                    }
 
-            bb.on('field', processFields)
-            bb.on('file', processFiles)
+                    data.createdAt = new Date(Date.now())
+                    data.updatedAt = new Date(Date.now())
 
-            bb.on('finish', async () => {
-                if (!form.data.title)
-                    return res.status(400).json({
-                        message: 'Title is required',
-                        errorCode: ApiErrorCode.BAD_REQUEST
-                    });
+                    let newMediaData: MediaData[] = []
+                    if (data.media) {
+                        // we init it here, since we need mediaIDs for some fields
+                        newMediaData = newMedia()
+                        data.media = newMediaData
+                    }
 
-                let newTagsData: { id: string }[] = []
-                // new tags
-                if (form.data?.tags && form.data.tags.length > 0) {
-                    newTagsData = handleTags(tags);
-                    if (newTagsData.length > 0)
-                        await $createTags(newTagsData as TagData[]);
+                    data.layout = mapLayouts()
+
+                    const [item] = await $createItems(data)
+
+                    // should be created after the item, since it uses the item id as a foreign key
+                    if (data.media)
+                        newMediaData = await $createItemMedia(newMediaData)
+
+                    res.status(201).json({
+                        item: item,
+                        // for cache update on the client:
+                        newTags: newTagsData,
+                        newMedia: newMediaData,
+                    } as ItemSaveResponse);
+
+                    console.log('[Created] api/lists/[id]/items:', item.id + ' ' + item.title);
                 }
+            )
 
-                form.data.createdAt = new Date(Date.now())
-                form.data.updatedAt = new Date(Date.now())
-
-                let newMediaData: MediaData[] = []
-                if (form.data.media) {
-                    // we init it here, since we mediaIDs for some fields
-                    newMediaData = handleMediaImages()
-                    form.data.media = newMediaData
-                }
-
-                form.data.layout = mapLayoutsToPaths()
-
-                const [item] = await $createItems(form.data)
-
-                // should be created after the item, since it uses the item id as a foreign key
-                if (form.data.media)
-                    newMediaData = await $createItemMedia(newMediaData)
-
-                await Promise.all(promises)
-                res.status(201).json({
-                    item: item,
-                    // for cache update on the client:
-                    newTags: newTagsData,
-                    newMedia: newMediaData,
-                } as ItemSaveResponse);
-
-                console.log('[Created] api/lists/[id]/items:', item.id + ' ' + item.title);
-            })
-
-            bb.on('error', () =>
+            form.on('error', () =>
                 res.status(500).json({ errorCode: ApiErrorCode.INTERNAL_SERVER_ERROR })
             )
 
-            return req.pipe(bb)
+            return req.pipe(form)
         }
 
         res.status(405).json({ errorCode: ApiErrorCode.METHOD_NOT_ALLOWED })
