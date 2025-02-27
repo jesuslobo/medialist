@@ -23,8 +23,9 @@ export default function ListPageTagsSearch({
         const value = (e.target as HTMLInputElement).value.trim().toLowerCase()
         if (!value) return setVisibleTags(allTags)
 
-        setVisibleTags(prevTags => prevTags.filter(tag =>
-            tag.label.toLowerCase().split(" ").some(word => word.startsWith(value))
+        setVisibleTags(allTags.filter(tag =>
+            tag.label.toLowerCase().split(" ").some(word => word.startsWith(value)) ||
+            tag.groupName?.toLowerCase().split(" ").some(word => word.startsWith(value))
         ))
     }
 

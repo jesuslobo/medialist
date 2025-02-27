@@ -1,6 +1,4 @@
 import { TagGroup } from "@/utils/functions/sortTagsByGroup";
-import { useContext } from "react";
-import { ListPageContext } from "../ListPageProvider";
 import ListPageTagsCard from "./ListPageTagCard";
 
 export default function ListPageGroupTagCard({

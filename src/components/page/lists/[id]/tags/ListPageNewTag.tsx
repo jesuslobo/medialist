@@ -10,6 +10,7 @@ import { useContext, useState } from "react"
 import { useForm } from "react-hook-form"
 import { BiPlus, BiX } from "react-icons/bi"
 import { ListPageContext } from "../ListPageProvider"
+import TagCardBadgeButton from "./TagCardBadgeButton"
 
 type TagForm = Omit<TagData, 'id' | 'userId' | 'listId'>
 
@@ -21,7 +22,8 @@ export default function ListPageNewTag({
     const { list } = useContext(ListPageContext)
     const [showForm, setShowForm] = useState(false)
 
-    const { handleSubmit, register, reset } = useForm<TagForm>()
+    const { handleSubmit, register, reset, setValue, getValues } = useForm<TagForm>()
+    const badgeable = getValues('badgeable')
 
     const mutation = useMutation({
         mutationFn: (data: TagForm) => httpClient().post(`lists/${list.id}/tags`, data),
@@ -86,6 +88,8 @@ export default function ListPageNewTag({
                                 defaultContent={<> Add Tag <BiPlus size={20} /></>}
                                 onPress={handleSubmit(onSubmit)}
                             />
+                            <TagCardBadgeButton setValue={setValue} badgeable={badgeable} />
+
                             <Button onPress={() => setShowForm(false)} className=" rounded-l-sm" isIconOnly>
                                 <BiX size={20} />
                             </Button>

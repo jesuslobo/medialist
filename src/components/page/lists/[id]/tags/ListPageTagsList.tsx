@@ -11,6 +11,7 @@ export default function ListPageTagsList() {
     const { showTags, tags } = useContext(ListPageContext)
 
     const [visibleTags, setVisibleTags] = useState<TagData[]>(tags)
+    const groupedAllTags = sortTagsByGroup(tags)
     const groupedTags = sortTagsByGroup(visibleTags)
 
     // make it sticky?
@@ -34,7 +35,7 @@ export default function ListPageTagsList() {
                         {groupedTags?.map(group =>
                             <ListPageGroupTagCard
                                 key={group.groupName || "ungrouped"}
-                                tagsGroups={groupedTags}
+                                tagsGroups={groupedAllTags}
                                 tagGroup={group}
                             />
                         )}
