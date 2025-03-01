@@ -1,3 +1,4 @@
+import useIntersectionObserver from "@/utils/hooks/useIntersectionObserver";
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
 import { badgeColors, TagData } from "@/utils/types/global";
 import { ItemData } from "@/utils/types/item";
@@ -12,12 +13,13 @@ export default function ItemCardsList({
     item: ItemData,
     tagsData?: TagData[]
 }) {
+    const { ref, isIntersecting } = useIntersectionObserver({ rootMargin: '300px', threshold: 0.5 });
     const [imageIsLoaded, setImageIsLoaded] = useState(true);
     const router = useRouter()
     const pageLink = `/lists/${item.listId}/${item.id}`
 
     return (
-        <div className="flex h-52 shadow-lg bg-default/10 rounded-xl">
+        <div ref={ref} className="flex h-52 shadow-lg bg-default/10 rounded-xl">
             <Card
                 className="h-52 aspect-2/3 flex-none z-10 shadow-lg hover:scale-105 duration-200"
                 onPress={() => router.push(pageLink)}
@@ -27,7 +29,7 @@ export default function ItemCardsList({
                     ? <Image
                         className="aspect-[2/3] object-cover"
                         alt={item.title}
-                        src={`/api/file/${item.userId}/${item.listId}/${item.id}/${thumbnailName(item.posterPath, { w: 700 })}`}
+                        src={isIntersecting ?`/api/file/${item.userId}/${item.listId}/${item.id}/${thumbnailName(item.posterPath, { w: 300 })}`: undefined}
                         onError={() => setImageIsLoaded(false)}
                     />
                     : <Card className="aspect-[2/3] h-full w-full p-2 bg-accented flex items-center justify-center capitalize text-xl" >

@@ -1,3 +1,4 @@
+import useIntersectionObserver from "@/utils/hooks/useIntersectionObserver";
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
 import { ItemData } from "@/utils/types/item";
 import { Card, CardFooter, Image } from "@heroui/react";
@@ -13,6 +14,7 @@ export default function ItemCard({
     onPress?: () => void
     className?: string
 }) {
+    const { ref, isIntersecting } = useIntersectionObserver({rootMargin: '300px', threshold: 0.1});
     const [imageIsLoaded, setImageIsLoaded] = useState(true);
     const router = useRouter()
 
@@ -22,6 +24,7 @@ export default function ItemCard({
 
     return (
         <Card
+            ref={ref}
             radius="lg"
             className={className}
             onPress={onPress || onPressFn}
@@ -32,7 +35,7 @@ export default function ItemCard({
                 ? <Image
                     alt={item.title}
                     className="object-cover aspect-[2/3]"
-                    src={`/api/file/${item.userId}/${item.listId}/${item.id}/${thumbnailName(item.posterPath, { w: 700 })}`}
+                    src={isIntersecting ? `/api/file/${item.userId}/${item.listId}/${item.id}/${thumbnailName(item.posterPath, { w: 640 })}` : undefined}
                     onError={() => setImageIsLoaded(false)}
                 />
                 : <Card className=" aspect-2/3 h-full w-full p-2 bg-accented flex items-center justify-center capitalize text-xl">

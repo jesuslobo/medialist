@@ -1,3 +1,4 @@
+import useIntersectionObserver from "@/utils/hooks/useIntersectionObserver";
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions";
 import { ListData } from "@/utils/types/list";
 import { Card, CardBody, CardFooter, Image } from "@heroui/react";
@@ -5,11 +6,13 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 export default function ListCard({ list }: { list: ListData }) {
+    const { ref, isIntersecting } = useIntersectionObserver({ rootMargin: '200px', threshold: 0.5 });
     const [imageIsLoaded, setImageIsLoaded] = useState(true);
     const router = useRouter()
 
     return (
         <Card
+            ref={ref}
             className=" group bg-transparent duration-200 hover:scale-110 cubic-bezier animate-fade-in"
             key={list.title}
             shadow="none"
@@ -23,7 +26,7 @@ export default function ListCard({ list }: { list: ListData }) {
                         radius="lg"
                         alt={list.title}
                         className=" object-cover aspect-square bg-accented shadow-lg"
-                        src={`/api/file/${list.userId}/${list.id}/${thumbnailName(list.coverPath, { w: 300 })}`}
+                        src={isIntersecting ? `/api/file/${list.userId}/${list.id}/${thumbnailName(list.coverPath, { w: 300 })}` : undefined}
                         onError={() => setImageIsLoaded(false)}
                     />
                     : <Card
