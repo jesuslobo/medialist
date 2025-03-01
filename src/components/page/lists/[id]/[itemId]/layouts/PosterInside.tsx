@@ -15,11 +15,11 @@ export default function ItemPagePosterInside() {
 
     return (
         <header
-            className={`grid w-full bg-cover bg-center rounded-xl ${imagePaths.backgroundImage ? '' : 'bg-pure-theme'}`}
-            style={{ backgroundImage: imagePaths.bg300 }}
+            className={`grid w-full bg-cover bg-center rounded-xl ${imagePaths.bgSrc ? '' : 'bg-pure-theme'}`}
+            style={{ backgroundImage: imagePaths.bgLowest }}
         >
             <div
-                className={`grid w-full h-full bg-pure-theme backdrop-blur-lg rounded-lg p-7 ${imagePaths.backgroundImage ? 'bg-opacity-40' : ''}`}
+                className={`grid w-full h-full bg-pure-theme backdrop-blur-lg rounded-lg p-7 ${imagePaths.bgSrc ? 'bg-opacity-40' : ''}`}
                 style={{
                     gridTemplateColumns: imagePaths.posterSrc ? 'minmax(10vw, 22vw) minmax(22vw, 75vw)' : '1fr'
                 }}
@@ -30,7 +30,7 @@ export default function ItemPagePosterInside() {
                 <section className="flex flex-col items-start gap-y-2 px-10 pb-8 pt-4">
                     <section className="flex flex-col items-start gap-y-2 w-full" ref={headerRef}>
                         <h1 className="text-4xl capitalize font-bold line-clamp-2">{item.title}</h1>
-                        <ItemPageBadges className={imagePaths.backgroundImage ? "opacity-85" : undefined} />
+                        <ItemPageBadges className={imagePaths.bgSrc ? "opacity-85" : undefined} />
                     </section>
 
                     {item.description

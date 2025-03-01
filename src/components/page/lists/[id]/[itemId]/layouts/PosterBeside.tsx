@@ -12,15 +12,17 @@ export default function ItemPagePosterBeside() {
 
     return (
         <>
-            <header className="grid gap-x-4 overflow-hidden" style={{
-                gridTemplateColumns: imagePaths.posterSrc ? 'minmax(22vw, 25vw) minmax(22vw, 75vw)' : '1fr'
-            }}>
+            <header
+                className="grid gap-x-4 overflow-hidden"
+                style={{
+                    gridTemplateColumns: imagePaths.posterSrc ? 'minmax(18vw, 21vw) minmax(22vw, 75vw)' : '1fr'
+                }}>
                 {imagePaths.posterSrc &&
-                    <ItemPagePoster ref={posterRef} className="hover:scale-101 w= flex-none" /> // need fix, if the weidth is too big, it overlaps with the cover
+                    <ItemPagePoster ref={posterRef} className="hover:scale-101 flex-none" /> // need fix, if the weidth is too big, it overlaps with the cover
                 }
                 <section
-                    className={`flex-grow grid w-full h-full bg-cover bg-center rounded-xl overflow-hidden ${imagePaths.backgroundImage ? 'pt-52' : ''}`}
-                    style={{ backgroundImage: imagePaths.bg700 }}
+                    className={`flex-grow grid w-full h-full bg-cover bg-center rounded-xl overflow-hidden ${imagePaths.bgSrc ? 'pt-52' : ''}`}
+                    style={{ backgroundImage: imagePaths.bgThumb }}
                 >
                     <div className="grid w-full h-full p-4 bg-pure-theme bg-opacity-40 backdrop-blur-lg rounded-lg">
                         <article className="flex flex-col items-start gap-y-2 px-5 pb-2 pt-2">

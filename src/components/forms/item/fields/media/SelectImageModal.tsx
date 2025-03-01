@@ -53,7 +53,7 @@ export default function SelectImageModal({
                                     key={index + "image-pick"}
                                     alt={image.id && image?.path || "image"}
                                     src={image.id !== undefined
-                                        ? `${itemSrc}/${thumbnailName(image.path, { w: 700 })}`
+                                        ? `${itemSrc}/${thumbnailName(image.path, { w: 300 })}`
                                         : URL.createObjectURL(image.path)}
                                     onClick={() => {
                                         set({ imageId: image?.id || image.ref })

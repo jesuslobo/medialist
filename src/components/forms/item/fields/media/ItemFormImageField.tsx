@@ -32,7 +32,7 @@ export default function ItemFormImageField({
         [imageId, newMedia])
 
     const src = selectedImage && (selectedImage.id !== undefined
-        ? `${itemSrc}/${thumbnailName(selectedImage.path, { w: 700 })}`
+        ? `${itemSrc}/${thumbnailName(selectedImage.path, {})}`
         : URL.createObjectURL(selectedImage.path))
 
     return (<>

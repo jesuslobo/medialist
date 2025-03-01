@@ -18,7 +18,7 @@ export default function ItemPageImageField({
     const image = useMemo(() => media.find(image => image.id === field.imageId), [media])
     if (!image) return <></>
     const src = `${itemSrc}/${image.path}`
-    const thumbnailSrc = `${itemSrc}/${thumbnailName(image.path, { w: 700 })}`
+    const thumbnailSrc = `${itemSrc}/${thumbnailName(image.path, {})}`
 
     return (
         <>

@@ -25,8 +25,10 @@ export default function ItemPageCardField({
     const onOpen = () => setIsOpen(true)
 
     const image = useMemo(() => isEditing ? undefined : media.find(image => image.id === field.imageId), [media])
+
     const src = isEditing ? field.src : `${imagePaths.itemSrc}/${(image as MediaData)?.path}`
-    const thumbnailSrc = isEditing ? field.src : `${imagePaths.itemSrc}/${thumbnailName((image as MediaData)?.path, { w: 700 })}`
+    const thumbnailSrc = isEditing ? field.src : `${imagePaths.itemSrc}/${thumbnailName((image as MediaData)?.path, {})}`
+    const thumbnailSrc512 = isEditing ? field.src : `${imagePaths.itemSrc}/${thumbnailName((image as MediaData)?.path, { w: 512 })}`
 
     return (
         <>
@@ -39,7 +41,7 @@ export default function ItemPageCardField({
                 />
                 :
                 <ProfileCard
-                    thumbnail={thumbnailSrc}
+                    thumbnail={thumbnailSrc512}
                     title={field.title}
                     subText={field.subText}
                     onOpen={onOpen}

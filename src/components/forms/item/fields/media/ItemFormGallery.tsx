@@ -145,7 +145,7 @@ export default function ItemFormGallery({
                         title={image.title as string | undefined}
                         keywords={image.keywords}
                         src={`${itemSrc}/${image.path}`}
-                        thumbnailSrc={`${itemSrc}/${thumbnailName(image.path, { w: 700 })}`}
+                        thumbnailSrc={`${itemSrc}/${thumbnailName(image.path, { w: 720 })}`}
                         onEdit={(data) => editMutation.mutate({ ...data, id: image.id })}
                         onDelete={() => deleteMutation.mutate(image.id)}
                     />

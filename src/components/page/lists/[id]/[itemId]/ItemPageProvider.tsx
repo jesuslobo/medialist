@@ -21,25 +21,26 @@ export function ItemPageProvider({
     const [activeTabIndex, setActiveTabIndex] = useState(0)
 
     const itemSrc = `/api/file/${item.userId}/${item.listId}/${item.id}`
-    const posterSrc = item.posterPath && `${itemSrc}/${thumbnailName(item.posterPath, { w: 700 })}`
-    const originalPoster = item.posterPath && `${itemSrc}/${item.posterPath}`
-    const coverSrc = item.coverPath && `${itemSrc}/${thumbnailName(item.coverPath, { w: 700 })}`
-    const coverSrc300 = item.coverPath && `${itemSrc}/${thumbnailName(item.coverPath, { w: 300 })}`
-    const originalCover = item.coverPath && `${itemSrc}/${item.coverPath}`
-    const backgroundImage = (coverSrc || posterSrc) ? `url(${coverSrc || posterSrc})` : undefined
-    const bg300 = (coverSrc300 || posterSrc) ? `url(${coverSrc300 || posterSrc})` : undefined
-    const bg700 = (coverSrc || posterSrc) ? `url(${coverSrc || posterSrc})` : undefined
+
+    const posterSrc = item.posterPath && `${itemSrc}/${item.posterPath}`
+    const posterSrcThumb = item.posterPath && `${itemSrc}/${thumbnailName(item.posterPath, {})}`
+    const posterSrcThumb720 = item.posterPath && `${itemSrc}/${thumbnailName(item.posterPath, { w: 720 })}`
+
+    const coverSrc = item.coverPath && `${itemSrc}/${item.coverPath}`
+    const coverSrcThumb = item.coverPath && `${itemSrc}/${thumbnailName(item.coverPath, {})}`
+    const coverSrcThumb300 = item.coverPath && `${itemSrc}/${thumbnailName(item.coverPath, { w: 300 })}`
 
     const imagePaths = {
         itemSrc,
         posterSrc,
-        originalPoster,
+        posterSrcThumb,
+        posterSrcThumb720,
         coverSrc,
-        coverSrc300,
-        originalCover,
-        backgroundImage,
-        bg300,
-        bg700,
+        coverSrcThumb,
+        coverSrcThumb300,
+        bgSrc: (coverSrc || posterSrc) ? `url(${coverSrc || posterSrc})` : undefined,
+        bgThumb: (coverSrcThumb || posterSrcThumb) ? `url(${coverSrcThumb || posterSrcThumb})` : undefined,
+        bgLowest: (coverSrcThumb300 || posterSrcThumb720) ? `url(${coverSrcThumb300 || posterSrcThumb720})` : undefined,
     }
 
     return (
@@ -65,14 +66,15 @@ interface itemPageContext {
     activeTabIndex: number,
     setActiveTabIndex: Dispatch<SetStateAction<number>>,
     imagePaths: {
-        itemSrc: string,
-        posterSrc?: string,
-        originalPoster?: string,
-        coverSrc?: string,
-        coverSrc300?: string,
-        originalCover?: string,
-        backgroundImage?: string,
-        bg300?: string,
-        bg700?: string,
-    },
+        itemSrc: string;
+        posterSrc?: string;
+        posterSrcThumb?: string;
+        posterSrcThumb720?: string;
+        coverSrc?: string;
+        coverSrcThumb?: string;
+        coverSrcThumb300?: string;
+        bgSrc?: string;
+        bgThumb?: string;
+        bgLowest?: string;
+    }
 }

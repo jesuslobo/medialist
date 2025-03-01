@@ -17,9 +17,9 @@ export const thumbnailName = (fileName: string, thumbnailsOptions: ThumbnailOpti
 
 export const THUMBNAILS_OPTIONS = {
     LIST_COVER: [{ w: 300 }],
-    ITEM_POSTER: [{ w: 300 }, { w: 700 }, {}],
-    ITEM_COVER: [{ w: 300 }, { w: 700 }, {}],
-    ITEM_MEDIA: [{ w: 300 }, { w: 700 }, {}],
+    ITEM_POSTER: [{ w: 300 }, { w: 640 }, { w: 720 }, {}],
+    ITEM_COVER: [{ w: 300 }, {}], // {}, { w: 300} for blurred
+    ITEM_MEDIA: [{ w: 300 }, { w: 512 }, { w: 720 }, {}],
     LOGO: [{ w: 50 }],
 }
 

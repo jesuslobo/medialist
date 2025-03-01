@@ -31,7 +31,7 @@ export default function ItemFormCardField({
         [imageId, newMedia])
 
     const src = (selectedImage && (selectedImage.id !== undefined
-        ? `${itemSrc}/${thumbnailName(selectedImage.path, { w: 700 })}`
+        ? `${itemSrc}/${thumbnailName(selectedImage.path, { w: 720 })}`
         : URL.createObjectURL(selectedImage.path))) as string
 
     return (<>
