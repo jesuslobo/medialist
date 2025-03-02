@@ -1,12 +1,14 @@
 import { TagData } from "../types/global";
 
-export interface TagGroup {
+type MinimalTag = Pick<TagData, 'groupName'>;
+
+export interface TagGroup<T extends MinimalTag = TagData> {
     groupName: string | null;
-    groupTags: TagData[];
+    groupTags: T[];
 }
 
-export const sortTagsByGroup = (tags: TagData[]) => {
-    let ArrayTags: TagGroup[] = [];
+export function sortTagsByGroup<T extends MinimalTag = TagData>(tags: T[]) {
+    let ArrayTags: TagGroup<T>[] = [];
 
     tags.forEach((tag) => {
         const groupName = tag.groupName || "" //if group_name doesn't exist go for null

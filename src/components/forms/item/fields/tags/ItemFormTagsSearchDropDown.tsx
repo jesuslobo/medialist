@@ -1,9 +1,11 @@
 import { sortTagsByGroup } from "@/utils/functions/sortTagsByGroup"
-import { validateLongID } from "@/utils/lib/generateID"
+import { TagData } from "@/utils/types/global"
 import { Button, Checkbox, CheckboxGroup, Divider, Input, Popover, PopoverContent, PopoverTrigger } from "@heroui/react"
 import { Dispatch, KeyboardEvent, SetStateAction, useContext, useRef, useState } from "react"
 import { BiPurchaseTag } from "react-icons/bi"
 import { ItemFormContext } from "../../ItemFormProvider"
+
+type FormTag = Pick<TagData, 'id' | 'label' | 'groupName'>
 
 export default function ItemFormTagsSearchDropDown({
     selectedTags,
@@ -12,18 +14,18 @@ export default function ItemFormTagsSearchDropDown({
     selectedTags: string[],
     setSelectedTags: Dispatch<SetStateAction<string[]>>,
 }) {
-    const { tags } = useContext(ItemFormContext)
     const searchRef = useRef<HTMLInputElement>(null)
+    const { tags } = useContext(ItemFormContext)
+    const tagsIDs = new Set(tags.map(tag => tag.id))
 
-    const [displayedTags, setDisplayedTags] = useState(tags)
     const newTags = selectedTags
-        .filter(value => !validateLongID(value))
-        .map(value => { return { id: value, label: value } })
+        .filter(value => !tagsIDs.has(value))
+        .map(value => ({ id: value, label: value, groupName: "New Tags" })) as FormTag[]
 
-    const groupedDisplayedTags = [
-        ...sortTagsByGroup(displayedTags),
-        { groupName: "New Tags", groupTags: newTags },
-    ]
+    const allTags = (tags as unknown as FormTag[]).concat(newTags)
+    const [displayedTags, setDisplayedTags] = useState(allTags)
+
+    const groupedDisplayedTags = sortTagsByGroup(displayedTags)
 
     function addTag() {
         const input = searchRef.current?.value.trim() || null
@@ -37,20 +39,26 @@ export default function ItemFormTagsSearchDropDown({
         // add it to the list
         setSelectedTags(prev => [...prev, tagExists?.id || input])
         searchRef.current?.blur
+        return input
     }
 
     function handleSearch() {
         const input = searchRef.current?.value.trim().toLowerCase() || null
-        if (!input) return setDisplayedTags(tags) //return all results
+        if (!input) return setDisplayedTags(allTags) //return all results
 
-        const filtered = tags.filter(tag =>
+        const filtered = allTags.filter(tag =>
             tag.label.toLowerCase().split(" ").some(word => word.startsWith(input)) // so you can search by typing the n-th word
         )
         setDisplayedTags(filtered)
     }
 
     function onKeyEvent(event: KeyboardEvent<HTMLInputElement>) {
-        if (event.key === 'Enter') return addTag()
+        if (event.key === 'Enter') {
+            const newTag = addTag()
+            if (newTag)
+                setDisplayedTags(e => [...e, { id: newTag, label: newTag, groupName: "New Tags" }])
+            return
+        }
         handleSearch()
     }
 
