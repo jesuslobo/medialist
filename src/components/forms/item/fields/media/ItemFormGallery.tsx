@@ -8,14 +8,16 @@ import httpClient from "@/utils/lib/httpClient"
 import { mutateMediaCache } from "@/utils/lib/tanquery/mediaQuery"
 import { GalleryField, GalleryFieldFilter, ItemData } from "@/utils/types/item"
 import { MediaData } from "@/utils/types/media"
-import { Button, Card, Chip, Input, Textarea } from "@heroui/react"
+import { Button, Card, Chip, Divider, Input, Pagination, Textarea } from "@heroui/react"
 import { useMutation } from "@tanstack/react-query"
 import React, { Dispatch, SetStateAction, useContext, useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { BiFilterAlt, BiImageAdd, BiLockOpenAlt, BiSave, BiSearch, BiSolidLockAlt, BiX } from "react-icons/bi"
 import { ItemFormMedia } from "../../ItemFormProvider"
 
-// it is stateless like tags field
+const NUMBER_OF_IMAGES_PER_PAGE = 12
+
+// the fields it self doesn't contain data about images, just  the filter
 export default function ItemFormGallery({
     rowIndex,
     colIndex
@@ -43,19 +45,25 @@ export default function ItemFormGallery({
         set({ filter: { ...filter, keywords: newVal ? keywords : [] } })
     }
 
-    const filteredMedia = useMemo(() => {
+    const newMedia = itemForm.watch('media') as ItemFormMedia[] || []
+    const setNewMedia = (data: SetMediaCallBack | ItemFormMedia[]) =>
+        setValue('media', typeof data === 'function' ? data(newMedia) : data)
+
+    function filterMedia<T extends { keywords: string[] }>(media: T[]) {
         if (!searchValue) return media
         const keywords = searchValue.split(',').map(key => key.trim()) || []
 
         const baseKeywordsFilters = new Set<string>(keywords)
         return baseKeywordsFilters.size
-            ? media.filter(item => item?.keywords?.some(key => baseKeywordsFilters.has(key)))
+            ? media.filter(item => item.keywords.some(key => baseKeywordsFilters.has(key)))
             : media
-    }, [media, searchValue])
+    }
 
-    const newMedia = itemForm.watch('media') as ItemFormMedia[] || []
-    const setNewMedia = (data: SetMediaCallBack | ItemFormMedia[]) =>
-        setValue('media', typeof data === 'function' ? data(newMedia) : data)
+    const filtredNewMedia = useMemo(() => filterMedia(newMedia), [JSON.stringify(newMedia), searchValue])
+
+    const filteredMedia = useMemo(() => filterMedia(media), [media, searchValue])
+    const [currentPage, setCurrentPage] = useState(1);
+    const pagesNumber = Math.ceil(filteredMedia.length / NUMBER_OF_IMAGES_PER_PAGE)
 
     const [showAddForm, setShowAddForm] = useState(false)
     const itemSrc = item && `/api/file/${list.userId}/${list.id}/${(item as ItemData).id}`
@@ -135,11 +143,17 @@ export default function ItemFormGallery({
                 }
 
                 <MemoizedNewMedia
-                    newMedia={newMedia}
+                    newMedia={filtredNewMedia}
                     setNewMedia={setNewMedia}
                 />
+            </div>
+            <Divider />
+            <div className="w-full h-full columns-3xs gap-x-4 space-y-4">
 
                 {filteredMedia.map((image, index) =>
+                    (pagesNumber === 1 ||
+                        NUMBER_OF_IMAGES_PER_PAGE * (currentPage - 1) <= index &&
+                        index < NUMBER_OF_IMAGES_PER_PAGE * currentPage) &&
                     <MediaImageCard
                         key={'gallery-image' + index}
                         title={image.title as string | undefined}
@@ -151,6 +165,10 @@ export default function ItemFormGallery({
                     />
                 )}
             </div>
+            {pagesNumber > 1 &&
+                <div className="w-full flex justify-center items-center pt-2">
+                    <Pagination initialPage={1} total={pagesNumber} page={currentPage} onChange={setCurrentPage} showControls />
+                </div>}
         </article>
     )
 }

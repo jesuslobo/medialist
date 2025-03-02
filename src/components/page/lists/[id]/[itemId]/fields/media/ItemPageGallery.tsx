@@ -6,13 +6,15 @@ import httpClient from "@/utils/lib/httpClient"
 import { mutateMediaCache } from "@/utils/lib/tanquery/mediaQuery"
 import { GalleryField, GalleryFieldFilter } from "@/utils/types/item"
 import { MediaData } from "@/utils/types/media"
-import { Button, Card, Chip, Image, Input, Spinner, Textarea } from "@heroui/react"
+import { Button, Card, Chip, Image, Input, Pagination, Spinner, Textarea } from "@heroui/react"
 import { useMutation } from "@tanstack/react-query"
 import { Dispatch, SetStateAction, useContext, useMemo, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { BiFilterAlt, BiImageAdd, BiSave, BiSearch, BiSolidLockAlt } from "react-icons/bi"
 import { itemPageContext } from "../../ItemPageProvider"
 import MediaImageCard from "./MediaImageCard"
+
+const NUMBER_OF_IMAGES_PER_PAGE = 12
 
 export default function ItemPageGallery({ field }: { field?: GalleryField }) {
     const { item, media, imagePaths: { itemSrc } } = useContext(itemPageContext)
@@ -29,6 +31,8 @@ export default function ItemPageGallery({ field }: { field?: GalleryField }) {
     const isFilterLocked = Array.isArray(field?.filter?.keywords) && field?.filter?.keywords.length > 0
 
     const [visiableMedia, setVisiableMedia] = useState(filteredMedia)
+    const [currentPage, setCurrentPage] = useState(1);
+    const pagesNumber = Math.ceil(visiableMedia.length / NUMBER_OF_IMAGES_PER_PAGE)
 
     const editMutation = useMutation({
         mutationFn: async (data: Pick<MediaData, 'keywords' | 'title' | 'id'>) =>
@@ -95,6 +99,9 @@ export default function ItemPageGallery({ field }: { field?: GalleryField }) {
             <div className="w-full h-full columns-2xs gap-x-4 space-y-4">
                 {showAddForm && <AddImageForm itemId={item.id} setShowAddForm={setShowAddForm} filter={field?.filter} />}
                 {visiableMedia.map((image, index) =>
+                    (pagesNumber === 1 || // no need to check if there is only one page
+                        NUMBER_OF_IMAGES_PER_PAGE * (currentPage - 1) <= index && // not in previous pages
+                        index < NUMBER_OF_IMAGES_PER_PAGE * currentPage) && // in the range of the current page
                     <MediaImageCard
                         key={'gallery-image' + index}
                         title={image.title as string | undefined}
@@ -106,6 +113,10 @@ export default function ItemPageGallery({ field }: { field?: GalleryField }) {
                     />
                 )}
             </div>
+            {pagesNumber > 1 &&
+                <div className="w-full flex justify-center items-center pt-2">
+                    <Pagination initialPage={1} total={pagesNumber} page={currentPage} onChange={setCurrentPage} showControls />
+                </div>}
         </article>
     )
 }
