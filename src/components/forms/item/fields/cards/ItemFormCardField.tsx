@@ -2,7 +2,7 @@ import ItemPageCardField from "@/components/page/lists/[id]/[itemId]/fields/card
 import { thumbnailName } from "@/utils/lib/fileHandling/thumbnailOptions"
 import { ItemCardField, ItemData } from "@/utils/types/item"
 import { Button, Image, Input, InputProps, Textarea, TextAreaProps, useDisclosure } from "@heroui/react"
-import { useContext, useMemo, useState } from "react"
+import React, { useContext, useMemo, useState } from "react"
 import { BiImageAdd, BiX } from "react-icons/bi"
 import { useItemFormLayoutField } from "../../ItemFormLayoutSection"
 import { ItemFormContext, ItemFormMedia } from "../../ItemFormProvider"
@@ -44,12 +44,11 @@ export default function ItemFormCardField({
                 ? variant === "banner"
                     ? <BannerForm useField={useField} >
                         {selectedImage
-                            ? <Image
-                                title="click to view full image"
-                                className="w-full h-full object-cover aspect-square"
-                                alt="image-card"
+                            ? <MemoizedImage
+                                imageRef={imageId}
                                 src={src}
-                                onClick={onOpen}
+                                onOpen={onOpen}
+                                className="w-full h-full object-cover aspect-square"
                             />
                             : <Button onPress={onOpen} onDragOver={onOpen} className="aspect-square w-full h-40">
                                 <BiImageAdd className="text-2xl" /> Select Image
@@ -58,12 +57,11 @@ export default function ItemFormCardField({
                     </BannerForm>
                     : <ProfileForm useField={useField} >
                         {selectedImage
-                            ? <Image
-                                title="click to view full image"
-                                className="h-36 object-cover aspect-square"
-                                alt="image-card"
+                            ? <MemoizedImage
+                                imageRef={imageId}
                                 src={src}
-                                onClick={onOpen}
+                                onOpen={onOpen}
+                                className="h-36 object-cover aspect-square"
                             />
                             : <Button onPress={onOpen} onDragOver={onOpen} className="aspect-square h-36">
                                 <BiImageAdd className="text-4xl" />
@@ -96,10 +94,12 @@ function BannerForm({
 
     return (
         <div className="grid gap-y-2">
-            <Button onPress={remove} className=" w-full">
-                <BiX className="text-2xl" />
-            </Button>
-            {children}
+            <div className="relative w-full">
+                <Button className="absolute top-0 right-0 z-50 mt-2 mr-2" onPress={remove} isIconOnly>
+                    <BiX className="text-2xl" />
+                </Button>
+                {children}
+            </div>
             <Input
                 {...inputProps}
                 placeholder="Title..."
@@ -157,3 +157,23 @@ function ProfileForm({
         </div>
     )
 }
+
+const MemoizedImage = React.memo(function SelectedImage({
+    src,
+    className,
+    onOpen,
+}: {
+    imageRef: string | number, // a unique key to force re-render
+    src: string,
+    className?: string,
+    onOpen: () => void
+}) {
+    return <Image
+        title="click to view full image"
+        className={className}
+        alt="image-card"
+        src={src}
+        onClick={onOpen}
+    />
+}, (prev, next) => String(prev.imageRef) === String(next.imageRef)
+)
