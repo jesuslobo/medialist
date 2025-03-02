@@ -1,3 +1,4 @@
+import RootFooter from "@/components/layouts/RootFooter";
 import { Button, Divider } from "@heroui/react";
 import { useState } from "react";
 import { BiLogInCircle } from "react-icons/bi";
@@ -32,6 +33,7 @@ export default function AuthLayout() {
                         >
                             Already a Member? Log In
                         </Button>}
+                    <RootFooter />
                 </section>
             </main>
         </div>

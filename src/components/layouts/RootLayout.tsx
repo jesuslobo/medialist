@@ -10,6 +10,7 @@ import { twJoin } from 'tailwind-merge';
 import { useUser } from '../providers/AuthProvider';
 import BaseNavBar from '../ui/bars/nav/BaseNavBar';
 import BaseNavButton, { BaseNavButtonProps } from '../ui/bars/nav/BaseNavButtons';
+import RootFooter from "./RootFooter";
 
 const poppins = Poppins({ weight: '400', subsets: ['latin'] })
 
@@ -51,15 +52,20 @@ export default function RootLayout({
                     items={navItems}
                     className='hidden xs:flex fixed bottom-0 w-full shadow-custom-md p-3 bg-accented animate-fade-in'
                 />
-                <div className={twJoin(poppins.className, 'py-5 ltr:pr-5 rtl:pl-5 xs:px-5')}>
-                    <div>{children}</div>
+                <div className={twJoin(poppins.className, 'pt-5 ltr:pr-5 rtl:pl-5 xs:px-5 w-full flex flex-col items-start')}>
+                    <div className="pb-28 h-full w-full">{children}</div>
+                    <RootFooter />
                 </div>
             </div>
         </>
     )
 }
 
-const ThemeButton = ({ varient }: { varient: BaseNavButtonProps['varient'] }) => {
+interface CustomButtonsProps {
+    varient: BaseNavButtonProps['varient']
+}
+
+const ThemeButton = ({ varient }: CustomButtonsProps) => {
     const { theme, setTheme } = useTheme()
     return (
         <BaseNavButton
@@ -71,7 +77,7 @@ const ThemeButton = ({ varient }: { varient: BaseNavButtonProps['varient'] }) =>
         />)
 }
 
-const LogOutButton = ({ varient }: { varient: BaseNavButtonProps['varient'] }) => {
+const LogOutButton = ({ varient }: CustomButtonsProps) => {
     const [isLoading, setIsLoading] = useState(false)
     const { logout } = useUser()
 
