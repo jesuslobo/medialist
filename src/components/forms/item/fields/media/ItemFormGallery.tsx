@@ -52,11 +52,11 @@ export default function ItemFormGallery({
     function filterMedia<T extends { keywords: string[] }>(media: T[]) {
         if (!searchValue) return media
         const keywords = searchValue.split(',').map(key => key.trim()) || []
+        if (keywords.length === 0) return media
 
         const baseKeywordsFilters = new Set<string>(keywords)
-        return baseKeywordsFilters.size
-            ? media.filter(item => item.keywords.some(key => baseKeywordsFilters.has(key)))
-            : media
+        return media.filter(item => item.keywords.some(key => baseKeywordsFilters.has(key)))
+
     }
 
     const filtredNewMedia = useMemo(() => filterMedia(newMedia), [JSON.stringify(newMedia), searchValue])

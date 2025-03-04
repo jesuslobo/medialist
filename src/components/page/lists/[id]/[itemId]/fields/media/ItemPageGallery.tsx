@@ -21,13 +21,15 @@ export default function ItemPageGallery({ field }: { field?: GalleryField }) {
 
     const [showAddForm, setShowAddForm] = useState(false)
 
+    // fixed filter based ont the field
     const filteredMedia = useMemo(() => {
         const filterKeywords = field?.filter?.keywords || []
+        if (filterKeywords.length === 0) return media
+
         const baseKeywordsFilters = new Set<string>(filterKeywords)
-        return baseKeywordsFilters.size
-            ? media.filter(item => item?.keywords?.some(key => baseKeywordsFilters.has(key)))
-            : media
-    }, [media, field])
+        return media.filter(item => item?.keywords?.some(key => baseKeywordsFilters.has(key)))
+    }, [media, JSON.stringify(field)])
+
     const isFilterLocked = Array.isArray(field?.filter?.keywords) && field?.filter?.keywords.length > 0
 
     const [visiableMedia, setVisiableMedia] = useState(filteredMedia)
@@ -49,9 +51,8 @@ export default function ItemPageGallery({ field }: { field?: GalleryField }) {
         const value = (e.target as HTMLInputElement).value.trim().toLowerCase()
         if (!value) return setVisiableMedia(filteredMedia)
 
-        setVisiableMedia(filteredMedia.filter(item =>
-            item.title?.toLowerCase().includes(value) ||
-            item.keywords?.some(key => typeof key === 'string' && key.toLowerCase() === value)
+        setVisiableMedia(filteredMedia.filter(item => item.title?.toLowerCase().includes(value) ||
+            item.keywords?.some(key => typeof key === 'string' && key.toLowerCase().includes(value))
         ))
     }
 
@@ -156,7 +157,7 @@ function AddImageForm({
         if (data.title)
             formData.append('title', data.title)
         if (data.keywords)
-            formData.append('keywords', JSON.stringify([data?.keywords.split(',').map((key: string) => key.trim()) || []]))
+            formData.append('keywords', JSON.stringify(data?.keywords?.split(',').map((key: string) => key.trim()) || []))
 
         mutation.mutate(formData)
     }
