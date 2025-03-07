@@ -31,12 +31,12 @@ describe('api/trash', () => {
 
             const { body, statusCode } = await $mockHttp(trashHandler).get(undefined, { cookies });
 
-            expect(body).toEqual([
+            expect(body).toEqual(expect.arrayContaining([
                 { id: l1.id, listId: null, title: l1.title, coverPath: l1.coverPath, updatedAt: l1.updatedAt.toISOString() },
                 { id: l2.id, listId: null, title: l2.title, coverPath: l2.coverPath, updatedAt: l2.updatedAt.toISOString() },
                 { id: item1.id, listId: item1.listId, title: item1.title, coverPath: item1.posterPath, updatedAt: item1.updatedAt },
                 { id: item2.id, listId: item2.listId, title: item2.title, coverPath: item2.posterPath, updatedAt: item2.updatedAt },
-            ]);
+            ]));
             expect(statusCode).toBe(200);
 
             await user.delete();

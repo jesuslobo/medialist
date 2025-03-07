@@ -128,7 +128,9 @@ describe('api/lists/', async () => {
                 title: 'Test List',
                 coverPath: null,
                 trash: false,
-                configs: "{}",
+                configs: {
+                    titlePlacement: 'title-below',
+                },
                 createdAt: expect.any(String),
                 updatedAt: expect.any(String),
             })
@@ -156,7 +158,9 @@ describe('api/lists/', async () => {
                 title: 'Test List',
                 coverPath: expect.any(String),
                 trash: false,
-                configs: "{}",
+                configs: {
+                    titlePlacement: 'title-below',
+                },
                 createdAt: expect.any(String),
                 updatedAt: expect.any(String),
             })
