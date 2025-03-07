@@ -33,8 +33,8 @@ export default function ItemPageLabelTextField({
 
         let newLayout = [...item.layout]
         // "+ 1" because we are skipping the header row, thus the index is off by 1
-        const row = newLayout[activeTabIndex][rowIndex + 1] as ItemField[]
-        row[colIndex] = { ...row[colIndex], body: String(val) } as ItemLabelTextField
+        const col = newLayout[activeTabIndex][colIndex + 1] as ItemField[]
+        col[rowIndex] = { ...col[rowIndex], body: String(val) } as ItemLabelTextField
 
         const formData = new FormData()
         formData.append("layout", JSON.stringify(newLayout))
