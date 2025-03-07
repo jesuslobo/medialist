@@ -5,6 +5,7 @@
 **/.vscode
 *.md
 LICENSE
+docs
 
 # Build Data
 **/.env
