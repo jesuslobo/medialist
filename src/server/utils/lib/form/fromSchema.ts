@@ -3,6 +3,7 @@ import { ProcessFormDataBuilder } from "./parseFormData";
 
 const $LIST_FORM_SCHEMA = (dir: string) => ({
   title: 'String',
+  configs: 'JSON',
   trash: "Boolean",
   coverPath: {
     dir,

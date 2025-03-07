@@ -5,13 +5,16 @@ import { ItemData } from "@/utils/types/item";
 import { Card, Chip, Image } from "@heroui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { twJoin } from "tailwind-merge";
 
 export default function ItemCardsList({
     item,
     tagsData,
+    className,
 }: {
     item: ItemData,
-    tagsData?: TagData[]
+    tagsData?: TagData[],
+    className?: string
 }) {
     const { ref, isIntersecting } = useIntersectionObserver({ rootMargin: '300px', threshold: 0.5 });
     const [imageIsLoaded, setImageIsLoaded] = useState(true);
@@ -19,7 +22,7 @@ export default function ItemCardsList({
     const pageLink = `/lists/${item.listId}/${item.id}`
 
     return (
-        <div ref={ref} className="flex h-52 shadow-lg bg-default/10 rounded-xl">
+        <div ref={ref} className={twJoin(className, "flex h-52 shadow-lg bg-default/10 rounded-xl")}>
             <Card
                 className="h-52 aspect-2/3 flex-none z-10 shadow-lg hover:scale-105 duration-200"
                 onPress={() => router.push(pageLink)}
@@ -29,7 +32,7 @@ export default function ItemCardsList({
                     ? <Image
                         className="aspect-[2/3] object-cover"
                         alt={item.title}
-                        src={isIntersecting ?`/api/file/${item.userId}/${item.listId}/${item.id}/${thumbnailName(item.posterPath, { w: 300 })}`: undefined}
+                        src={isIntersecting ? `/api/file/${item.userId}/${item.listId}/${item.id}/${thumbnailName(item.posterPath, { w: 300 })}` : undefined}
                         onError={() => setImageIsLoaded(false)}
                     />
                     : <Card className="aspect-[2/3] h-full w-full p-2 bg-accented flex items-center justify-center capitalize text-xl" >

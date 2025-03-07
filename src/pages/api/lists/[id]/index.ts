@@ -47,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const dir = await $getDir(user.id, list.id, true);
       const bbConfig = {
         headers: req.headers,
-        limits: { fields: 2, files: 2, fileSize: 1024 * 1024 * 100 } // 100MB
+        limits: { fields: 3, files: 2, fileSize: 1024 * 1024 * 100 } // 100MB
       }
       const form = $parseFormData<ListData & ProcessedFormData>(
         $LIST_FORM_SCHEMA(dir.list),

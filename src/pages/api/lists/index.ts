@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       const bbConfig = {
         headers: req.headers,
-        limits: { fields: 1, files: 2, fileSize: 1024 * 1024 * 100 } // 100MB
+        limits: { fields: 2, files: 2, fileSize: 1024 * 1024 * 100 } // 100MB
       }
       const form = $parseFormData<ListData & ProcessedFormData>(
         $LIST_FORM_SCHEMA(dir.list),
@@ -48,6 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             title: data.title,
             coverPath: data.coverPath,
             userId: user.id,
+            configs: data?.configs || { titlePlacement: 'title-below' },
             createdAt,
             updatedAt: createdAt,
           });

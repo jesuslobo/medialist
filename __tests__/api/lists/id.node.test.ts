@@ -105,6 +105,26 @@ describe('api/lists/[id]', async () => {
             await user.delete();
         })
 
+        test('should change configs ', async () => {
+            const form = new FormData();
+            form.append('configs', JSON.stringify({ titlePlacement: 'hidden' }));
+
+            const { listData, userMock } = await $mockList({ title: 'List1', ...fakeDate });
+            const { userData, ...user } = userMock;
+            const { cookies } = await user.createCookie();
+
+            const { body, statusCode } = await $mockHttp(listsRouter).patch(form, { cookies, query: { id: listData.id } });
+            expect(body).toEqual({
+                ...listData,
+                configs: { titlePlacement: 'hidden' },
+                updatedAt: expect.not.stringMatching(listData.updatedAt.toISOString()),
+                createdAt: listData.createdAt.toISOString()
+            });
+            expect(statusCode).toBe(200);
+
+            await user.delete();
+        })
+
         test('should keep cover if not updated', async () => {
             const { listData, userMock, listDir } = await $mockList({ cover: true, ...fakeDate });
             const { userData, ...user } = userMock;

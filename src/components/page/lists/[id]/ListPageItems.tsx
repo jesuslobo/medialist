@@ -18,6 +18,7 @@ export default function ListPageItems() {
                     {visibleItems.map(item =>
                         <ItemCardsList
                             key={item.title + item.id}
+                            className="animate-fade-in"
                             item={item}
                             tagsData={badgeableTags}
                         />
@@ -30,8 +31,8 @@ export default function ListPageItems() {
                     {visibleItems.map(item =>
                         <ItemCard
                             key={item.title + item.id}
+                            className="border-none duration-200 hover:scale-110 animate-fade-in"
                             item={item}
-                            className="text-background border-none duration-200 hover:scale-110 cubic-bezier shadow-lg group aspect-2/3 animate-fade-in"
                         />
                     )}
                 </div >

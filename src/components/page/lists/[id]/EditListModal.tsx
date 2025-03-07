@@ -4,15 +4,17 @@ import httpClient from "@/utils/lib/httpClient";
 import { mutateListCache } from "@/utils/lib/tanquery/listsQuery";
 import { errorToast, simpleToast } from "@/utils/toast";
 import { ListData } from "@/utils/types/list";
-import { addToast, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
+import { addToast, Button, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Radio, RadioGroup } from "@heroui/react";
 import { useMutation } from "@tanstack/react-query";
 import { useContext } from "react";
 import { Controller, FieldPath, useForm } from "react-hook-form";
 import { BiImageAdd, BiRevision } from "react-icons/bi";
 import { ListPageContext } from "./ListPageProvider";
 
-interface ListFormData extends Omit<ListData, "id" | "createdAt" | "updatedAt" | 'coverPath' | 'userId'> {
-    cover: File | null | string
+interface ListFormData extends Pick<ListData, "title"> {
+    cover: File | null | string,
+    titlePlacement: ListData['configs']['titlePlacement']
+
 }
 
 export default function EditListModal({
@@ -42,6 +44,7 @@ export default function EditListModal({
             reset({
                 cover: data.coverPath ? `${listSrc}/${data.coverPath}` : null,
                 title: data.title,
+                titlePlacement: data.configs.titlePlacement
             })
             mutation.reset()
             onOpenChange()
@@ -56,6 +59,8 @@ export default function EditListModal({
             formData.append('title', data.title)
         if (dirtyFields.cover)
             formData.append('cover', data.cover as File)
+        if (dirtyFields.titlePlacement)
+            formData.append('configs', JSON.stringify({ ...list?.configs, titlePlacement: data.titlePlacement }))
         mutation.mutate(formData)
     }
 
@@ -80,7 +85,7 @@ export default function EditListModal({
                                     />
                                 )}
                             />
-                            <div className=" flex flex-col justify-between flex-grow w-full">
+                            <div className=" flex flex-col flex-grow w-full gap-y-2">
                                 <Input
                                     size="lg"
                                     className="w-full"
@@ -89,7 +94,22 @@ export default function EditListModal({
                                     placeholder="List Name..."
                                     {...register("title", { required: true })}
                                 />
-
+                                <Controller
+                                    control={control}
+                                    name="titlePlacement"
+                                    render={({ field }) => (
+                                        <RadioGroup
+                                            label="Title Style (Card View)"
+                                            orientation="horizontal"
+                                            {...field}
+                                        >
+                                            <Radio value="title-below">Title Below</Radio>
+                                            <Radio value="title-overlay">Title Overlay</Radio>
+                                            <Radio value="hidden">Title Hidden</Radio>
+                                        </RadioGroup>
+                                    )}
+                                />
+                                <div className="flex-grow"></div>
                                 <div className="flex flex-row gap-x-2 w-full items-center justify-end">
                                     <Button color="danger" variant="light" onPress={onClose}>
                                         Close

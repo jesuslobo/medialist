@@ -1,5 +1,6 @@
 import { TagData } from "@/utils/types/global";
 import { ItemHeader, ItemLayoutTab } from "@/utils/types/item";
+import { ListData } from "@/utils/types/list";
 import { MediaData } from "@/utils/types/media";
 import { InferSelectModel, sql } from "drizzle-orm";
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
@@ -62,7 +63,8 @@ export const listsTable = sqliteTable("lists", {
     coverPath: text("cover_path"),
     configs: text("configs_json", { mode: "json" })
         .notNull()
-        .default("{}"),
+        .default("{}")
+        .$type<ListData['configs']>(),
     trash: integer("trash", { mode: "boolean" })
         .notNull()
         .default(false),
