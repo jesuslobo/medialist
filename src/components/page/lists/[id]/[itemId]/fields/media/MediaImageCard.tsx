@@ -65,7 +65,6 @@ export default function MediaImageCard({
         <Card
             className="group h-full w-full border-none rounded-2xl shadow-lg hover:scale-105 duration-200 cursor-pointer animate-fade-in"
             radius="lg"
-            onMouseLeave={() => setIsEditMode(false)}
             isFooterBlurred
         >
             <CardHeader className="absolute flex gap-x-2 w-fit z-30 top-1 right-1 overflow-hidden p-1 border-1 bg-accented/35 before:bg-white/10

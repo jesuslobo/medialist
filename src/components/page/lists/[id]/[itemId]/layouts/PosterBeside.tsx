@@ -8,7 +8,7 @@ import ItemPageSubNav from "../header/SubNav";
 export default function ItemPagePosterBeside() {
     const { item, imagePaths } = useContext(itemPageContext)
     const posterRef = useRef<HTMLImageElement>(null)
-    const height = (posterRef.current?.clientHeight || 300) - 16 - 8 - 208 - 120 // 16, 8, 208 are the paddings, 120 is like a margin of error
+    const height = (posterRef.current?.clientHeight || 400) - 16 - 8 - 208 - 120 // 16, 8, 208 are the paddings, 120 is like a margin of error
 
     return (
         <>
