@@ -19,7 +19,7 @@ WORKDIR /app
 COPY --chown=node:node package*.json ./
 
 USER root
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 # 2. Rebuild the source code only when needed
 FROM base AS builder
@@ -28,7 +28,6 @@ COPY --from=deps --chown=node:node /app/node_modules ./node_modules
 COPY --chown=node:node . .
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
@@ -37,6 +36,9 @@ FROM base AS runner
 WORKDIR /app
 
 COPY --from=builder --chown=node:node /app/public ./public
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
