@@ -81,13 +81,15 @@ const config: Config = {
         },
         light: {
           colors: {
+            background: '#e7e7e7',
             foreground: '#151515',
-            accented: "#e0e0e0",
+            accented: "#f7f7f7",
+            default: '#fff',
             pure: { opposite: "#000", theme: '#fff' }, //opposite of theme, i.e for light is pure black and vicevirsa
           }
         },
       }
-    } as HeroUIPluginConfig) //even though nextUI uses tw-colors plugin, apparently it is not friendly with custom colors
+    } as HeroUIPluginConfig)
   ],
 };
 export default config;
