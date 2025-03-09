@@ -35,25 +35,24 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-COPY --from=builder --chown=node:node /app/public ./public
-
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Migration packages
+RUN npm install drizzle-kit drizzle-orm
+
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=node:node /app/public ./public
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 
 # Migration files
 COPY --from=builder --chown=node:node /app/src/server/db/migrations ./src/server/db/migrations
 COPY --from=builder --chown=node:node /app/drizzle.config.ts ./drizzle.config.ts
-# Docker entrypoint
-COPY --from=builder --chown=node:node /app/docker-run.sh ./run.sh
-RUN chmod +x run.sh
 
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["sh", "run.sh"]
+CMD ["sh", "-c", "npm run db:migrate && node server.js"]
