@@ -70,7 +70,7 @@ const ThemeButton = ({ varient }: CustomButtonsProps) => {
     return (
         <BaseNavButton
             varient={varient}
-            label="Theme"
+            label={theme === 'dark' ? 'Light (Experimental)' : 'Dark'}
             icon={theme === 'dark' ? <RiMoonClearLine /> : <BsSun />}
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             disableActive
