@@ -34,7 +34,11 @@
 </div>
 
 ## Installation
-To get started, check out the [Installation Guide](https://github.com/khalidibnwalid/medialist/wiki/Installation)
+You can install it directly from Docker by running: 
+``` bash
+docker run --name medialist -p 3000:3000 -e PORT=3000 -e DATABASE_PATH=db/sqlite.db -v medialist:/app/public/users -v medialist:/app/db khalidibnwalid/medialist
+```
+For more details, see [Installation Guide](https://github.com/khalidibnwalid/medialist/wiki/Installation)
 
 ## Contribution
 You can contribute by reporting bugs or suggesting new features through issues.
