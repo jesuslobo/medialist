@@ -10,7 +10,28 @@
     </p>
 </div>
 
-[Screenshots]
+<div>
+    <img
+        src="https://github.com/user-attachments/assets/4ac26cc9-fbf0-4fcd-8c05-2695fed5c924"
+        width="100%"
+    />
+    <img
+        src="https://github.com/user-attachments/assets/7c1da51e-07b9-4403-bc90-fa7abe8af981"
+        width="24%"
+    />
+     <img
+        src="https://github.com/user-attachments/assets/f6688787-cfe7-4d10-b35b-1f69329e1703"
+        width="24%"
+    />
+     <img
+        src="https://github.com/user-attachments/assets/7c99829e-ce03-4c2b-baa9-7d5579a39c4f"
+        width="24%"
+    />
+     <img
+        src="https://github.com/user-attachments/assets/68db0602-1685-48e2-b487-853a2db36850"
+        width="24%"
+    />
+</div>
 
 ## Installation
 To get started, check out the [Installation Guide](https://github.com/khalidibnwalid/medialist/wiki/Installation)
