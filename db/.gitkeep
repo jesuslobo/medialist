@@ -1,0 +1,1 @@
+drizzle-kit doesn't create folders recursively anymore and now will give an error for unexisting folders, and the project has "db/" as default so yeah :D
