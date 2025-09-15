@@ -12,23 +12,23 @@
 
 <div>
     <img
-        src="https://github.com/user-attachments/assets/ff5f9d3c-6887-4876-992d-3b276e2bfe53"
+        src="./docs/assets/items.webp"
         width="100%"
     />
     <img
-        src="https://github.com/user-attachments/assets/dcf193aa-4a09-4906-b662-0d5de469220d"
+        src="./docs/assets/item_page.webp"
         width="24%"
     />
      <img
-        src="https://github.com/user-attachments/assets/5bafc3fe-fe9e-454f-a8ab-210c2e4f5faf"
+        src="./docs/assets/headers.webp"
         width="24%"
     />
      <img
-        src="https://github.com/user-attachments/assets/fa915e00-1b65-44a7-9b29-38a3621acadd"
+        src="./docs/assets/fields.webp"
         width="24%"
     />
      <img
-        src="https://github.com/user-attachments/assets/0be9748a-12ea-4ae4-afbc-81241de21128"
+        src="./docs/assets/lists.webp"
         width="24%"
     />
 </div>
