@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import RootFooter from "@/components/layouts/RootFooter";
 import { Button, Divider } from "@heroui/react";
 import { useState } from "react";
@@ -6,9 +7,15 @@ import { VscAccount } from "react-icons/vsc";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignupForm";
 
+const fetchConfig = async () => {
+    const res = await fetch('/api/config');
+    return res.json();
+};
+
 export default function AuthLayout() {
-    const [isLogin, setIsLogin] = useState(true)
-    const disableSignup = process.env.NEXT_PUBLIC_DISABLE_SIGNUP === 'true';
+    const [isLogin, setIsLogin] = useState(true);
+    const { data } = useQuery({ queryKey: ['config'], queryFn: fetchConfig });
+    const disableSignup = data?.disableSignup;
 
     return (
         <div className="flex h-screen w-full items-center justify-center">
