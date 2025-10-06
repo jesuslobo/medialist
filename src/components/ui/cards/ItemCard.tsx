@@ -113,7 +113,7 @@ function Footer({
     switch (titlePlacement) {
         case 'title-overlay':
             return (
-                <CardFooter className="justify-center items-center ml-1 z-10 bottom-1 py-1 absolute before:bg-white/10 border-white/5 border-1 before:rounded-xl rounded-large w-[calc(100%_-_8px)] shadow-small ">
+                <CardFooter className="justify-center items-center ml-1 z-10 bottom-1 py-1 absolute before:bg-white/10 border-white/5 border-1 before:rounded-xl rounded-large w-[calc(100%_-_8px)] shadow-small backdrop-blur-md bg-background/7">
                     <p className="capitalize text-small text-foreground/80 line-clamp-1 group-hover:line-clamp-3 drop-shadow-lg" >
                         {title}
                     </p>
