@@ -3,7 +3,7 @@ import { useTheme } from 'next-themes';
 import { Poppins } from 'next/font/google';
 import Head from "next/head";
 import { useState } from 'react';
-import { BiCollection, BiLogOutCircle, BiTrashAlt } from 'react-icons/bi';
+import { BiCollection, BiCategory, BiLogOutCircle, BiTrashAlt } from 'react-icons/bi';
 import { BsSun } from 'react-icons/bs';
 import { RiMoonClearLine, RiUserLine } from 'react-icons/ri';
 import { twJoin } from 'tailwind-merge';
@@ -11,6 +11,7 @@ import { useUser } from '../providers/AuthProvider';
 import BaseNavBar from '../ui/bars/nav/BaseNavBar';
 import BaseNavButton, { BaseNavButtonProps } from '../ui/bars/nav/BaseNavButtons';
 import RootFooter from "./RootFooter";
+import { useRouter } from "next/router";
 
 const poppins = Poppins({ weight: '400', subsets: ['latin'] })
 
@@ -20,8 +21,14 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     const { user } = useUser()
+    const router = useRouter();
+    const listId = router.query.id as string | undefined;
+
     const navItems = [
         { label: "Lists", link: "/", icon: <BiCollection key="nav-BiHomeAlt2" /> },
+        listId
+            ? { label: "Items", link: `/lists/${listId}`, icon: <BiCategory key="nav-BiHomeAlt2" /> }
+            : { label: "Items", link: "/", icon: <BiCategory key="nav-BiHomeAlt2" /> },
         { label: "Trash", link: "/trash", icon: <BiTrashAlt key="nav-BiHomeAlt2" /> },
         // user can never be undefined in this page, since this page is user-only
         { label: (user?.username) as string, link: "/user", icon: <RiUserLine key="nav-BiUserCircle" /> },
