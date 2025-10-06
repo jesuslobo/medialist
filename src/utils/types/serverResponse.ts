@@ -20,6 +20,7 @@ export enum ApiErrorCode {
     NOT_FOUND = "NOT_FOUND",
     INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
     METHOD_NOT_ALLOWED = "METHOD_NOT_ALLOWED",
+    SIGNUP_DISABLED = "SIGNUP_DISABLED",
 }
 
 export enum UserErrorCode {
