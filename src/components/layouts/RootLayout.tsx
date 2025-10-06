@@ -26,9 +26,9 @@ export default function RootLayout({
 
     const navItems = [
         { label: "Lists", link: "/", icon: <BiCollection key="nav-BiHomeAlt2" /> },
-        listId
-            ? { label: "Items", link: `/lists/${listId}`, icon: <BiCategory key="nav-BiHomeAlt2" /> }
-            : {},
+        ...(listId
+            ? [{ label: "Items", link: `/lists/${listId}`, icon: <BiCategory key="nav-BiHomeAlt2" /> }]
+            : []),
         { label: "Trash", link: "/trash", icon: <BiTrashAlt key="nav-BiHomeAlt2" /> },
         // user can never be undefined in this page, since this page is user-only
         { label: (user?.username) as string, link: "/user", icon: <RiUserLine key="nav-BiUserCircle" /> },
